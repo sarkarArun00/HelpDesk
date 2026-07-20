@@ -1,0 +1,25 @@
+<div class="main-layout">
+  <app-sidebar
+    [isMobileOpen]="isMobileSidebarOpen"
+    (navigationSelected)="closeMobileSidebar()"
+  ></app-sidebar>
+
+  @if (isMobileSidebarOpen) {
+    <button
+      type="button"
+      class="sidebar-backdrop"
+      aria-label="Close navigation menu"
+      (click)="closeMobileSidebar()"
+    ></button>
+  }
+
+  <div class="main-section">
+    <app-header
+      (mobileMenuClicked)="openMobileSidebar()"
+    ></app-header>
+
+    <main class="page-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

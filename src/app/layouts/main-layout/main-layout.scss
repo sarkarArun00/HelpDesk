@@ -1,0 +1,71 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.main-layout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  background: #f5f7fb;
+}
+
+/*
+ * The sidebar component must reserve 260px on desktop.
+ * This prevents it from covering dashboard content.
+ */
+app-sidebar {
+  display: block;
+  width: 260px;
+  flex: 0 0 260px;
+}
+
+.main-section {
+  width: calc(100% - 260px);
+  min-width: 0;
+  min-height: 100vh;
+  flex: 1;
+}
+
+.page-content {
+  width: 100%;
+  min-width: 0;
+  padding: 24px;
+  overflow-x: hidden;
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  z-index: 1050;
+  inset: 0;
+  display: none;
+  padding: 0;
+  background: rgb(16 24 40 / 55%);
+  border: 0;
+  backdrop-filter: blur(2px);
+}
+
+@media (max-width: 991px) {
+  app-sidebar {
+    width: 0;
+    flex: 0 0 0;
+  }
+
+  .main-section {
+    width: 100%;
+  }
+
+  .sidebar-backdrop {
+    display: block;
+  }
+
+  .page-content {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 576px) {
+  .page-content {
+    padding: 14px;
+  }
+}

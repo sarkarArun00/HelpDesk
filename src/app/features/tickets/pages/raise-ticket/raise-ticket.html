@@ -1,0 +1,503 @@
+<section class="raise-ticket-page">
+  <header class="page-header">
+    <div>
+      <span class="page-eyebrow">TICKET MANAGEMENT</span>
+
+      <h1>Raise New Ticket</h1>
+
+      <p>
+        Submit an internal request or operational issue to the
+        appropriate department.
+      </p>
+    </div>
+
+    <a routerLink="/dashboard" class="btn back-button">
+      <i class="bi bi-arrow-left"></i>
+      Back to Dashboard
+    </a>
+  </header>
+
+  <form
+    [formGroup]="ticketForm"
+    (ngSubmit)="onSubmit()"
+    novalidate
+    class="ticket-form"
+  >
+    <!-- Requester information -->
+    <section class="form-card">
+      <div class="form-card-header">
+        <div>
+          <h2>Requester Information</h2>
+
+          <p>
+            These details are populated from the logged-in employee
+            profile.
+          </p>
+        </div>
+
+        <span class="automatic-badge">
+          <i class="bi bi-stars"></i>
+          Automatically populated
+        </span>
+      </div>
+
+      <div class="form-card-body requester-section">
+        <div class="row g-3">
+          <div class="col-12 col-md-6 col-xl-4">
+            <article class="requester-item">
+              <span class="requester-icon">
+                <i class="bi bi-person"></i>
+              </span>
+
+              <div>
+                <span class="requester-label">Creator Name</span>
+
+                <strong>
+                  {{ ticketForm.controls.creatorName.value }}
+                </strong>
+              </div>
+            </article>
+          </div>
+
+          <div class="col-12 col-md-6 col-xl-4">
+            <article class="requester-item">
+              <span class="requester-icon">
+                <i class="bi bi-diagram-3"></i>
+              </span>
+
+              <div>
+                <span class="requester-label">
+                  Originating Department
+                </span>
+
+                <strong>
+                  {{
+                    ticketForm.controls.originatingDepartment.value
+                  }}
+                </strong>
+              </div>
+            </article>
+          </div>
+
+          <div class="col-12 col-md-6 col-xl-4">
+            <article class="requester-item">
+              <span class="requester-icon">
+                <i class="bi bi-calendar3"></i>
+              </span>
+
+              <div>
+                <span class="requester-label">Created At</span>
+
+                <strong>
+                  {{ ticketForm.controls.createdAt.value }}
+                </strong>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ticket information -->
+    <section class="form-card">
+      <div class="form-card-header">
+        <div>
+          <h2>Ticket Information</h2>
+
+          <p>
+            Enter the issue details and select the appropriate category.
+          </p>
+        </div>
+
+        <span class="required-message">
+          <strong>*</strong>
+          Required fields
+        </span>
+      </div>
+
+      <div class="form-card-body">
+        <div class="row g-4">
+          <!-- Subject -->
+          <div class="col-12">
+            <label for="ticketSubject" class="form-label">
+              Ticket Subject
+              <span class="required-star">*</span>
+            </label>
+
+            <input
+              id="ticketSubject"
+              type="text"
+              class="form-control"
+              formControlName="subject"
+              maxlength="120"
+              placeholder="Enter a short summary of the issue"
+              [class.is-invalid]="
+                ticketForm.controls.subject.touched &&
+                ticketForm.controls.subject.invalid
+              "
+            />
+
+            <div class="field-footer">
+              <div>
+                @if (
+                  ticketForm.controls.subject.touched &&
+                  ticketForm.controls.subject.hasError('required')
+                ) {
+                  <span class="invalid-message">
+                    Ticket subject is required.
+                  </span>
+                }
+
+                @if (
+                  ticketForm.controls.subject.touched &&
+                  ticketForm.controls.subject.hasError('minlength')
+                ) {
+                  <span class="invalid-message">
+                    Subject must contain at least 5 characters.
+                  </span>
+                }
+              </div>
+
+              <span class="character-count">
+                {{ ticketForm.controls.subject.value.length }}/120
+              </span>
+            </div>
+          </div>
+
+          <!-- Category -->
+          <div class="col-12 col-lg-6">
+            <label for="issueCategory" class="form-label">
+              Issue Category
+              <span class="required-star">*</span>
+            </label>
+
+            <select
+              id="issueCategory"
+              class="form-select"
+              formControlName="categoryId"
+              [class.is-invalid]="
+                ticketForm.controls.categoryId.touched &&
+                ticketForm.controls.categoryId.invalid
+              "
+              (change)="
+                onCategoryChange(
+                  ticketForm.controls.categoryId.value
+                )
+              "
+            >
+              <option [ngValue]="0" disabled>
+                Select issue category
+              </option>
+
+              @for (category of categories; track category.id) {
+                <option [ngValue]="category.id">
+                  {{ category.name }}
+                </option>
+              }
+            </select>
+
+            @if (
+              ticketForm.controls.categoryId.touched &&
+              ticketForm.controls.categoryId.invalid
+            ) {
+              <div class="invalid-message mt-2">
+                Issue category is required.
+              </div>
+            }
+          </div>
+
+          <!-- Target department -->
+          <div class="col-12 col-lg-6">
+            <label for="targetDepartment" class="form-label">
+              Target Department
+            </label>
+
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-building"></i>
+              </span>
+
+              <input
+                id="targetDepartment"
+                type="text"
+                class="form-control readonly-control"
+                formControlName="targetDepartment"
+                placeholder="Selected automatically"
+              />
+            </div>
+
+            <div class="form-text">
+              Determined by the selected issue category.
+            </div>
+          </div>
+
+          <!-- Centre -->
+          <div class="col-12 col-lg-6">
+            <label for="centreId" class="form-label">
+              Centre / Facility
+              <span class="required-star">*</span>
+            </label>
+
+            <select
+              id="centreId"
+              class="form-select"
+              formControlName="centreId"
+              [class.is-invalid]="
+                ticketForm.controls.centreId.touched &&
+                ticketForm.controls.centreId.invalid
+              "
+            >
+              <option [ngValue]="0" disabled>
+                Select centre or facility
+              </option>
+
+              @for (centre of centres; track centre.id) {
+                <option [ngValue]="centre.id">
+                  {{ centre.name }} — {{ centre.type }}
+                </option>
+              }
+            </select>
+
+            @if (
+              ticketForm.controls.centreId.touched &&
+              ticketForm.controls.centreId.invalid
+            ) {
+              <div class="invalid-message mt-2">
+                Centre or facility is required.
+              </div>
+            }
+          </div>
+
+          <!-- Priority -->
+          <div class="col-12 col-lg-6">
+            <label for="priority" class="form-label">
+              Priority
+              <span class="required-star">*</span>
+            </label>
+
+            <select
+              id="priority"
+              class="form-select"
+              formControlName="priority"
+              [class.is-invalid]="
+                ticketForm.controls.priority.touched &&
+                ticketForm.controls.priority.invalid
+              "
+            >
+              <option value="" disabled>
+                Select ticket priority
+              </option>
+
+              @for (priority of priorities; track priority) {
+                <option [value]="priority">
+                  {{ priority }}
+                </option>
+              }
+            </select>
+
+            <div class="form-text">
+              Default priority is selected from the category.
+            </div>
+
+            @if (
+              ticketForm.controls.priority.touched &&
+              ticketForm.controls.priority.invalid
+            ) {
+              <div class="invalid-message mt-2">
+                Priority is required.
+              </div>
+            }
+          </div>
+
+          <!-- Description -->
+          <div class="col-12">
+            <label for="description" class="form-label">
+              Detailed Description
+              <span class="required-star">*</span>
+            </label>
+
+            <textarea
+              id="description"
+              class="form-control description-control"
+              formControlName="description"
+              rows="7"
+              maxlength="2000"
+              placeholder="Describe the issue, its impact and any action already taken"
+              [class.is-invalid]="
+                ticketForm.controls.description.touched &&
+                ticketForm.controls.description.invalid
+              "
+            ></textarea>
+
+            <div class="field-footer">
+              <div>
+                @if (
+                  ticketForm.controls.description.touched &&
+                  ticketForm.controls.description.hasError('required')
+                ) {
+                  <span class="invalid-message">
+                    Detailed description is required.
+                  </span>
+                }
+
+                @if (
+                  ticketForm.controls.description.touched &&
+                  ticketForm.controls.description.hasError(
+                    'minlength'
+                  )
+                ) {
+                  <span class="invalid-message">
+                    Description must contain at least 20 characters.
+                  </span>
+                }
+
+                @if (
+                  !ticketForm.controls.description.invalid ||
+                  !ticketForm.controls.description.touched
+                ) {
+                  <span class="form-help">
+                    Do not include patient-identifiable or confidential
+                    medical information.
+                  </span>
+                }
+              </div>
+
+              <span class="character-count">
+                {{
+                  ticketForm.controls.description.value.length
+                }}/2000
+              </span>
+            </div>
+
+            <div class="privacy-warning">
+              <i class="bi bi-shield-exclamation"></i>
+
+              <div>
+                <strong>Patient data protection</strong>
+
+                <span>
+                  Do not enter patient names, diagnostic IDs, mobile
+                  numbers or other personally identifiable information.
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Attachments -->
+    <section class="form-card">
+      <div class="form-card-header">
+        <div>
+          <h2>Attachments</h2>
+
+          <p>
+            Add supporting documents or screenshots when necessary.
+          </p>
+        </div>
+
+        <span class="optional-badge">Optional</span>
+      </div>
+
+      <div class="form-card-body">
+        <input
+          #fileInput
+          id="ticketAttachments"
+          type="file"
+          hidden
+          multiple
+          accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg"
+          (change)="onFileSelected($event)"
+        />
+
+        <label
+          for="ticketAttachments"
+          class="upload-area"
+        >
+          <span class="upload-icon">
+            <i class="bi bi-cloud-arrow-up"></i>
+          </span>
+
+          <span class="upload-content">
+            <strong>Click to upload supporting files</strong>
+
+            <small>
+              PDF, PNG, JPG or JPEG — maximum 5 MB per file
+            </small>
+          </span>
+        </label>
+
+        @if (fileError) {
+          <div class="alert alert-danger file-alert" role="alert">
+            <i class="bi bi-exclamation-circle"></i>
+            {{ fileError }}
+          </div>
+        }
+
+        @if (selectedFiles.length > 0) {
+          <div class="selected-files">
+            <h3>Selected attachments</h3>
+
+            @for (
+              file of selectedFiles;
+              track $index;
+              let fileIndex = $index
+            ) {
+              <article class="file-item">
+                <div class="file-details">
+                  <span class="file-icon">
+                    <i class="bi bi-file-earmark"></i>
+                  </span>
+
+                  <div>
+                    <strong>{{ file.name }}</strong>
+                    <small>{{ getFileSize(file.size) }}</small>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  class="remove-file-button"
+                  [attr.aria-label]="'Remove ' + file.name"
+                  (click)="removeFile(fileIndex)"
+                >
+                  <i class="bi bi-trash3"></i>
+                </button>
+              </article>
+            }
+          </div>
+        }
+      </div>
+    </section>
+
+    @if (submissionMessage) {
+      <div
+        class="alert alert-success submission-message"
+        role="status"
+      >
+        <i class="bi bi-check-circle-fill"></i>
+        {{ submissionMessage }}
+      </div>
+    }
+
+    <footer class="form-actions">
+      <button
+        type="button"
+        class="btn btn-outline-secondary action-button"
+        (click)="resetForm()"
+      >
+        <i class="bi bi-arrow-counterclockwise"></i>
+        Reset Form
+      </button>
+
+      <button
+        type="submit"
+        class="btn btn-primary action-button submit-button"
+      >
+        <i class="bi bi-send"></i>
+        Submit Ticket
+      </button>
+    </footer>
+  </form>
+</section>

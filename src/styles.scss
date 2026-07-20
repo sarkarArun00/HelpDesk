@@ -1,0 +1,129 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  color: #172033;
+  background: #f5f7fb;
+  font-family: Roboto, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.sidebar-navigation {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 24px 20px;
+  overflow-y: auto;
+}
+
+.navigation-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.management-section {
+  margin-top: 30px;
+}
+
+.navigation-title {
+  display: block;
+  margin: 0 0 13px;
+  padding: 0 16px;
+  color: #8fa8c0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.sidebar-menu-link {
+  display: flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  gap: 14px;
+  padding: 0 15px;
+  color: #d6e2ef;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 1.2;
+  text-decoration: none;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease,
+    border-color 150ms ease;
+
+  &:hover {
+    color: #ffffff;
+    background: rgb(255 255 255 / 6%);
+  }
+
+  &.active {
+    color: #ffffff;
+    background: #174b7d;
+    border-color: #225f97;
+  }
+}
+
+.sidebar-menu-icon {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  place-items: center;
+  color: inherit;
+  font-size: 19px;
+  line-height: 1;
+
+  i {
+    display: block;
+    color: inherit;
+    font-size: inherit;
+    line-height: 1;
+  }
+}
+
+.sidebar-menu-label {
+  min-width: 0;
+  overflow: hidden;
+  color: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root {
+  --brand-primary: #00a651;
+  --brand-primary-hover: #008a44;
+  --brand-primary-dark: #007a3d;
+  --brand-primary-deep: #006b36;
+
+  --brand-light: #eaf8f0;
+  --brand-lightest: #f4fcf7;
+  --brand-border: #a9e5c3;
+  --brand-muted: #7bcb9e;
+
+  --brand-focus-shadow: rgb(0 166 81 / 12%);
+  --brand-gradient-start: #06351f;
+  --brand-gradient-middle: #075f35;
+  --brand-gradient-end: #008a44;
+}

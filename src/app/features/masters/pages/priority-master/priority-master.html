@@ -1,0 +1,465 @@
+<section class="priority-master-page">
+  <header class="page-header">
+    <div>
+      <a routerLink="/masters" class="back-link">
+        <i class="bi bi-arrow-left"></i>
+        Back to Configuration Masters
+      </a>
+
+      <span class="page-eyebrow">
+        CONFIGURATION MASTER
+      </span>
+
+      <h1>Priority Master</h1>
+
+      <p>
+        Manage ticket priority availability, display sequence and
+        badge appearance.
+      </p>
+    </div>
+  </header>
+
+  <section class="information-banner">
+    <span class="banner-icon">
+      <i class="bi bi-info-circle"></i>
+    </span>
+
+    <div>
+      <strong>Fixed priority levels</strong>
+
+      <p>
+        Critical, High, Medium and Low are the approved priority
+        levels. Additional SLA-time configuration is excluded.
+      </p>
+    </div>
+  </section>
+
+  <section class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-icon total-icon">
+        <i class="bi bi-flag"></i>
+      </span>
+
+      <div>
+        <span>Total Priorities</span>
+        <strong>{{ priorities.length }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon active-icon">
+        <i class="bi bi-check-circle"></i>
+      </span>
+
+      <div>
+        <span>Active Priorities</span>
+        <strong>{{ activePriorityCount }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon inactive-icon">
+        <i class="bi bi-slash-circle"></i>
+      </span>
+
+      <div>
+        <span>Inactive Priorities</span>
+        <strong>{{ inactivePriorityCount }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon ticket-icon">
+        <i class="bi bi-ticket-detailed"></i>
+      </span>
+
+      <div>
+        <span>Mapped Tickets</span>
+        <strong>{{ totalTicketCount }}</strong>
+      </div>
+    </article>
+  </section>
+
+  @if (successMessage) {
+    <div class="alert alert-success success-message">
+      <i class="bi bi-check-circle-fill"></i>
+
+      <span>{{ successMessage }}</span>
+
+      <button
+        type="button"
+        aria-label="Close message"
+        (click)="successMessage = ''"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+  }
+
+  <section class="filter-card">
+    <header class="section-header">
+      <div>
+        <h2>Search and Filter</h2>
+
+        <p>
+          Find priority records by name, description or ID.
+        </p>
+      </div>
+
+      @if (hasActiveFilters) {
+        <button
+          type="button"
+          class="clear-filter-button"
+          (click)="clearFilters()"
+        >
+          <i class="bi bi-x-circle"></i>
+          Clear Filters
+        </button>
+      }
+    </header>
+
+    <div class="filter-body">
+      <div class="row g-3">
+        <div class="col-12 col-md-8">
+          <label for="prioritySearch" class="form-label">
+            Search Priorities
+          </label>
+
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-search"></i>
+            </span>
+
+            <input
+              id="prioritySearch"
+              type="search"
+              class="form-control"
+              [(ngModel)]="searchTerm"
+              placeholder="Search priority name or description"
+            />
+          </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <label for="priorityStatus" class="form-label">
+            Status
+          </label>
+
+          <select
+            id="priorityStatus"
+            class="form-select"
+            [(ngModel)]="selectedStatus"
+          >
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="priority-list-card">
+    <header class="section-header">
+      <div>
+        <h2>Priority Levels</h2>
+
+        <p>
+          Showing
+          <strong>{{ filteredPriorities.length }}</strong>
+          of
+          <strong>{{ priorities.length }}</strong>
+          priority records
+        </p>
+      </div>
+    </header>
+
+    @if (filteredPriorities.length > 0) {
+      <div class="priority-grid">
+        @for (
+          priority of filteredPriorities;
+          track priority.id
+        ) {
+          <article
+            class="priority-card"
+            [class.inactive-card]="!priority.status"
+          >
+            <header class="priority-card-header">
+              <span
+                class="priority-preview"
+                [style.color]="priority.badgeColor"
+                [style.background]="
+                  getBackgroundColor(priority.badgeColor)
+                "
+              >
+                <i class="bi bi-flag-fill"></i>
+                {{ priority.priorityLevel }}
+              </span>
+
+              <span
+                class="status-badge"
+                [class.active-status]="priority.status"
+                [class.inactive-status]="!priority.status"
+              >
+                <span class="status-dot"></span>
+
+                {{ priority.status ? 'Active' : 'Inactive' }}
+              </span>
+            </header>
+
+            <div class="priority-card-body">
+              <span class="priority-id">
+                {{ priority.id }}
+              </span>
+
+              <h3>{{ priority.priorityLevel }} Priority</h3>
+
+              <p>{{ priority.description }}</p>
+
+              <div class="priority-metadata">
+                <div>
+                  <span>Display Order</span>
+                  <strong>{{ priority.displayOrder }}</strong>
+                </div>
+
+                <div>
+                  <span>Badge Colour</span>
+
+                  <strong class="colour-value">
+                    <span
+                      class="colour-dot"
+                      [style.background]="priority.badgeColor"
+                    ></span>
+
+                    {{ priority.badgeColor }}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Mapped Tickets</span>
+                  <strong>{{ priority.ticketCount }}</strong>
+                </div>
+              </div>
+
+              <small class="updated-date">
+                Last updated:
+                {{ formatDate(priority.updatedAt) }}
+              </small>
+            </div>
+
+            <footer class="priority-card-footer">
+              <button
+                type="button"
+                class="edit-button"
+                (click)="openEditModal(priority)"
+              >
+                <i class="bi bi-pencil"></i>
+                Edit Settings
+              </button>
+
+              <button
+                type="button"
+                class="status-button"
+                [class.activate-button]="!priority.status"
+                [class.deactivate-button]="priority.status"
+                (click)="togglePriorityStatus(priority)"
+              >
+                <i
+                  class="bi"
+                  [class.bi-check-circle]="!priority.status"
+                  [class.bi-slash-circle]="priority.status"
+                ></i>
+
+                {{ priority.status ? 'Deactivate' : 'Activate' }}
+              </button>
+            </footer>
+          </article>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <span class="empty-icon">
+          <i class="bi bi-flag"></i>
+        </span>
+
+        <h3>No priorities found</h3>
+
+        <p>
+          No priority records match the current search and filter.
+        </p>
+
+        <button
+          type="button"
+          class="btn btn-outline-primary"
+          (click)="clearFilters()"
+        >
+          Clear Filters
+        </button>
+      </div>
+    }
+  </section>
+</section>
+
+@if (isModalVisible && selectedPriority) {
+  <div
+    class="modal-backdrop-custom"
+    (click)="closeModal()"
+  ></div>
+
+  <section
+    class="priority-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="priorityModalTitle"
+  >
+    <header class="modal-header-custom">
+      <div>
+        <span>PRIORITY MASTER</span>
+
+        <h2 id="priorityModalTitle">
+          Edit {{ selectedPriority.priorityLevel }} Priority
+        </h2>
+      </div>
+
+      <button
+        type="button"
+        aria-label="Close modal"
+        (click)="closeModal()"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </header>
+
+    <div class="modal-body-custom">
+      @if (formError) {
+        <div class="alert alert-danger form-error">
+          <i class="bi bi-exclamation-circle"></i>
+          {{ formError }}
+        </div>
+      }
+
+      <div class="locked-priority">
+        <span
+          class="priority-preview"
+          [style.color]="priorityForm.badgeColor"
+          [style.background]="
+            getBackgroundColor(priorityForm.badgeColor)
+          "
+        >
+          <i class="bi bi-flag-fill"></i>
+          {{ selectedPriority.priorityLevel }}
+        </span>
+
+        <div>
+          <strong>Priority level is fixed</strong>
+          <span>
+            The approved priority name cannot be changed.
+          </span>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-12 col-md-6">
+          <label for="displayOrder" class="form-label">
+            Display Order
+            <span class="required-star">*</span>
+          </label>
+
+          <input
+            id="displayOrder"
+            type="number"
+            min="1"
+            max="99"
+            class="form-control"
+            [(ngModel)]="priorityForm.displayOrder"
+          />
+
+          <div class="form-text">
+            Lower numbers appear first in dropdowns.
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label for="badgeColor" class="form-label">
+            Badge Colour
+            <span class="required-star">*</span>
+          </label>
+
+          <div class="colour-input-group">
+            <input
+              id="badgeColorPicker"
+              type="color"
+              [(ngModel)]="priorityForm.badgeColor"
+            />
+
+            <input
+              id="badgeColor"
+              type="text"
+              maxlength="7"
+              class="form-control text-uppercase"
+              [(ngModel)]="priorityForm.badgeColor"
+              placeholder="#175CD3"
+            />
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="badge-preview-section">
+            <span>Badge Preview</span>
+
+            <strong
+              [style.color]="
+                getContrastColor(priorityForm.badgeColor)
+              "
+              [style.background]="priorityForm.badgeColor"
+            >
+              <i class="bi bi-flag-fill"></i>
+              {{ selectedPriority.priorityLevel }}
+            </strong>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="status-setting">
+            <div>
+              <strong>Priority Status</strong>
+
+              <span>
+                Inactive priorities cannot be selected for new
+                tickets.
+              </span>
+            </div>
+
+            <label class="status-switch">
+              <input
+                type="checkbox"
+                [(ngModel)]="priorityForm.status"
+              />
+
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="modal-footer-custom">
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="closeModal()"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="savePriority()"
+      >
+        <i class="bi bi-check-lg"></i>
+        Update Priority
+      </button>
+    </footer>
+  </section>
+}

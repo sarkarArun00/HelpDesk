@@ -1,0 +1,147 @@
+<aside
+  class="sidebar"
+  [class.mobile-open]="isMobileOpen"
+>
+  <div class="sidebar-brand">
+    <div class="brand-logo">N</div>
+
+    <div class="brand-content">
+      <strong>Nirnayan</strong>
+      <span>Service Desk</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-navigation">
+  <div class="navigation-section">
+    <span class="navigation-title">
+      Main Menu
+    </span>
+
+    <a
+    
+      routerLink="/dashboard"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="sidebar-menu-link"
+      (click)="closeAfterNavigation()"
+    >
+      <span class="sidebar-menu-icon">
+        <i class="bi bi-grid"></i>
+      </span>
+
+      <span class="sidebar-menu-label">
+        Dashboard
+      </span>
+    </a>
+
+    <a
+      routerLink="/tickets/raise"
+      routerLinkActive="active"
+      class="sidebar-menu-link"
+      (click)="closeAfterNavigation()"
+    >
+      <span class="sidebar-menu-icon">
+        <i class="bi bi-plus-lg"></i>
+      </span>
+
+      <span class="sidebar-menu-label">
+        Raise Ticket
+      </span>
+    </a>
+
+    <a
+      routerLink="/tickets/my-raised"
+      routerLinkActive="active"
+      class="sidebar-menu-link"
+      (click)="closeAfterNavigation()"
+    >
+      <span class="sidebar-menu-icon">
+        <i class="bi bi-ticket-detailed"></i>
+      </span>
+
+      <span class="sidebar-menu-label">
+        My Raised Tickets
+      </span>
+    </a>
+
+    <a
+      routerLink="/tickets/action-items"
+      routerLinkActive="active"
+      class="sidebar-menu-link"
+      (click)="closeAfterNavigation()"
+    >
+      <span class="sidebar-menu-icon">
+        <i class="bi bi-check2-circle"></i>
+      </span>
+
+      <span class="sidebar-menu-label">
+        My Action Items
+      </span>
+    </a>
+
+    @if (canViewTeamPool) {
+      <a
+        routerLink="/tickets/team-pool"
+        routerLinkActive="active"
+        class="sidebar-menu-link"
+        (click)="closeAfterNavigation()"
+      >
+        <span class="sidebar-menu-icon">
+          <i class="bi bi-people"></i>
+        </span>
+
+        <span class="sidebar-menu-label">
+          Team Pool
+        </span>
+      </a>
+    }
+  </div>
+
+  @if (canViewReports || canViewMasters) {
+    <div class="navigation-section management-section">
+      <span class="navigation-title">
+        Management
+      </span>
+
+      @if (canViewReports) {
+        <a
+          routerLink="/reports"
+          routerLinkActive="active"
+          class="sidebar-menu-link"
+          (click)="closeAfterNavigation()"
+        >
+          <span class="sidebar-menu-icon">
+            <i class="bi bi-bar-chart"></i>
+          </span>
+
+          <span class="sidebar-menu-label">
+            Reports
+          </span>
+        </a>
+      }
+
+      @if (canViewMasters) {
+        <a
+          routerLink="/masters"
+          routerLinkActive="active"
+          class="sidebar-menu-link"
+          (click)="closeAfterNavigation()"
+        >
+          <span class="sidebar-menu-icon">
+            <i class="bi bi-gear"></i>
+          </span>
+
+          <span class="sidebar-menu-label">
+            Configuration Masters
+          </span>
+        </a>
+      }
+    </div>
+  }
+</nav>
+
+  <div class="sidebar-footer">
+    <span>ISD Ticketing System</span>
+    <small>Version 1.0</small>
+  </div>
+</aside>

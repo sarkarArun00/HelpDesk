@@ -1,0 +1,179 @@
+<section class="master-dashboard-page">
+  <header class="page-header">
+    <div>
+      <span class="page-eyebrow">SYSTEM ADMINISTRATION</span>
+
+      <h1>Configuration Masters</h1>
+
+      <p>
+        Manage the master data that controls ticket routing, user access
+        and organizational configuration.
+      </p>
+    </div>
+
+    <a routerLink="/dashboard" class="btn back-button">
+      <i class="bi bi-arrow-left"></i>
+      Back to Dashboard
+    </a>
+  </header>
+
+  <section class="admin-notice">
+    <span class="notice-icon">
+      <i class="bi bi-shield-lock"></i>
+    </span>
+
+    <div>
+      <strong>System administrator access</strong>
+
+      <p>
+        Configuration master changes affect ticket routing and application
+        behaviour across the organization.
+      </p>
+    </div>
+  </section>
+
+  <section class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-icon modules-icon">
+        <i class="bi bi-grid"></i>
+      </span>
+
+      <div>
+        <span>Master Modules</span>
+        <strong>{{ masterModules.length }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon total-icon">
+        <i class="bi bi-database"></i>
+      </span>
+
+      <div>
+        <span>Total Records</span>
+        <strong>{{ totalRecords }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon active-icon">
+        <i class="bi bi-check-circle"></i>
+      </span>
+
+      <div>
+        <span>Active Records</span>
+        <strong>{{ activeRecords }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon inactive-icon">
+        <i class="bi bi-slash-circle"></i>
+      </span>
+
+      <div>
+        <span>Inactive Records</span>
+        <strong>{{ inactiveRecords }}</strong>
+      </div>
+    </article>
+  </section>
+
+  <section class="masters-section">
+    <header class="section-header">
+      <div>
+        <h2>Available Masters</h2>
+
+        <p>
+          Select a master module to view and manage its configuration.
+        </p>
+      </div>
+    </header>
+
+    <div class="master-grid">
+      @for (master of masterModules; track master.id) {
+        <article class="master-card">
+          <div class="master-card-top">
+            <span class="master-icon">
+              <i class="bi" [class]="'bi ' + master.icon"></i>
+            </span>
+
+            <span class="configured-badge">
+              <i class="bi bi-check-circle-fill"></i>
+              Configured
+            </span>
+          </div>
+
+          <div class="master-content">
+            <h3>{{ master.title }}</h3>
+            <p>{{ master.description }}</p>
+          </div>
+
+          <div class="record-summary">
+            <div>
+              <span>Total</span>
+              <strong>{{ master.totalRecords }}</strong>
+            </div>
+
+            <div>
+              <span>Active</span>
+              <strong class="active-count">
+                {{ master.activeRecords }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Inactive</span>
+              <strong class="inactive-count">
+                {{ master.inactiveRecords }}
+              </strong>
+            </div>
+          </div>
+
+<footer class="master-card-footer">
+  @if (master.id === 'departments') {
+    <a
+      routerLink="/masters/departments"
+      class="manage-master-link"
+    >
+      Manage Departments
+      <i class="bi bi-arrow-right"></i>
+    </a>
+  } @else if (master.id === 'users') {
+    <a
+      routerLink="/masters/users"
+      class="manage-master-link"
+    >
+      Manage User Mapping
+      <i class="bi bi-arrow-right"></i>
+    </a>
+  } @else if (master.id === 'priorities') {
+    <a
+      routerLink="/masters/priorities"
+      class="manage-master-link"
+    >
+      Manage Priorities
+      <i class="bi bi-arrow-right"></i>
+    </a>
+  } @else if (master.id === 'categories') {
+    <a
+      routerLink="/masters/categories"
+      class="manage-master-link"
+    >
+      Manage Categories
+      <i class="bi bi-arrow-right"></i>
+    </a>
+  } @else if (master.id === 'centres') {
+    <a
+      routerLink="/masters/centres"
+      class="manage-master-link"
+    >
+      Manage Centres
+      <i class="bi bi-arrow-right"></i>
+    </a>
+  }
+</footer>
+        </article>
+      }
+    </div>
+  </section>
+</section>

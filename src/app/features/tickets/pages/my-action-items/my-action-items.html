@@ -1,0 +1,378 @@
+<section class="action-items-page">
+  <header class="page-header">
+    <div>
+      <span class="page-eyebrow">
+        AGENT WORKSPACE
+      </span>
+
+      <h1>My Action Items</h1>
+
+      <p>
+        Process and update tickets currently assigned to you.
+      </p>
+    </div>
+
+    <a routerLink="/dashboard" class="btn back-button">
+      <i class="bi bi-arrow-left"></i>
+      Back to Dashboard
+    </a>
+  </header>
+
+  <section class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-icon total-icon">
+        <i class="bi bi-list-check"></i>
+      </span>
+
+      <div>
+        <span>Total Action Items</span>
+        <strong>{{ tickets.length }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon assigned-icon">
+        <i class="bi bi-person-check"></i>
+      </span>
+
+      <div>
+        <span>Assigned</span>
+        <strong>{{ assignedCount }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon progress-icon">
+        <i class="bi bi-arrow-repeat"></i>
+      </span>
+
+      <div>
+        <span>In Progress</span>
+        <strong>{{ inProgressCount }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon reopened-icon">
+        <i class="bi bi-arrow-counterclockwise"></i>
+      </span>
+
+      <div>
+        <span>Reopened</span>
+        <strong>{{ reopenedCount }}</strong>
+      </div>
+    </article>
+  </section>
+
+  @if (actionMessage) {
+    <div class="alert alert-success action-message">
+      <i class="bi bi-check-circle-fill"></i>
+
+      <span>{{ actionMessage }}</span>
+
+      <button
+        type="button"
+        aria-label="Close message"
+        (click)="actionMessage = ''"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+  }
+
+  <section class="filter-card">
+    <div class="filter-card-header">
+      <div>
+        <h2>Search and Filter</h2>
+
+        <p>
+          Find assigned tickets by ID, subject, category or creator.
+        </p>
+      </div>
+
+      @if (hasActiveFilters) {
+        <button
+          type="button"
+          class="clear-filter-button"
+          (click)="clearFilters()"
+        >
+          <i class="bi bi-x-circle"></i>
+          Clear Filters
+        </button>
+      }
+    </div>
+
+    <div class="filter-card-body">
+      <div class="row g-3">
+        <div class="col-12 col-xl-4">
+          <label
+            for="actionSearch"
+            class="form-label"
+          >
+            Search Tickets
+          </label>
+
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-search"></i>
+            </span>
+
+            <input
+              id="actionSearch"
+              type="search"
+              class="form-control"
+              [(ngModel)]="searchTerm"
+              placeholder="Search ticket ID, subject or creator"
+            />
+          </div>
+        </div>
+
+        <div class="col-12 col-md-4 col-xl-2">
+          <label
+            for="actionStatus"
+            class="form-label"
+          >
+            Status
+          </label>
+
+          <select
+            id="actionStatus"
+            class="form-select"
+            [(ngModel)]="selectedStatus"
+          >
+            <option value="">All Statuses</option>
+
+            @for (status of statuses; track status) {
+              <option [value]="status">
+                {{ status }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="col-12 col-md-4 col-xl-2">
+          <label
+            for="actionPriority"
+            class="form-label"
+          >
+            Priority
+          </label>
+
+          <select
+            id="actionPriority"
+            class="form-select"
+            [(ngModel)]="selectedPriority"
+          >
+            <option value="">All Priorities</option>
+
+            @for (priority of priorities; track priority) {
+              <option [value]="priority">
+                {{ priority }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="col-12 col-md-4 col-xl-4">
+          <label
+            for="actionCentre"
+            class="form-label"
+          >
+            Centre / Facility
+          </label>
+
+          <select
+            id="actionCentre"
+            class="form-select"
+            [(ngModel)]="selectedCentre"
+          >
+            <option value="">All Centres</option>
+
+            @for (centre of centres; track centre) {
+              <option [value]="centre">
+                {{ centre }}
+              </option>
+            }
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ticket-list-card">
+    <div class="ticket-list-header">
+      <div>
+        <h2>Assigned Tickets</h2>
+
+        <p>
+          Showing
+          <strong>{{ filteredTickets.length }}</strong>
+          of
+          <strong>{{ tickets.length }}</strong>
+          active action items
+        </p>
+      </div>
+    </div>
+
+    @if (filteredTickets.length > 0) {
+      <div class="table-responsive">
+        <table class="table ticket-table align-middle">
+          <thead>
+            <tr>
+              <th>Ticket</th>
+              <th>Raised By</th>
+              <th>Category</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Last Updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (
+              ticket of filteredTickets;
+              track ticket.id
+            ) {
+              <tr>
+                <td>
+                  <div class="ticket-primary">
+                    <a
+                        [routerLink]="['/tickets', ticket.ticketId]"
+                        class="ticket-id"
+                      >
+                        {{ ticket.ticketId }}
+                      </a>
+
+                    <span>{{ ticket.subject }}</span>
+
+                    <small>
+                      <i class="bi bi-geo-alt"></i>
+                      {{ ticket.centre }}
+                    </small>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="creator-cell">
+                    <span class="creator-avatar">
+                      {{ getInitials(ticket.createdBy) }}
+                    </span>
+
+                    <div>
+                      <strong>
+                        {{ ticket.createdBy }}
+                      </strong>
+
+                      <small>
+                        {{ ticket.originatingDepartment }}
+                      </small>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="category-text">
+                    {{ ticket.category }}
+                  </span>
+                </td>
+
+                <td>
+                  <span
+                    class="priority-badge"
+                    [class]="
+                      'priority-badge ' +
+                      getPriorityClass(ticket.priority)
+                    "
+                  >
+                    {{ ticket.priority }}
+                  </span>
+                </td>
+
+                <td>
+                  <span
+                    class="status-badge"
+                    [class]="
+                      'status-badge ' +
+                      getStatusClass(ticket.status)
+                    "
+                  >
+                    <span class="status-dot"></span>
+                    {{ ticket.status }}
+                  </span>
+                </td>
+
+                <td>
+                  <span class="updated-date">
+                    {{ formatDate(ticket.lastUpdatedAt) }}
+                  </span>
+                </td>
+
+                <td>
+                  <div class="action-buttons">
+                    <a
+                        [routerLink]="['/tickets', ticket.ticketId]"
+                        class="view-button"
+                      >
+                        <i class="bi bi-eye"></i>
+                        View
+                      </a>
+
+                    @if (
+                      ticket.status === 'Assigned' ||
+                      ticket.status === 'Reopened'
+                    ) {
+                      <button
+                        type="button"
+                        class="process-button"
+                        (click)="startProcessing(ticket.id)"
+                      >
+                        <i class="bi bi-play-fill"></i>
+                        Start
+                      </button>
+                    }
+
+                    @if (
+                      ticket.status === 'In Progress'
+                    ) {
+                      <button
+                        type="button"
+                        class="resolve-button"
+                        (click)="markResolved(ticket.id)"
+                      >
+                        <i class="bi bi-check-lg"></i>
+                        Resolve
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="empty-state">
+        <span class="empty-icon">
+          <i class="bi bi-check2-circle"></i>
+        </span>
+
+        <h3>No action items found</h3>
+
+        <p>
+          There are no assigned tickets matching the current filters.
+        </p>
+
+        @if (hasActiveFilters) {
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            (click)="clearFilters()"
+          >
+            Clear Filters
+          </button>
+        }
+      </div>
+    }
+  </section>
+</section>

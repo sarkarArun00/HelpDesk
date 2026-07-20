@@ -1,0 +1,625 @@
+<section class="reports-page">
+  <header class="page-header">
+    <div>
+      <span class="page-eyebrow">REPORTS & ANALYTICS</span>
+
+      <h1>Ticket Reports</h1>
+
+      <p>
+        Analyse ticket distribution across departments, categories,
+        centres, priorities, statuses and assigned employees.
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <a routerLink="/dashboard" class="btn back-button">
+        <i class="bi bi-arrow-left"></i>
+        Dashboard
+      </a>
+
+      <button
+        type="button"
+        class="btn export-button"
+        [disabled]="
+          isDateRangeInvalid ||
+          filteredTickets.length === 0
+        "
+        (click)="exportCsv()"
+      >
+        <i class="bi bi-download"></i>
+        Export CSV
+      </button>
+    </div>
+  </header>
+
+  @if (exportMessage) {
+    <div
+      class="alert export-message"
+      [class.alert-success]="
+        !isDateRangeInvalid &&
+        filteredTickets.length > 0
+      "
+      [class.alert-danger]="
+        isDateRangeInvalid ||
+        filteredTickets.length === 0
+      "
+    >
+      <i
+        class="bi"
+        [class.bi-check-circle-fill]="
+          !isDateRangeInvalid &&
+          filteredTickets.length > 0
+        "
+        [class.bi-exclamation-circle-fill]="
+          isDateRangeInvalid ||
+          filteredTickets.length === 0
+        "
+      ></i>
+
+      <span>{{ exportMessage }}</span>
+
+      <button
+        type="button"
+        aria-label="Close message"
+        (click)="exportMessage = ''"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+  }
+
+  <section class="filter-card">
+    <header class="section-header">
+      <div>
+        <h2>Report Filters</h2>
+
+        <p>
+          Filter ticket records before reviewing or exporting the
+          report.
+        </p>
+      </div>
+
+      @if (hasActiveFilters) {
+        <button
+          type="button"
+          class="clear-filter-button"
+          (click)="resetFilters()"
+        >
+          <i class="bi bi-x-circle"></i>
+          Reset Filters
+        </button>
+      }
+    </header>
+
+    <div class="filter-body">
+      <div class="row g-3">
+        <div class="col-12 col-md-6 col-xl-2">
+          <label for="dateFrom" class="form-label">
+            From Date
+          </label>
+
+          <input
+            id="dateFrom"
+            type="date"
+            class="form-control"
+            [(ngModel)]="dateFrom"
+          />
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-2">
+          <label for="dateTo" class="form-label">
+            To Date
+          </label>
+
+          <input
+            id="dateTo"
+            type="date"
+            class="form-control"
+            [(ngModel)]="dateTo"
+          />
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-2">
+          <label for="departmentFilter" class="form-label">
+            Department
+          </label>
+
+          <select
+            id="departmentFilter"
+            class="form-select"
+            [(ngModel)]="selectedDepartment"
+          >
+            <option value="">All Departments</option>
+
+            @for (
+              department of departments;
+              track department
+            ) {
+              <option [value]="department">
+                {{ department }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-2">
+          <label for="centreFilter" class="form-label">
+            Centre
+          </label>
+
+          <select
+            id="centreFilter"
+            class="form-select"
+            [(ngModel)]="selectedCentre"
+          >
+            <option value="">All Centres</option>
+
+            @for (centre of centres; track centre) {
+              <option [value]="centre">
+                {{ centre }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-2">
+          <label for="priorityFilter" class="form-label">
+            Priority
+          </label>
+
+          <select
+            id="priorityFilter"
+            class="form-select"
+            [(ngModel)]="selectedPriority"
+          >
+            <option value="">All Priorities</option>
+
+            @for (priority of priorities; track priority) {
+              <option [value]="priority">
+                {{ priority }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-2">
+          <label for="statusFilter" class="form-label">
+            Status
+          </label>
+
+          <select
+            id="statusFilter"
+            class="form-select"
+            [(ngModel)]="selectedStatus"
+          >
+            <option value="">All Statuses</option>
+
+            @for (status of statuses; track status) {
+              <option [value]="status">
+                {{ status }}
+              </option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (isDateRangeInvalid) {
+        <div class="date-error">
+          <i class="bi bi-exclamation-circle"></i>
+          The From Date cannot be later than the To Date.
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-icon total-icon">
+        <i class="bi bi-ticket-detailed"></i>
+      </span>
+
+      <div>
+        <span>Total Tickets</span>
+        <strong>{{ filteredTickets.length }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon assigned-icon">
+        <i class="bi bi-person-check"></i>
+      </span>
+
+      <div>
+        <span>Assigned</span>
+        <strong>{{ assignedCount }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon progress-icon">
+        <i class="bi bi-arrow-repeat"></i>
+      </span>
+
+      <div>
+        <span>In Progress</span>
+        <strong>{{ inProgressCount }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon resolved-icon">
+        <i class="bi bi-check-circle"></i>
+      </span>
+
+      <div>
+        <span>Resolved</span>
+        <strong>{{ resolvedCount }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon closed-icon">
+        <i class="bi bi-lock"></i>
+      </span>
+
+      <div>
+        <span>Closed</span>
+        <strong>{{ closedCount }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon reopened-icon">
+        <i class="bi bi-arrow-counterclockwise"></i>
+      </span>
+
+      <div>
+        <span>Reopened</span>
+        <strong>{{ reopenedCount }}</strong>
+      </div>
+    </article>
+  </section>
+
+  <section class="analytics-grid">
+    <article class="analytics-card">
+      <header>
+        <div>
+          <h2>Department-wise Report</h2>
+          <p>Tickets routed to each department.</p>
+        </div>
+
+        <i class="bi bi-diagram-3"></i>
+      </header>
+
+      <div class="analytics-list">
+        @for (
+          item of departmentSummary;
+          track item.label
+        ) {
+          <div class="analytics-item">
+            <div class="analytics-label">
+              <span>{{ item.label }}</span>
+              <strong>{{ item.count }}</strong>
+            </div>
+
+            <div class="progress-track">
+              <span
+                [style.width.%]="item.percentage"
+              ></span>
+            </div>
+
+            <small>{{ item.percentage }}%</small>
+          </div>
+        } @empty {
+          <div class="analytics-empty">
+            No department data available.
+          </div>
+        }
+      </div>
+    </article>
+
+    <article class="analytics-card">
+      <header>
+        <div>
+          <h2>Category-wise Report</h2>
+          <p>Most frequently raised ticket categories.</p>
+        </div>
+
+        <i class="bi bi-tags"></i>
+      </header>
+
+      <div class="analytics-list">
+        @for (
+          item of categorySummary;
+          track item.label
+        ) {
+          <div class="analytics-item">
+            <div class="analytics-label">
+              <span>{{ item.label }}</span>
+              <strong>{{ item.count }}</strong>
+            </div>
+
+            <div class="progress-track">
+              <span
+                [style.width.%]="item.percentage"
+              ></span>
+            </div>
+
+            <small>{{ item.percentage }}%</small>
+          </div>
+        } @empty {
+          <div class="analytics-empty">
+            No category data available.
+          </div>
+        }
+      </div>
+    </article>
+
+    <article class="analytics-card">
+      <header>
+        <div>
+          <h2>Priority-wise Report</h2>
+          <p>Ticket distribution by priority.</p>
+        </div>
+
+        <i class="bi bi-flag"></i>
+      </header>
+
+      <div class="analytics-list">
+        @for (
+          item of prioritySummary;
+          track item.label
+        ) {
+          <div class="analytics-item">
+            <div class="analytics-label">
+              <span>{{ item.label }}</span>
+              <strong>{{ item.count }}</strong>
+            </div>
+
+            <div class="progress-track">
+              <span
+                [class]="
+                  'priority-bar priority-bar-' +
+                  item.label.toLowerCase()
+                "
+                [style.width.%]="item.percentage"
+              ></span>
+            </div>
+
+            <small>{{ item.percentage }}%</small>
+          </div>
+        }
+      </div>
+    </article>
+
+    <article class="analytics-card">
+      <header>
+        <div>
+          <h2>Status-wise Report</h2>
+          <p>Current ticket lifecycle distribution.</p>
+        </div>
+
+        <i class="bi bi-list-check"></i>
+      </header>
+
+      <div class="analytics-list">
+        @for (
+          item of statusSummary;
+          track item.label
+        ) {
+          <div class="analytics-item">
+            <div class="analytics-label">
+              <span>{{ item.label }}</span>
+              <strong>{{ item.count }}</strong>
+            </div>
+
+            <div class="progress-track">
+              <span
+                [style.width.%]="item.percentage"
+              ></span>
+            </div>
+
+            <small>{{ item.percentage }}%</small>
+          </div>
+        }
+      </div>
+    </article>
+
+    <article class="analytics-card">
+      <header>
+        <div>
+          <h2>Centre-wise Report</h2>
+          <p>Tickets raised across centres and facilities.</p>
+        </div>
+
+        <i class="bi bi-geo-alt"></i>
+      </header>
+
+      <div class="analytics-list">
+        @for (
+          item of centreSummary;
+          track item.label
+        ) {
+          <div class="analytics-item">
+            <div class="analytics-label">
+              <span>{{ item.label }}</span>
+              <strong>{{ item.count }}</strong>
+            </div>
+
+            <div class="progress-track">
+              <span
+                [style.width.%]="item.percentage"
+              ></span>
+            </div>
+
+            <small>{{ item.percentage }}%</small>
+          </div>
+        } @empty {
+          <div class="analytics-empty">
+            No centre data available.
+          </div>
+        }
+      </div>
+    </article>
+
+    <article class="analytics-card">
+      <header>
+        <div>
+          <h2>Assignee-wise Report</h2>
+          <p>Ticket workload by assigned employee.</p>
+        </div>
+
+        <i class="bi bi-people"></i>
+      </header>
+
+      <div class="analytics-list">
+        @for (
+          item of assigneeSummary;
+          track item.label
+        ) {
+          <div class="analytics-item">
+            <div class="analytics-label">
+              <span>{{ item.label }}</span>
+              <strong>{{ item.count }}</strong>
+            </div>
+
+            <div class="progress-track">
+              <span
+                [style.width.%]="item.percentage"
+              ></span>
+            </div>
+
+            <small>{{ item.percentage }}%</small>
+          </div>
+        } @empty {
+          <div class="analytics-empty">
+            No assignee data available.
+          </div>
+        }
+      </div>
+    </article>
+  </section>
+
+  <section class="report-table-card">
+    <header class="section-header">
+      <div>
+        <h2>Ticket Report Details</h2>
+
+        <p>
+          Showing
+          <strong>{{ filteredTickets.length }}</strong>
+          of
+          <strong>{{ tickets.length }}</strong>
+          ticket records
+        </p>
+      </div>
+    </header>
+
+    @if (filteredTickets.length > 0) {
+      <div class="table-responsive">
+        <table class="table report-table align-middle">
+          <thead>
+            <tr>
+              <th>Ticket</th>
+              <th>Category</th>
+              <th>Department</th>
+              <th>Centre</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Assignee</th>
+              <th>Created At</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (
+              ticket of filteredTickets;
+              track ticket.id
+            ) {
+              <tr>
+                <td>
+                  <div class="ticket-cell">
+                    <a
+                      [routerLink]="[
+                        '/tickets',
+                        ticket.ticketId
+                      ]"
+                    >
+                      {{ ticket.ticketId }}
+                    </a>
+
+                    <span>{{ ticket.subject }}</span>
+                  </div>
+                </td>
+
+                <td>{{ ticket.category }}</td>
+
+                <td>
+                  <div class="department-cell">
+                    <i class="bi bi-building"></i>
+                    {{ ticket.department }}
+                  </div>
+                </td>
+
+                <td>{{ ticket.centre }}</td>
+
+                <td>
+                  <span
+                    class="priority-badge"
+                    [class]="
+                      'priority-badge ' +
+                      getPriorityClass(ticket.priority)
+                    "
+                  >
+                    {{ ticket.priority }}
+                  </span>
+                </td>
+
+                <td>
+                  <span
+                    class="status-badge"
+                    [class]="
+                      'status-badge ' +
+                      getStatusClass(ticket.status)
+                    "
+                  >
+                    <span class="status-dot"></span>
+                    {{ ticket.status }}
+                  </span>
+                </td>
+
+                <td>{{ ticket.assignee }}</td>
+
+                <td>
+                  <span class="created-date">
+                    {{ formatDate(ticket.createdAt) }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="empty-state">
+        <span class="empty-icon">
+          <i class="bi bi-bar-chart"></i>
+        </span>
+
+        <h3>No report data found</h3>
+
+        <p>
+          No ticket records match the selected report filters.
+        </p>
+
+        <button
+          type="button"
+          class="btn btn-outline-primary"
+          (click)="resetFilters()"
+        >
+          Reset Filters
+        </button>
+      </div>
+    }
+  </section>
+</section>

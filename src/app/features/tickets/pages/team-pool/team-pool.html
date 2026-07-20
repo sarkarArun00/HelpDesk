@@ -1,0 +1,452 @@
+<section class="team-pool-page">
+  <header class="page-header">
+    <div>
+      <span class="page-eyebrow">DEPARTMENT WORKSPACE</span>
+
+      <h1>Unassigned Team Pool</h1>
+
+      <p>
+        Review and assign tickets routed to the
+        {{ currentDepartment }} department.
+      </p>
+    </div>
+
+    <a routerLink="/dashboard" class="btn back-button">
+      <i class="bi bi-arrow-left"></i>
+      Back to Dashboard
+    </a>
+  </header>
+
+  <section class="department-banner">
+    <span class="department-banner-icon">
+      <i class="bi bi-diagram-3"></i>
+    </span>
+
+    <div>
+      <span>Current Department</span>
+      <strong>{{ currentDepartment }}</strong>
+    </div>
+
+    <span class="pool-count">
+      {{ tickets.length }}
+      unassigned
+    </span>
+  </section>
+
+  <section class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-icon total-icon">
+        <i class="bi bi-inboxes"></i>
+      </span>
+
+      <div>
+        <span>Total Pool Tickets</span>
+        <strong>{{ tickets.length }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon critical-icon">
+        <i class="bi bi-exclamation-triangle"></i>
+      </span>
+
+      <div>
+        <span>Critical</span>
+        <strong>{{ criticalCount }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon high-icon">
+        <i class="bi bi-arrow-up-circle"></i>
+      </span>
+
+      <div>
+        <span>High Priority</span>
+        <strong>{{ highPriorityCount }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon centre-icon">
+        <i class="bi bi-geo-alt"></i>
+      </span>
+
+      <div>
+        <span>Affected Centres</span>
+        <strong>{{ affectedCentreCount }}</strong>
+      </div>
+    </article>
+  </section>
+
+  @if (assignmentMessage) {
+    <div class="alert alert-success assignment-message">
+      <i class="bi bi-check-circle-fill"></i>
+
+      <span>{{ assignmentMessage }}</span>
+
+      <button
+        type="button"
+        aria-label="Close message"
+        (click)="assignmentMessage = ''"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+  }
+
+  <section class="filter-card">
+    <div class="filter-card-header">
+      <div>
+        <h2>Search and Filter</h2>
+
+        <p>
+          Find pool tickets by ID, subject, category or creator.
+        </p>
+      </div>
+
+      @if (hasActiveFilters) {
+        <button
+          type="button"
+          class="clear-filter-button"
+          (click)="clearFilters()"
+        >
+          <i class="bi bi-x-circle"></i>
+          Clear Filters
+        </button>
+      }
+    </div>
+
+    <div class="filter-card-body">
+      <div class="row g-3">
+        <div class="col-12 col-xl-4">
+          <label for="poolSearch" class="form-label">
+            Search Tickets
+          </label>
+
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-search"></i>
+            </span>
+
+            <input
+              id="poolSearch"
+              type="search"
+              class="form-control"
+              [(ngModel)]="searchTerm"
+              placeholder="Search ticket ID, subject or creator"
+            />
+          </div>
+        </div>
+
+        <div class="col-12 col-md-4 col-xl-2">
+          <label for="poolPriority" class="form-label">
+            Priority
+          </label>
+
+          <select
+            id="poolPriority"
+            class="form-select"
+            [(ngModel)]="selectedPriority"
+          >
+            <option value="">All Priorities</option>
+
+            @for (priority of priorities; track priority) {
+              <option [value]="priority">
+                {{ priority }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="col-12 col-md-4 col-xl-3">
+          <label for="poolCategory" class="form-label">
+            Category
+          </label>
+
+          <select
+            id="poolCategory"
+            class="form-select"
+            [(ngModel)]="selectedCategory"
+          >
+            <option value="">All Categories</option>
+
+            @for (category of categories; track category) {
+              <option [value]="category">
+                {{ category }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="col-12 col-md-4 col-xl-3">
+          <label for="poolCentre" class="form-label">
+            Centre / Facility
+          </label>
+
+          <select
+            id="poolCentre"
+            class="form-select"
+            [(ngModel)]="selectedCentre"
+          >
+            <option value="">All Centres</option>
+
+            @for (centre of centres; track centre) {
+              <option [value]="centre">
+                {{ centre }}
+              </option>
+            }
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ticket-list-card">
+    <div class="ticket-list-header">
+      <div>
+        <h2>Department Pool Tickets</h2>
+
+        <p>
+          Showing
+          <strong>{{ filteredTickets.length }}</strong>
+          of
+          <strong>{{ tickets.length }}</strong>
+          unassigned tickets
+        </p>
+      </div>
+    </div>
+
+    @if (filteredTickets.length > 0) {
+      <div class="table-responsive">
+        <table class="table ticket-table align-middle">
+          <thead>
+            <tr>
+              <th>Ticket</th>
+              <th>Raised By</th>
+              <th>Category</th>
+              <th>Priority</th>
+              <th>Created At</th>
+              <th>Assignment</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (ticket of filteredTickets; track ticket.id) {
+              <tr>
+                <td>
+                  <div class="ticket-primary">
+                    <a
+                    [routerLink]="['/tickets', ticket.ticketId]"
+                    class="ticket-id"
+                    >
+                    {{ ticket.ticketId }}
+                    </a>
+
+                    <span>{{ ticket.subject }}</span>
+
+                    <small>
+                      <i class="bi bi-geo-alt"></i>
+                      {{ ticket.centre }}
+                    </small>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="creator-cell">
+                    <span class="creator-avatar">
+                      {{ getInitials(ticket.createdBy) }}
+                    </span>
+
+                    <div>
+                      <strong>{{ ticket.createdBy }}</strong>
+                      <small>
+                        {{ ticket.originatingDepartment }}
+                      </small>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="category-text">
+                    {{ ticket.category }}
+                  </span>
+                </td>
+
+                <td>
+                  <span
+                    class="priority-badge"
+                    [class]="
+                      'priority-badge ' +
+                      getPriorityClass(ticket.priority)
+                    "
+                  >
+                    {{ ticket.priority }}
+                  </span>
+                </td>
+
+                <td>
+                  <span class="created-date">
+                    {{ formatDate(ticket.createdAt) }}
+                  </span>
+                </td>
+
+                <td>
+                  <div class="assignment-actions">
+                    <button
+                      type="button"
+                      class="pickup-button"
+                      (click)="pickUpTicket(ticket)"
+                    >
+                      <i class="bi bi-person-check"></i>
+                      Pick Up
+                    </button>
+
+                    <button
+                      type="button"
+                      class="assign-button"
+                      (click)="openAssignmentModal(ticket)"
+                    >
+                      <i class="bi bi-person-plus"></i>
+                      Assign
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="empty-state">
+        <span class="empty-icon">
+          <i class="bi bi-inbox"></i>
+        </span>
+
+        <h3>No pool tickets found</h3>
+
+        <p>
+          There are no unassigned tickets matching the current filters.
+        </p>
+
+        @if (hasActiveFilters) {
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            (click)="clearFilters()"
+          >
+            Clear Filters
+          </button>
+        }
+      </div>
+    }
+  </section>
+</section>
+
+@if (selectedTicket) {
+  <div
+    class="modal-backdrop-custom"
+    (click)="closeAssignmentModal()"
+  ></div>
+
+  <section
+    class="assignment-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="assignmentModalTitle"
+  >
+    <header class="assignment-modal-header">
+      <div>
+        <span>ASSIGN TICKET</span>
+
+        <h2 id="assignmentModalTitle">
+          Select Team Member
+        </h2>
+      </div>
+
+      <button
+        type="button"
+        aria-label="Close assignment modal"
+        (click)="closeAssignmentModal()"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </header>
+
+    <div class="assignment-modal-body">
+      <article class="selected-ticket-card">
+        <span class="ticket-icon">
+          <i class="bi bi-ticket-detailed"></i>
+        </span>
+
+        <div>
+          <strong>{{ selectedTicket.ticketId }}</strong>
+          <span>{{ selectedTicket.subject }}</span>
+        </div>
+      </article>
+
+      <label for="teamMember" class="form-label">
+        Assign To
+        <span class="required-star">*</span>
+      </label>
+
+      <select
+        id="teamMember"
+        class="form-select"
+        [(ngModel)]="selectedAssigneeId"
+      >
+        <option [ngValue]="0" disabled>
+          Select a team member
+        </option>
+
+        @for (member of teamMembers; track member.id) {
+          <option [ngValue]="member.id">
+            {{ member.name }} — {{ member.designation }}
+          </option>
+        }
+      </select>
+
+      @if (getSelectedEmployee(); as selectedEmployee) {
+        <article class="employee-preview">
+          <span class="employee-avatar">
+            {{ getInitials(selectedEmployee.name) }}
+          </span>
+
+          <div>
+            <strong>{{ selectedEmployee.name }}</strong>
+            <span>
+              {{ selectedEmployee.employeeCode }}
+              ·
+              {{ selectedEmployee.designation }}
+            </span>
+          </div>
+
+          <div class="workload">
+            <strong>{{ selectedEmployee.activeTickets }}</strong>
+            <span>Active tickets</span>
+          </div>
+        </article>
+      }
+    </div>
+
+    <footer class="assignment-modal-footer">
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="closeAssignmentModal()"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="!selectedAssigneeId"
+        (click)="assignTicket()"
+      >
+        <i class="bi bi-person-check"></i>
+        Confirm Assignment
+      </button>
+    </footer>
+  </section>
+}

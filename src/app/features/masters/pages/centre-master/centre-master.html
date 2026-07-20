@@ -1,0 +1,632 @@
+<section class="centre-master-page">
+  <header class="page-header">
+    <div>
+      <a routerLink="/masters" class="back-link">
+        <i class="bi bi-arrow-left"></i>
+        Back to Configuration Masters
+      </a>
+
+      <span class="page-eyebrow">
+        CONFIGURATION MASTER
+      </span>
+
+      <h1>Centre / Facility Master</h1>
+
+      <p>
+        Manage laboratories, collection centres, offices and facility
+        location information.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="btn add-centre-button"
+      (click)="openAddModal()"
+    >
+      <i class="bi bi-plus-lg"></i>
+      Add Centre
+    </button>
+  </header>
+
+  <section class="information-banner">
+    <span class="banner-icon">
+      <i class="bi bi-geo-alt"></i>
+    </span>
+
+    <div>
+      <strong>Centre-based ticket tracking</strong>
+
+      <p>
+        Active centres are available on the Raise Ticket form and in
+        ticket dashboard filters.
+      </p>
+    </div>
+  </section>
+
+  <section class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-icon total-icon">
+        <i class="bi bi-buildings"></i>
+      </span>
+
+      <div>
+        <span>Total Centres</span>
+        <strong>{{ centres.length }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon active-icon">
+        <i class="bi bi-check-circle"></i>
+      </span>
+
+      <div>
+        <span>Active Centres</span>
+        <strong>{{ activeCentreCount }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon inactive-icon">
+        <i class="bi bi-slash-circle"></i>
+      </span>
+
+      <div>
+        <span>Inactive Centres</span>
+        <strong>{{ inactiveCentreCount }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon collection-icon">
+        <i class="bi bi-geo-alt"></i>
+      </span>
+
+      <div>
+        <span>Collection Centres</span>
+        <strong>{{ collectionCentreCount }}</strong>
+      </div>
+    </article>
+  </section>
+
+  @if (successMessage) {
+    <div class="alert alert-success success-message">
+      <i class="bi bi-check-circle-fill"></i>
+
+      <span>{{ successMessage }}</span>
+
+      <button
+        type="button"
+        aria-label="Close success message"
+        (click)="successMessage = ''"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+  }
+
+  <section class="filter-card">
+    <header class="section-header">
+      <div>
+        <h2>Search and Filter</h2>
+
+        <p>
+          Find centres by code, name, city, PIN code or facility type.
+        </p>
+      </div>
+
+      @if (hasActiveFilters) {
+        <button
+          type="button"
+          class="clear-filter-button"
+          (click)="clearFilters()"
+        >
+          <i class="bi bi-x-circle"></i>
+          Clear Filters
+        </button>
+      }
+    </header>
+
+    <div class="filter-body">
+      <div class="row g-3">
+        <div class="col-12 col-xl-4">
+          <label for="centreSearch" class="form-label">
+            Search Centres
+          </label>
+
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-search"></i>
+            </span>
+
+            <input
+              id="centreSearch"
+              type="search"
+              class="form-control"
+              [(ngModel)]="searchTerm"
+              placeholder="Search code, name, city or PIN code"
+            />
+          </div>
+        </div>
+
+        <div class="col-12 col-md-4 col-xl-3">
+          <label for="centreTypeFilter" class="form-label">
+            Centre Type
+          </label>
+
+          <select
+            id="centreTypeFilter"
+            class="form-select"
+            [(ngModel)]="selectedCentreType"
+          >
+            <option value="">All Centre Types</option>
+
+            @for (centreType of centreTypes; track centreType) {
+              <option [value]="centreType">
+                {{ centreType }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="col-12 col-md-4 col-xl-3">
+          <label for="regionFilter" class="form-label">
+            Region
+          </label>
+
+          <select
+            id="regionFilter"
+            class="form-select"
+            [(ngModel)]="selectedRegion"
+          >
+            <option value="">All Regions</option>
+
+            @for (region of regions; track region) {
+              <option [value]="region">
+                {{ region }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="col-12 col-md-4 col-xl-2">
+          <label for="centreStatusFilter" class="form-label">
+            Status
+          </label>
+
+          <select
+            id="centreStatusFilter"
+            class="form-select"
+            [(ngModel)]="selectedStatus"
+          >
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="centre-list-card">
+    <header class="section-header">
+      <div>
+        <h2>Centres and Facilities</h2>
+
+        <p>
+          Showing
+          <strong>{{ filteredCentres.length }}</strong>
+          of
+          <strong>{{ centres.length }}</strong>
+          centres
+        </p>
+      </div>
+    </header>
+
+    @if (filteredCentres.length > 0) {
+      <div class="table-responsive">
+        <table class="table centre-table align-middle">
+          <thead>
+            <tr>
+              <th>Centre / Facility</th>
+              <th>Centre ID</th>
+              <th>Facility Type</th>
+              <th>Location</th>
+              <th>Mapped Tickets</th>
+              <th>Status</th>
+              <th>Last Updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (
+              centre of filteredCentres;
+              track centre.id
+            ) {
+              <tr>
+                <td>
+                  <div class="centre-primary">
+                    <span class="centre-icon">
+                      <i
+                        class="bi"
+                        [class]="
+                          'bi ' +
+                          getCentreTypeIcon(centre.centreType)
+                        "
+                      ></i>
+                    </span>
+
+                    <div>
+                      <strong>{{ centre.centreName }}</strong>
+                      <small>{{ centre.centreCode }}</small>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="centre-id">
+                    {{ centre.id }}
+                  </span>
+                </td>
+
+                <td>
+                  <span
+                    class="type-badge"
+                    [class]="
+                      'type-badge ' +
+                      getCentreTypeClass(centre.centreType)
+                    "
+                  >
+                    {{ centre.centreType }}
+                  </span>
+                </td>
+
+                <td>
+                  <div class="location-cell">
+                    <i class="bi bi-geo-alt"></i>
+
+                    <div>
+                      <strong>
+                        {{ centre.city }},
+                        {{ centre.state }}
+                      </strong>
+
+                      <small>
+                        {{ centre.region }}
+                        ·
+                        {{ centre.pinCode }}
+                      </small>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="ticket-count">
+                    <i class="bi bi-ticket-detailed"></i>
+                    {{ centre.ticketCount }}
+                  </span>
+                </td>
+
+                <td>
+                  <span
+                    class="status-badge"
+                    [class.active-status]="centre.status"
+                    [class.inactive-status]="!centre.status"
+                  >
+                    <span class="status-dot"></span>
+
+                    {{ centre.status ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+
+                <td>
+                  <span class="updated-date">
+                    {{ formatDate(centre.updatedAt) }}
+                  </span>
+                </td>
+
+                <td>
+                  <div class="action-buttons">
+                    <button
+                      type="button"
+                      class="edit-button"
+                      (click)="openEditModal(centre)"
+                    >
+                      <i class="bi bi-pencil"></i>
+                      Edit
+                    </button>
+
+                    <button
+                      type="button"
+                      class="status-button"
+                      [class.activate-button]="!centre.status"
+                      [class.deactivate-button]="centre.status"
+                      (click)="toggleCentreStatus(centre)"
+                    >
+                      <i
+                        class="bi"
+                        [class.bi-check-circle]="!centre.status"
+                        [class.bi-slash-circle]="centre.status"
+                      ></i>
+
+                      {{
+                        centre.status
+                          ? 'Deactivate'
+                          : 'Activate'
+                      }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="empty-state">
+        <span class="empty-icon">
+          <i class="bi bi-building-x"></i>
+        </span>
+
+        <h3>No centres found</h3>
+
+        <p>
+          No centre or facility records match the current filters.
+        </p>
+
+        <button
+          type="button"
+          class="btn btn-outline-primary"
+          (click)="clearFilters()"
+        >
+          Clear Filters
+        </button>
+      </div>
+    }
+  </section>
+</section>
+
+@if (isModalVisible) {
+  <div
+    class="modal-backdrop-custom"
+    (click)="closeModal()"
+  ></div>
+
+  <section
+    class="centre-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="centreModalTitle"
+  >
+    <header class="modal-header-custom">
+      <div>
+        <span>CENTRE / FACILITY MASTER</span>
+
+        <h2 id="centreModalTitle">
+          {{
+            editingCentreId
+              ? 'Edit Centre'
+              : 'Add Centre'
+          }}
+        </h2>
+      </div>
+
+      <button
+        type="button"
+        aria-label="Close centre modal"
+        (click)="closeModal()"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </header>
+
+    <div class="modal-body-custom">
+      @if (formError) {
+        <div class="alert alert-danger form-error">
+          <i class="bi bi-exclamation-circle"></i>
+          {{ formError }}
+        </div>
+      }
+
+      <div class="row g-4">
+        <div class="col-12 col-md-5">
+          <label for="centreCode" class="form-label">
+            Centre Code
+            <span class="required-star">*</span>
+          </label>
+
+          <input
+            id="centreCode"
+            type="text"
+            class="form-control text-uppercase"
+            maxlength="20"
+            [(ngModel)]="centreForm.centreCode"
+            placeholder="Example: NTCC-01"
+          />
+        </div>
+
+        <div class="col-12 col-md-7">
+          <label for="centreName" class="form-label">
+            Centre Name
+            <span class="required-star">*</span>
+          </label>
+
+          <input
+            id="centreName"
+            type="text"
+            class="form-control"
+            maxlength="120"
+            [(ngModel)]="centreForm.centreName"
+            placeholder="Enter centre or facility name"
+          />
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label for="centreType" class="form-label">
+            Centre Type
+            <span class="required-star">*</span>
+          </label>
+
+          <select
+            id="centreType"
+            class="form-select"
+            [(ngModel)]="centreForm.centreType"
+          >
+            <option value="" disabled>
+              Select centre type
+            </option>
+
+            @for (centreType of centreTypes; track centreType) {
+              <option [value]="centreType">
+                {{ centreType }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label for="centreRegion" class="form-label">
+            Region
+            <span class="required-star">*</span>
+          </label>
+
+          <select
+            id="centreRegion"
+            class="form-select"
+            [(ngModel)]="centreForm.region"
+          >
+            <option value="" disabled>
+              Select region
+            </option>
+
+            @for (region of regions; track region) {
+              <option [value]="region">
+                {{ region }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="col-12 col-md-5">
+          <label for="centreCity" class="form-label">
+            City
+            <span class="required-star">*</span>
+          </label>
+
+          <input
+            id="centreCity"
+            type="text"
+            class="form-control"
+            maxlength="80"
+            [(ngModel)]="centreForm.city"
+            placeholder="Enter city"
+          />
+        </div>
+
+        <div class="col-12 col-md-4">
+          <label for="centreState" class="form-label">
+            State
+            <span class="required-star">*</span>
+          </label>
+
+          <input
+            id="centreState"
+            type="text"
+            class="form-control"
+            maxlength="80"
+            [(ngModel)]="centreForm.state"
+            placeholder="Enter state"
+          />
+        </div>
+
+        <div class="col-12 col-md-3">
+          <label for="centrePinCode" class="form-label">
+            PIN Code
+            <span class="required-star">*</span>
+          </label>
+
+          <input
+            id="centrePinCode"
+            type="text"
+            inputmode="numeric"
+            class="form-control"
+            maxlength="6"
+            [(ngModel)]="centreForm.pinCode"
+            placeholder="700001"
+          />
+        </div>
+
+        <div class="col-12">
+          <label for="centreAddress" class="form-label">
+            Complete Address
+            <span class="required-star">*</span>
+          </label>
+
+          <textarea
+            id="centreAddress"
+            class="form-control"
+            rows="3"
+            maxlength="300"
+            [(ngModel)]="centreForm.address"
+            placeholder="Enter complete centre address"
+          ></textarea>
+
+          <div class="form-text text-end">
+            {{ centreForm.address.length }}/300
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="status-setting">
+            <div>
+              <strong>Centre Status</strong>
+
+              <span>
+                Inactive centres cannot be selected while raising new
+                tickets.
+              </span>
+            </div>
+
+            <label class="status-switch">
+              <input
+                type="checkbox"
+                [(ngModel)]="centreForm.status"
+              />
+
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="modal-footer-custom">
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="closeModal()"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="saveCentre()"
+      >
+        <i
+          class="bi"
+          [class.bi-plus-lg]="!editingCentreId"
+          [class.bi-check-lg]="editingCentreId"
+        ></i>
+
+        {{
+          editingCentreId
+            ? 'Update Centre'
+            : 'Create Centre'
+        }}
+      </button>
+    </footer>
+  </section>
+}

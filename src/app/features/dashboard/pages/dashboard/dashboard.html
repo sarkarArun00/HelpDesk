@@ -1,0 +1,166 @@
+<section class="dashboard-page">
+    <header class="page-header">
+        <div class="page-heading">
+            <span class="page-eyebrow">OVERVIEW</span>
+            <h1>Dashboard</h1>
+            <p>Monitor ticket activity and department workload.</p>
+        </div>
+
+        <a mat-flat-button routerLink="/tickets/raise" class="raise-ticket-button">
+            <span class="button-plus">+</span>
+            Raise Ticket
+        </a>
+    </header>
+
+    @if (accessDenied) {
+  <div
+    class="access-denied-alert"
+    role="alert"
+  >
+    <span class="alert-icon">
+      <i class="bi bi-shield-exclamation"></i>
+    </span>
+
+    <div class="alert-content">
+      <strong>Access denied</strong>
+
+      <p>
+        Your current system role does not have permission
+        to open the requested page.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="alert-close-button"
+      aria-label="Close access denied message"
+      (click)="dismissAccessDenied()"
+    >
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+}
+
+    <section class="statistics-grid" aria-label="Ticket statistics">
+        @for (statistic of statistics; track statistic.label) {
+        <article class="statistic-card" [class]="'statistic-card statistic-' + statistic.type">
+            <div class="statistic-card-header">
+                <div class="statistic-icon">
+                    {{ statistic.icon }}
+                </div>
+
+                <span class="statistic-label">
+                    {{ statistic.label }}
+                </span>
+            </div>
+
+            <strong class="statistic-value">
+                {{ statistic.value }}
+            </strong>
+
+            <p>{{ statistic.description }}</p>
+        </article>
+        }
+    </section>
+
+    <section class="dashboard-section">
+        <div class="section-header">
+            <div>
+                <h2>Operational Queues</h2>
+                <p>Your current ticket workload and pending actions.</p>
+            </div>
+        </div>
+
+        <div class="queue-grid">
+            @for (queue of queueSummaries; track queue.label) {
+            <article class="queue-card">
+                <div class="queue-content">
+                    <span>{{ queue.label }}</span>
+                    <strong>{{ queue.value }}</strong>
+                    <p>{{ queue.description }}</p>
+                </div>
+
+                <button type="button" class="queue-action" [attr.aria-label]="'View ' + queue.label">
+                    →
+                </button>
+            </article>
+            }
+        </div>
+    </section>
+
+    <section class="dashboard-section recent-tickets-section">
+        <div class="section-header">
+            <div>
+                <h2>Recent Tickets</h2>
+                <p>Latest tickets available according to your role.</p>
+            </div>
+
+            <button type="button" class="view-all-button">
+                View all tickets
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table class="ticket-table">
+                <thead>
+                    <tr>
+                        <th>Ticket ID</th>
+                        <th>Issue Category</th>
+                        <th>Department</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Assigned To</th>
+                        <th aria-label="Ticket action"></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @for (ticket of recentTickets; track ticket.ticketId) {
+                    <tr>
+                        <td>
+                            <button type="button" class="ticket-id">
+                                {{ ticket.ticketId }}
+                            </button>
+                        </td>
+
+                        <td>
+                            <strong class="category-name">
+                                {{ ticket.category }}
+                            </strong>
+                        </td>
+
+                        <td>{{ ticket.department }}</td>
+
+                        <td>
+                            <span class="priority-badge" [class]="
+                    'priority-badge ' +
+                    getPriorityClass(ticket.priority)
+                  ">
+                                {{ ticket.priority }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="status-badge" [class]="
+                    'status-badge ' +
+                    getStatusClass(ticket.status)
+                  ">
+                                {{ ticket.status }}
+                            </span>
+                        </td>
+
+                        <td>{{ ticket.assignee }}</td>
+
+                        <td>
+                            <button type="button" class="row-action"
+                                [attr.aria-label]="'View ticket ' + ticket.ticketId">
+                                ›
+                            </button>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</section>

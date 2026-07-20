@@ -1,0 +1,542 @@
+<section class="department-master-page">
+  <header class="page-header">
+    <div>
+      <a routerLink="/masters" class="back-link">
+        <i class="bi bi-arrow-left"></i>
+        Back to Configuration Masters
+      </a>
+
+      <span class="page-eyebrow">
+        CONFIGURATION MASTER
+      </span>
+
+      <h1>Department / Team Master</h1>
+
+      <p>
+        Manage organizational departments, department supervisors
+        and active status.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="btn add-department-button"
+      (click)="openAddDepartmentModal()"
+    >
+      <i class="bi bi-plus-lg"></i>
+      Add Department
+    </button>
+  </header>
+
+  <section class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-icon total-icon">
+        <i class="bi bi-diagram-3"></i>
+      </span>
+
+      <div>
+        <span>Total Departments</span>
+        <strong>{{ departments.length }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon active-icon">
+        <i class="bi bi-check-circle"></i>
+      </span>
+
+      <div>
+        <span>Active Departments</span>
+        <strong>{{ activeDepartmentCount }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon inactive-icon">
+        <i class="bi bi-slash-circle"></i>
+      </span>
+
+      <div>
+        <span>Inactive Departments</span>
+        <strong>{{ inactiveDepartmentCount }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon employee-icon">
+        <i class="bi bi-people"></i>
+      </span>
+
+      <div>
+        <span>Mapped Employees</span>
+        <strong>{{ totalEmployeeCount }}</strong>
+      </div>
+    </article>
+  </section>
+
+  @if (successMessage) {
+    <div
+      class="alert alert-success success-message"
+      role="status"
+    >
+      <i class="bi bi-check-circle-fill"></i>
+
+      <span>{{ successMessage }}</span>
+
+      <button
+        type="button"
+        aria-label="Close success message"
+        (click)="successMessage = ''"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+  }
+
+  <section class="filter-card">
+    <div class="filter-card-header">
+      <div>
+        <h2>Search and Filter</h2>
+
+        <p>
+          Find departments by code, name or supervisor.
+        </p>
+      </div>
+
+      @if (hasActiveFilters) {
+        <button
+          type="button"
+          class="clear-filter-button"
+          (click)="clearFilters()"
+        >
+          <i class="bi bi-x-circle"></i>
+          Clear Filters
+        </button>
+      }
+    </div>
+
+    <div class="filter-card-body">
+      <div class="row g-3">
+        <div class="col-12 col-md-8">
+          <label
+            for="departmentSearch"
+            class="form-label"
+          >
+            Search Departments
+          </label>
+
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-search"></i>
+            </span>
+
+            <input
+              id="departmentSearch"
+              type="search"
+              class="form-control"
+              [(ngModel)]="searchTerm"
+              placeholder="Search department code, name or supervisor"
+            />
+          </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <label
+            for="departmentStatus"
+            class="form-label"
+          >
+            Status
+          </label>
+
+          <select
+            id="departmentStatus"
+            class="form-select"
+            [(ngModel)]="selectedStatus"
+          >
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="department-list-card">
+    <header class="department-list-header">
+      <div>
+        <h2>Departments</h2>
+
+        <p>
+          Showing
+          <strong>{{ filteredDepartments.length }}</strong>
+          of
+          <strong>{{ departments.length }}</strong>
+          departments
+        </p>
+      </div>
+    </header>
+
+    @if (filteredDepartments.length > 0) {
+      <div class="table-responsive">
+        <table class="table department-table align-middle">
+          <thead>
+            <tr>
+              <th>Department</th>
+              <th>Department ID</th>
+              <th>Supervisor / HOD</th>
+              <th>Employees</th>
+              <th>Status</th>
+              <th>Last Updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (
+              department of filteredDepartments;
+              track department.id
+            ) {
+              <tr>
+                <td>
+                  <div class="department-primary">
+                    <span class="department-icon">
+                      <i class="bi bi-building"></i>
+                    </span>
+
+                    <div>
+                      <strong>
+                        {{ department.departmentName }}
+                      </strong>
+
+                      <span>
+                        {{ department.departmentCode }}
+                      </span>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="department-id">
+                    {{ department.id }}
+                  </span>
+                </td>
+
+                <td>
+                  <div class="supervisor-cell">
+                    <span class="supervisor-avatar">
+                      {{
+                        getInitials(
+                          department.supervisorName
+                        )
+                      }}
+                    </span>
+
+                    <div>
+                      <strong>
+                        {{ department.supervisorName }}
+                      </strong>
+
+                      <small>Department Supervisor</small>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="employee-count">
+                    <i class="bi bi-people"></i>
+                    {{ department.employeeCount }}
+                  </span>
+                </td>
+
+                <td>
+                  <span
+                    class="status-badge"
+                    [class.active-status]="department.status"
+                    [class.inactive-status]="!department.status"
+                  >
+                    <span class="status-dot"></span>
+
+                    {{
+                      department.status
+                        ? 'Active'
+                        : 'Inactive'
+                    }}
+                  </span>
+                </td>
+
+                <td>
+                  <span class="updated-date">
+                    {{ formatDate(department.updatedAt) }}
+                  </span>
+                </td>
+
+                <td>
+                  <div class="action-buttons">
+                    <button
+                      type="button"
+                      class="edit-button"
+                      (click)="
+                        openEditDepartmentModal(department)
+                      "
+                    >
+                      <i class="bi bi-pencil"></i>
+                      Edit
+                    </button>
+
+                    <button
+                      type="button"
+                      class="status-button"
+                      [class.activate-button]="
+                        !department.status
+                      "
+                      [class.deactivate-button]="
+                        department.status
+                      "
+                      (click)="
+                        toggleDepartmentStatus(department)
+                      "
+                    >
+                      <i
+                        class="bi"
+                        [class.bi-check-circle]="
+                          !department.status
+                        "
+                        [class.bi-slash-circle]="
+                          department.status
+                        "
+                      ></i>
+
+                      {{
+                        department.status
+                          ? 'Deactivate'
+                          : 'Activate'
+                      }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="empty-state">
+        <span class="empty-icon">
+          <i class="bi bi-building-x"></i>
+        </span>
+
+        <h3>No departments found</h3>
+
+        <p>
+          No department records match the current search and
+          filter criteria.
+        </p>
+
+        <button
+          type="button"
+          class="btn btn-outline-primary"
+          (click)="clearFilters()"
+        >
+          Clear Filters
+        </button>
+      </div>
+    }
+  </section>
+</section>
+
+@if (isDepartmentModalVisible) {
+  <div
+    class="modal-backdrop-custom"
+    (click)="closeDepartmentModal()"
+  ></div>
+
+  <section
+    class="department-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="departmentModalTitle"
+  >
+    <header class="department-modal-header">
+      <div>
+        <span>DEPARTMENT MASTER</span>
+
+        <h2 id="departmentModalTitle">
+          {{
+            editingDepartmentId
+              ? 'Edit Department'
+              : 'Add Department'
+          }}
+        </h2>
+      </div>
+
+      <button
+        type="button"
+        aria-label="Close department modal"
+        (click)="closeDepartmentModal()"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </header>
+
+    <div class="department-modal-body">
+      @if (formError) {
+        <div class="alert alert-danger form-error">
+          <i class="bi bi-exclamation-circle"></i>
+          {{ formError }}
+        </div>
+      }
+
+      <div class="row g-4">
+        <div class="col-12 col-md-5">
+          <label
+            for="departmentCode"
+            class="form-label"
+          >
+            Department Code
+            <span class="required-star">*</span>
+          </label>
+
+          <input
+            id="departmentCode"
+            type="text"
+            class="form-control text-uppercase"
+            maxlength="10"
+            [(ngModel)]="
+              departmentForm.departmentCode
+            "
+            placeholder="Example: LOG"
+          />
+
+          <div class="form-text">
+            Use a short, unique department code.
+          </div>
+        </div>
+
+        <div class="col-12 col-md-7">
+          <label
+            for="departmentName"
+            class="form-label"
+          >
+            Department Name
+            <span class="required-star">*</span>
+          </label>
+
+          <input
+            id="departmentName"
+            type="text"
+            class="form-control"
+            maxlength="100"
+            [(ngModel)]="
+              departmentForm.departmentName
+            "
+            placeholder="Enter department name"
+          />
+        </div>
+
+        <div class="col-12">
+          <label
+            for="departmentSupervisor"
+            class="form-label"
+          >
+            Supervisor / Department Head
+            <span class="required-star">*</span>
+          </label>
+
+          <select
+            id="departmentSupervisor"
+            class="form-select"
+            [(ngModel)]="
+              departmentForm.supervisorId
+            "
+          >
+            <option [ngValue]="0" disabled>
+              Select department supervisor
+            </option>
+
+            @for (
+              supervisor of supervisors;
+              track supervisor.id
+            ) {
+              <option [ngValue]="supervisor.id">
+                {{ supervisor.name }}
+                —
+                {{ supervisor.employeeCode }}
+                —
+                {{ supervisor.designation }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="col-12">
+          <div class="status-setting">
+            <div>
+              <strong>Department Status</strong>
+
+              <span>
+                Inactive departments cannot receive newly routed
+                tickets.
+              </span>
+            </div>
+
+            <label class="status-switch">
+              <input
+                type="checkbox"
+                [(ngModel)]="departmentForm.status"
+              />
+
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+
+          <div
+            class="current-status-preview"
+            [class.active-preview]="
+              departmentForm.status
+            "
+            [class.inactive-preview]="
+              !departmentForm.status
+            "
+          >
+            <span class="status-dot"></span>
+
+            {{
+              departmentForm.status
+                ? 'Department will be active'
+                : 'Department will be inactive'
+            }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="department-modal-footer">
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="closeDepartmentModal()"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="saveDepartment()"
+      >
+        <i
+          class="bi"
+          [class.bi-plus-lg]="!editingDepartmentId"
+          [class.bi-check-lg]="editingDepartmentId"
+        ></i>
+
+        {{
+          editingDepartmentId
+            ? 'Update Department'
+            : 'Create Department'
+        }}
+      </button>
+    </footer>
+  </section>
+}
