@@ -12,6 +12,18 @@ export const routes: Routes = [
       ).then(component => component.Login),
   },
   {
+    path: 'forgot-password',
+    title:
+      'Forgot Password | ISD Ticketing System',
+    loadComponent: () =>
+      import(
+        './features/auth/pages/forgot-password/forgot-password'
+      ).then(
+        component =>
+          component.ForgotPassword,
+      ),
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () =>

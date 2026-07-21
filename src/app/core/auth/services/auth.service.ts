@@ -13,6 +13,7 @@ import {
   AuthUser,
   DemoAccount,
 } from '../models/auth-user.model';
+import { LoginApiResponse } from '../../../features/auth/models/login-api.model';
 
 @Injectable({
   providedIn: 'root',
@@ -28,6 +29,12 @@ export class AuthService {
   private readonly sessionStorageKey =
     'isd-session-user';
 
+  private readonly localTokenStorageKey =
+    'isd-access-token';
+
+  private readonly sessionTokenStorageKey =
+    'isd-session-access-token';
+  
   readonly demoAccounts: readonly DemoAccount[] = [
     {
       id: 1,
@@ -106,6 +113,89 @@ export class AuthService {
     this.saveUser(authenticatedUser, rememberMe);
 
     return true;
+  }
+
+
+  establishSession(
+    response: LoginApiResponse,
+    rememberMe: boolean,
+  ): void {
+    const authenticatedUser: AuthUser = {
+      id: response.employee.id,
+      employeeCode:
+        response.employee.employee_code,
+      fullName:
+        response.employee.employee_name,
+
+      // The current login response does not provide these fields.
+      email: '',
+      department: '',
+      role: 'System Admin',
+    };
+
+    this.currentUserSignal.set(
+      authenticatedUser,
+    );
+
+    this.saveApiSession(
+      authenticatedUser,
+      response.access_token,
+      rememberMe,
+    );
+  }
+
+  getAccessToken(): string | null {
+    if (!this.isBrowser()) {
+      return null;
+    }
+
+    return (
+      localStorage.getItem(
+        this.localTokenStorageKey,
+      ) ??
+      sessionStorage.getItem(
+        this.sessionTokenStorageKey,
+      )
+    );
+  }
+
+  private saveApiSession(
+    user: AuthUser,
+    accessToken: string,
+    rememberMe: boolean,
+  ): void {
+    if (!this.isBrowser()) {
+      return;
+    }
+
+    this.clearStoredUser();
+
+    const serializedUser =
+      JSON.stringify(user);
+
+    if (rememberMe) {
+      localStorage.setItem(
+        this.localStorageKey,
+        serializedUser,
+      );
+
+      localStorage.setItem(
+        this.localTokenStorageKey,
+        accessToken,
+      );
+
+      return;
+    }
+
+    sessionStorage.setItem(
+      this.sessionStorageKey,
+      serializedUser,
+    );
+
+    sessionStorage.setItem(
+      this.sessionTokenStorageKey,
+      accessToken,
+    );
   }
 
   logout(): void {
@@ -187,9 +277,10 @@ export class AuthService {
 
       if (
         !parsedUser.id ||
-        !parsedUser.email ||
+        !parsedUser.employeeCode ||
         !parsedUser.fullName ||
-        !parsedUser.role
+        !parsedUser.role ||
+        !this.getAccessToken()
       ) {
         this.clearStoredUser();
         return null;
@@ -206,7 +297,7 @@ export class AuthService {
     if (!this.isBrowser()) {
       return;
     }
-
+    // localStorage.clear();
     localStorage.removeItem(
       this.localStorageKey,
     );
@@ -214,9 +305,12 @@ export class AuthService {
     sessionStorage.removeItem(
       this.sessionStorageKey,
     );
+    
   }
 
   private isBrowser(): boolean {
     return isPlatformBrowser(this.platformId);
   }
+
+  
 }

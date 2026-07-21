@@ -174,7 +174,7 @@
           </select>
         </div>
 
-        <div class="col-12 col-md-4 col-xl-3">
+        <!-- <div class="col-12 col-md-4 col-xl-3">
           <label for="priorityFilter" class="form-label">
             Default Priority
           </label>
@@ -192,7 +192,7 @@
               </option>
             }
           </select>
-        </div>
+        </div> -->
 
         <div class="col-12 col-md-4 col-xl-2">
           <label for="statusFilter" class="form-label">
@@ -236,7 +236,7 @@
               <th>Category</th>
               <th>Category ID</th>
               <th>Target Department</th>
-              <th>Default Priority</th>
+              <!-- <th>Default Priority</th> -->
               <th>Mapped Tickets</th>
               <th>Status</th>
               <th>Last Updated</th>
@@ -290,7 +290,7 @@
                   </div>
                 </td>
 
-                <td>
+                <!-- <td>
                   <span
                     class="priority-badge"
                     [class]="
@@ -303,7 +303,7 @@
                     <i class="bi bi-flag-fill"></i>
                     {{ category.defaultPriority }}
                   </span>
-                </td>
+                </td> -->
 
                 <td>
                   <span class="ticket-count">
@@ -345,7 +345,7 @@
                       Edit
                     </button>
 
-                    <button
+                    <!-- <button
                       type="button"
                       class="status-button"
                       [class.activate-button]="
@@ -357,7 +357,7 @@
                       (click)="
                         toggleCategoryStatus(category)
                       "
-                    >
+                      >
                       <i
                         class="bi"
                         [class.bi-check-circle]="
@@ -373,7 +373,7 @@
                           ? 'Deactivate'
                           : 'Activate'
                       }}
-                    </button>
+                    </button> -->
                   </div>
                 </td>
               </tr>
@@ -498,7 +498,7 @@
           </select>
         </div>
 
-        <div class="col-12 col-md-6">
+        <!-- <div class="col-12 col-md-6">
           <label for="defaultPriority" class="form-label">
             Default Priority
             <span class="required-star">*</span>
@@ -519,8 +519,34 @@
               </option>
             }
           </select>
-        </div>
+        </div> -->
 
+                <div class="form-group">
+              <label
+                for="categoryDescription"
+                class="form-label"
+              >
+                Description
+              </label>
+
+              <textarea
+                id="categoryDescription"
+                class="form-control"
+                rows="4"
+                maxlength="500"
+                [(ngModel)]="
+                  categoryForm.description
+                "
+                name="categoryDescription"
+                placeholder="Enter category description"
+              ></textarea>
+
+              <div class="form-hint">
+                {{
+                  categoryForm.description.length
+                }}/500 characters
+              </div>
+            </div>
         <div class="col-12">
           <section class="routing-preview">
             <span class="routing-preview-icon">
@@ -542,13 +568,13 @@
                 }
               </strong>
 
-              <small>
+              <!-- <small>
                 Default priority:
                 {{
                   categoryForm.defaultPriority ||
                     'Not selected'
                 }}
-              </small>
+              </small> -->
             </div>
           </section>
         </div>

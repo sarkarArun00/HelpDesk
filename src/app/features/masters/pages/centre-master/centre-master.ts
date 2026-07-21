@@ -1,4 +1,10 @@
-import { Component } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  Component,
+  OnInit,
+  inject,
+} from '@angular/core';
+import { TicketCategoryApiService } from '../../services/ticket-category-api.service.js';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -42,7 +48,14 @@ interface CentreFormModel {
   templateUrl: './centre-master.html',
   styleUrl: './centre-master.scss',
 })
-export class CentreMaster {
+export class CentreMaster
+  implements OnInit {
+  private readonly TicketCategoryApiService =
+    inject(TicketCategoryApiService);
+
+  isLoading = false;
+
+  loadError = '';
   searchTerm = '';
 
   selectedCentreType = '';
@@ -75,96 +88,6 @@ export class CentreMaster {
   ];
 
   centres: CentreRecord[] = [
-    {
-      id: 'CEN-001',
-      centreCode: 'MLAB-A',
-      centreName: 'Main Laboratory - Block A',
-      centreType: 'Laboratory',
-      region: 'Kolkata Central',
-      city: 'Kolkata',
-      state: 'West Bengal',
-      pinCode: '700014',
-      address: 'Central Kolkata, West Bengal',
-      status: true,
-      ticketCount: 46,
-      createdAt: '2026-05-12T10:10:00',
-      updatedAt: '2026-07-17T14:20:00',
-    },
-    {
-      id: 'CEN-002',
-      centreCode: 'SSC-01',
-      centreName: 'South Satellite Centre',
-      centreType: 'Collection Centre',
-      region: 'Kolkata South',
-      city: 'Kolkata',
-      state: 'West Bengal',
-      pinCode: '700047',
-      address: 'South Kolkata, West Bengal',
-      status: true,
-      ticketCount: 27,
-      createdAt: '2026-05-12T10:20:00',
-      updatedAt: '2026-07-16T12:45:00',
-    },
-    {
-      id: 'CEN-003',
-      centreCode: 'CORP-HO',
-      centreName: 'Corporate Office',
-      centreType: 'Corporate Office',
-      region: 'Kolkata Central',
-      city: 'Kolkata',
-      state: 'West Bengal',
-      pinCode: '700091',
-      address: 'Sector V, Salt Lake, Kolkata',
-      status: true,
-      ticketCount: 38,
-      createdAt: '2026-05-12T10:30:00',
-      updatedAt: '2026-07-15T17:25:00',
-    },
-    {
-      id: 'CEN-004',
-      centreCode: 'NTCC-01',
-      centreName: 'New Town Collection Centre',
-      centreType: 'Collection Centre',
-      region: 'Kolkata East',
-      city: 'New Town',
-      state: 'West Bengal',
-      pinCode: '700156',
-      address: 'Action Area I, New Town',
-      status: true,
-      ticketCount: 19,
-      createdAt: '2026-05-12T10:40:00',
-      updatedAt: '2026-07-14T13:40:00',
-    },
-    {
-      id: 'CEN-005',
-      centreCode: 'NCC-01',
-      centreName: 'North Collection Centre',
-      centreType: 'Collection Centre',
-      region: 'Kolkata North',
-      city: 'Kolkata',
-      state: 'West Bengal',
-      pinCode: '700004',
-      address: 'North Kolkata, West Bengal',
-      status: true,
-      ticketCount: 15,
-      createdAt: '2026-05-13T09:30:00',
-      updatedAt: '2026-07-13T11:15:00',
-    },
-    {
-      id: 'CEN-006',
-      centreCode: 'HOW-BR',
-      centreName: 'Howrah Branch Office',
-      centreType: 'Branch Office',
-      region: 'Outside Kolkata',
-      city: 'Howrah',
-      state: 'West Bengal',
-      pinCode: '711101',
-      address: 'Howrah, West Bengal',
-      status: false,
-      ticketCount: 6,
-      createdAt: '2026-05-13T09:40:00',
-      updatedAt: '2026-07-10T16:35:00',
-    },
   ];
 
   centreForm: CentreFormModel = this.createEmptyForm();
@@ -233,6 +156,73 @@ export class CentreMaster {
     );
   }
 
+  ngOnInit(): void {
+    this.loadCentres();
+  }
+
+  loadCentres(): void {
+    this.isLoading = true;
+    this.loadError = '';
+
+    this.TicketCategoryApiService
+      .getAllCentres()
+      .subscribe({
+        next: response => {
+          this.isLoading = false;
+
+          if (!response.success) {
+            this.centres = [];
+
+            this.loadError =
+              response.message ||
+              'Unable to load centres.';
+
+            return;
+          }
+
+          this.centres =
+            response.data
+              .map(centre => ({
+                id: String(centre.id),
+                centreCode:
+                  centre.centreCode,
+                centreName:
+                  centre.centreName.trim(),
+
+                // These values are not provided
+                // by the current list API.
+                centreType:
+                  'Branch Office' as CentreType,
+                region: '',
+                city: '',
+                state: '',
+                pinCode: '',
+                address: '',
+                status: true,
+                ticketCount: 0,
+                createdAt: '',
+                updatedAt: '',
+              }))
+              .sort((first, second) =>
+                first.centreName.localeCompare(
+                  second.centreName,
+                ),
+              );
+        },
+
+        error: (
+          error: HttpErrorResponse,
+        ) => {
+          this.isLoading = false;
+          this.centres = [];
+
+          this.loadError =
+            error.error?.message ||
+            'Unable to load centres.';
+        },
+      });
+  }
+  
   openAddModal(): void {
     this.editingCentreId = null;
     this.centreForm = this.createEmptyForm();

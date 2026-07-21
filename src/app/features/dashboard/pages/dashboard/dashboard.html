@@ -151,9 +151,12 @@
 
                         <td>{{ ticket.assignee }}</td>
 
+                        
                         <td>
                             <button type="button" class="row-action"
-                                [attr.aria-label]="'View ticket ' + ticket.ticketId">
+                                [routerLink]="['/tickets', ticket.ticketId]"
+                                [attr.aria-label]="'View ticket ' + ticket.ticketId"
+                                >
                                 ›
                             </button>
                         </td>
