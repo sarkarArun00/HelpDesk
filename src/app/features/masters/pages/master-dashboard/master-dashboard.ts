@@ -19,36 +19,36 @@ interface MasterModule {
 })
 export class MasterDashboard {
   readonly masterModules: MasterModule[] = [
-    {
-      id: 'departments',
-      title: 'Department / Team Master',
-      description:
-        'Manage organizational departments, supervisors and department availability.',
-      icon: 'bi-diagram-3',
-      totalRecords: 12,
-      activeRecords: 10,
-      inactiveRecords: 2,
-    },
-    {
-      id: 'users',
-      title: 'User & Department Mapping',
-      description:
-        'Map employees to departments and configure their system roles.',
-      icon: 'bi-people',
-      totalRecords: 85,
-      activeRecords: 80,
-      inactiveRecords: 5,
-    },
-    {
-      id: 'priorities',
-      title: 'Priority Master',
-      description:
-        'Configure the Critical, High, Medium and Low ticket priorities.',
-      icon: 'bi-flag',
-      totalRecords: 4,
-      activeRecords: 4,
-      inactiveRecords: 0,
-    },
+    // {
+    //   id: 'departments',
+    //   title: 'Department / Team Master',
+    //   description:
+    //     'Manage organizational departments, supervisors and department availability.',
+    //   icon: 'bi-diagram-3',
+    //   totalRecords: 12,
+    //   activeRecords: 10,
+    //   inactiveRecords: 2,
+    // },
+    // {
+    //   id: 'users',
+    //   title: 'User & Department Mapping',
+    //   description:
+    //     'Map employees to departments and configure their system roles.',
+    //   icon: 'bi-people',
+    //   totalRecords: 85,
+    //   activeRecords: 80,
+    //   inactiveRecords: 5,
+    // },
+    // {
+    //   id: 'priorities',
+    //   title: 'Priority Master',
+    //   description:
+    //     'Configure the Critical, High, Medium and Low ticket priorities.',
+    //   icon: 'bi-flag',
+    //   totalRecords: 4,
+    //   activeRecords: 4,
+    //   inactiveRecords: 0,
+    // },
     {
       id: 'categories',
       title: 'Ticket Category Master',

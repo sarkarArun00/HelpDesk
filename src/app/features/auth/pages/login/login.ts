@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
   OnInit,
@@ -11,17 +12,22 @@ import {
 import {
   ActivatedRoute,
   Router,
+  RouterLink,
 } from '@angular/router';
 
-import { DemoAccount } from '../../../../core/auth/models/auth-user.model';
 import { AuthService } from '../../../../core/auth/services/auth.service';
+import { AuthApiService } from '../../services/auth-api.service';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+  ],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
+  
 export class Login implements OnInit {
   private readonly formBuilder =
     inject(FormBuilder);
@@ -29,7 +35,11 @@ export class Login implements OnInit {
   private readonly authService =
     inject(AuthService);
 
-  private readonly router = inject(Router);
+  private readonly authApiService =
+    inject(AuthApiService);
+
+  private readonly router =
+    inject(Router);
 
   private readonly activatedRoute =
     inject(ActivatedRoute);
@@ -40,17 +50,11 @@ export class Login implements OnInit {
 
   showPassword = false;
 
-  readonly demoAccounts =
-    this.authService.demoAccounts;
-
   readonly loginForm =
     this.formBuilder.nonNullable.group({
-      email: [
+      employeeCode: [
         '',
-        [
-          Validators.required,
-          Validators.email,
-        ],
+        [Validators.required],
       ],
       password: [
         '',
@@ -64,7 +68,9 @@ export class Login implements OnInit {
 
   ngOnInit(): void {
     if (this.authService.isAuthenticated()) {
-      void this.router.navigate(['/dashboard']);
+      void this.router.navigate([
+        '/dashboard',
+      ]);
     }
   }
 
@@ -79,55 +85,72 @@ export class Login implements OnInit {
     this.isSubmitting = true;
 
     const {
-      email,
+      employeeCode,
       password,
       rememberMe,
     } = this.loginForm.getRawValue();
 
-    const loginSuccessful =
-      this.authService.login(
-        email,
+    this.authApiService
+      .login({
+        employee_code:
+        employeeCode.trim(),
         password,
-        rememberMe,
-      );
+      })
+      .subscribe({
+        next: response => {
+          if (
+            !response.success ||
+            !response.access_token
+          ) {
+            this.isSubmitting = false;
 
-    if (!loginSuccessful) {
-      this.isSubmitting = false;
+            this.loginError =
+              response.message ||
+              'Unable to sign in.';
 
-      this.loginError =
-        'The email address or password is incorrect.';
+            return;
+          }
 
-      return;
-    }
+          this.authService.establishSession(
+            response,
+            rememberMe,
+          );
 
-    const requestedReturnUrl =
-      this.activatedRoute.snapshot.queryParamMap.get(
-        'returnUrl',
-      );
+          const requestedReturnUrl =
+            this.activatedRoute.snapshot
+              .queryParamMap.get(
+                'returnUrl',
+              );
 
-    const safeReturnUrl =
-      requestedReturnUrl?.startsWith('/')
-        ? requestedReturnUrl
-        : '/dashboard';
+          const safeReturnUrl =
+            requestedReturnUrl?.startsWith(
+              '/',
+            ) &&
+              !requestedReturnUrl.startsWith(
+                '//',
+              )
+              ? requestedReturnUrl
+              : '/dashboard';
 
-    void this.router.navigateByUrl(
-      safeReturnUrl,
-    );
-  }
+          void this.router.navigateByUrl(
+            safeReturnUrl,
+          );
+        },
 
-  loginWithDemoAccount(
-    account: DemoAccount,
-  ): void {
-    this.loginForm.patchValue({
-      email: account.email,
-      password: account.password,
-      rememberMe: true,
-    });
+        error: (
+          error: HttpErrorResponse,
+        ) => {
+          this.isSubmitting = false;
 
-    this.submitLogin();
+          this.loginError =
+            error.error?.message ||
+            'Login failed. Please check your employee code and password.';
+        },
+      });
   }
 
   togglePasswordVisibility(): void {
-    this.showPassword = !this.showPassword;
+    this.showPassword =
+      !this.showPassword;
   }
 }

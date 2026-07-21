@@ -1,4 +1,10 @@
-import { Component } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+} from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { TicketCategoryApiService } from '../../services/ticket-category-api.service';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -15,8 +21,9 @@ interface TicketCategoryRecord {
   categoryName: string;
   targetDepartmentId: number;
   targetDepartmentName: string;
-  defaultPriority: TicketPriority;
+  // defaultPriority: TicketPriority;
   status: boolean;
+  description: string;
   ticketCount: number;
   createdAt: string;
   updatedAt: string;
@@ -24,8 +31,9 @@ interface TicketCategoryRecord {
 
 interface TicketCategoryFormModel {
   categoryName: string;
+  description: string;
   targetDepartmentId: number;
-  defaultPriority: TicketPriority | '';
+  // defaultPriority: TicketPriority | '';
   status: boolean;
 }
 
@@ -35,7 +43,9 @@ interface TicketCategoryFormModel {
   templateUrl: './ticket-category-master.html',
   styleUrl: './ticket-category-master.scss',
 })
-export class TicketCategoryMaster {
+export class TicketCategoryMaster
+  implements OnInit {
+
   searchTerm = '';
 
   selectedDepartmentId = 0;
@@ -52,125 +62,17 @@ export class TicketCategoryMaster {
 
   formError = '';
 
-  readonly priorities: TicketPriority[] = [
-    'Critical',
-    'High',
-    'Medium',
-    'Low',
-  ];
+  // priorities: TicketPriority[] = [];
 
-  readonly departments: DepartmentOption[] = [
-    {
-      id: 1,
-      code: 'IT',
-      name: 'Information Technology',
-    },
-    {
-      id: 2,
-      code: 'LOG',
-      name: 'Logistics',
-    },
-    {
-      id: 3,
-      code: 'ACC',
-      name: 'Accounts',
-    },
-    {
-      id: 4,
-      code: 'TECH',
-      name: 'Technical',
-    },
-    {
-      id: 5,
-      code: 'LAB',
-      name: 'Laboratory',
-    },
-    {
-      id: 6,
-      code: 'CRM',
-      name: 'Customer Relationship Management',
-    },
-  ];
+  // private readonly priorityNameById =
+  //   new Map<number, TicketPriority>();
 
-  categories: TicketCategoryRecord[] = [
-    {
-      id: 'CAT-001',
-      categoryName: 'Sample Collection Delay',
-      targetDepartmentId: 2,
-      targetDepartmentName: 'Logistics',
-      defaultPriority: 'Critical',
-      status: true,
-      ticketCount: 28,
-      createdAt: '2026-05-15T10:10:00',
-      updatedAt: '2026-07-17T11:20:00',
-    },
-    {
-      id: 'CAT-002',
-      categoryName: 'Invoice Discrepancy',
-      targetDepartmentId: 3,
-      targetDepartmentName: 'Accounts',
-      defaultPriority: 'High',
-      status: true,
-      ticketCount: 17,
-      createdAt: '2026-05-15T10:15:00',
-      updatedAt: '2026-07-16T15:30:00',
-    },
-    {
-      id: 'CAT-003',
-      categoryName: 'Report Correction',
-      targetDepartmentId: 4,
-      targetDepartmentName: 'Technical',
-      defaultPriority: 'Medium',
-      status: true,
-      ticketCount: 22,
-      createdAt: '2026-05-15T10:20:00',
-      updatedAt: '2026-07-16T12:10:00',
-    },
-    {
-      id: 'CAT-004',
-      categoryName: 'Reagent Requirement',
-      targetDepartmentId: 5,
-      targetDepartmentName: 'Laboratory',
-      defaultPriority: 'High',
-      status: true,
-      ticketCount: 14,
-      createdAt: '2026-05-15T10:25:00',
-      updatedAt: '2026-07-15T16:50:00',
-    },
-    {
-      id: 'CAT-005',
-      categoryName: 'CRM Support Request',
-      targetDepartmentId: 6,
-      targetDepartmentName: 'Customer Relationship Management',
-      defaultPriority: 'Medium',
-      status: true,
-      ticketCount: 31,
-      createdAt: '2026-05-15T10:30:00',
-      updatedAt: '2026-07-15T13:45:00',
-    },
-    {
-      id: 'CAT-006',
-      categoryName: 'Application Access Issue',
-      targetDepartmentId: 1,
-      targetDepartmentName: 'Information Technology',
-      defaultPriority: 'High',
-      status: true,
-      ticketCount: 19,
-      createdAt: '2026-05-15T10:35:00',
-      updatedAt: '2026-07-14T17:25:00',
-    },
-    {
-      id: 'CAT-007',
-      categoryName: 'Vehicle Support',
-      targetDepartmentId: 2,
-      targetDepartmentName: 'Logistics',
-      defaultPriority: 'Medium',
-      status: false,
-      ticketCount: 7,
-      createdAt: '2026-05-16T09:20:00',
-      updatedAt: '2026-07-10T11:40:00',
-    },
-  ];
+  private readonly ticketCategoryApiService =
+    inject(TicketCategoryApiService);
+
+  departments: DepartmentOption[] = [];
+
+  categories: TicketCategoryRecord[] = [];
 
   categoryForm: TicketCategoryFormModel =
     this.createEmptyForm();
@@ -192,9 +94,9 @@ export class TicketCategoryMaster {
         category.targetDepartmentId ===
           this.selectedDepartmentId;
 
-      const matchesPriority =
-        !this.selectedPriority ||
-        category.defaultPriority === this.selectedPriority;
+      // const matchesPriority =
+      //   !this.selectedPriority ||
+      //   category.defaultPriority === this.selectedPriority;
 
       const matchesStatus =
         !this.selectedStatus ||
@@ -204,11 +106,25 @@ export class TicketCategoryMaster {
       return (
         matchesSearch &&
         matchesDepartment &&
-        matchesPriority &&
+        // matchesPriority &&
         matchesStatus
       );
     });
   }
+
+  isLoading = false;
+
+  isSaving = false;
+
+  loadError = '';
+
+  currentPage = 1;
+
+  pageSize = 10;
+
+  totalRecords = 0;
+
+  totalPages = 0;
 
   get activeCategoryCount(): number {
     return this.categories.filter(
@@ -246,6 +162,242 @@ export class TicketCategoryMaster {
     );
   }
 
+
+  ngOnInit(): void {
+    this.loadCategories();
+    // this.loadPriorities();
+    this.loadDepartments();
+  }
+
+
+  loadCategories(
+    page = this.currentPage,
+  ): void {
+    this.isLoading = true;
+    this.loadError = '';
+
+    this.ticketCategoryApiService
+      .getAllCategories(
+        page,
+        this.pageSize,
+      )
+      .subscribe({
+        next: response => {
+          this.isLoading = false;
+
+          if (!response.success) {
+            this.categories = [];
+            this.loadError =
+              response.message ||
+              'Unable to load ticket categories.';
+
+            return;
+          }
+
+          this.categories =
+            response.data.map(item => {
+              const departmentId =
+                item.department?.id ??
+                item.department_id ??
+                0;
+
+              const departmentName =
+                item.department?.departmentName ??
+                this.departments.find(
+                  department =>
+                    department.id ===
+                    departmentId,
+                )?.name ??
+                'Not assigned';
+
+              return {
+                id: String(item.id),
+
+                categoryName:
+                  item.category_name,
+
+                description:
+                  item.description ?? '',
+
+                targetDepartmentId:
+                  departmentId,
+
+                targetDepartmentName:
+                  departmentName,
+
+                // defaultPriority:
+                //   item.default_priority
+                //     ? this.getPriorityName(
+                //       item.default_priority,
+                //     )
+                //     : 'Medium',
+
+                status: item.status,
+
+                ticketCount: 0,
+
+                createdAt:
+                  item.created_at ??
+                  item.department?.createdAt ??
+                  '',
+
+                updatedAt:
+                  item.updated_at ??
+                  item.department?.updatedAt ??
+                  '',
+              };
+            });
+
+          this.totalRecords =
+            response.pagination.total;
+
+          this.currentPage =
+            response.pagination.page;
+
+          this.pageSize =
+            response.pagination.limit;
+
+          this.totalPages =
+            response.pagination.totalPages;
+        },
+
+        error: (
+          error: HttpErrorResponse,
+        ) => {
+          this.isLoading = false;
+          this.categories = [];
+
+          this.loadError =
+            error.error?.message ||
+            'Unable to load ticket categories.';
+        },
+      });
+  }
+
+  loadDepartments(): void {
+    this.isLoading = true;
+    this.loadError = '';
+
+    this.ticketCategoryApiService
+      .getAllDepartments()
+      .subscribe({
+        next: response => {
+          if (!response.success) {
+            this.isLoading = false;
+
+            this.loadError =
+              response.message ||
+              'Unable to load departments.';
+
+            return;
+          }
+
+          this.departments =
+            response.data
+              .filter(
+                department =>
+                  String(
+                    department.status,
+                  ) === '1',
+              )
+              .map(department => ({
+                id: department.id,
+
+                // The API does not provide
+                // a department code.
+                code: String(department.id),
+
+                name:
+                  department.departmentName,
+              }))
+              .sort((first, second) =>
+                first.name.localeCompare(
+                  second.name,
+                ),
+              );
+
+          // this.loadPriorities();
+        },
+
+        error: (
+          error: HttpErrorResponse,
+        ) => {
+          this.isLoading = false;
+
+          this.loadError =
+            error.error?.message ||
+            'Unable to load departments.';
+        },
+      });
+  }
+
+  // loadPriorities(): void {
+  //   this.isLoading = true;
+  //   this.loadError = '';
+
+  //   this.ticketCategoryApiService
+  //     .getAllPriorities()
+  //     .subscribe({
+  //       next: response => {
+  //         if (!response.success) {
+  //           this.isLoading = false;
+
+  //           this.loadError =
+  //             response.message ||
+  //             'Unable to load priorities.';
+
+  //           return;
+  //         }
+
+  //         const activePriorities =
+  //           response.data
+  //             .filter(priority => priority.status)
+  //             .sort(
+  //               (firstPriority, secondPriority) =>
+  //                 secondPriority.priority_level -
+  //                 firstPriority.priority_level,
+  //             );
+
+  //         this.priorities =
+  //           activePriorities.map(
+  //             priority =>
+  //               priority.priority_name as TicketPriority,
+  //           );
+
+  //         this.priorityNameById.clear();
+
+  //         activePriorities.forEach(priority => {
+  //           this.priorityNameById.set(
+  //             priority.id,
+  //             priority.priority_name as TicketPriority,
+  //           );
+  //         });
+
+  //         this.loadCategories();
+  //       },
+
+  //       error: (
+  //         error: HttpErrorResponse,
+  //       ) => {
+  //         this.isLoading = false;
+
+  //         this.loadError =
+  //           error.error?.message ||
+  //           'Unable to load ticket priorities.';
+  //       },
+  //     });
+  // }
+
+  // private getPriorityName(
+  //   priorityId: number,
+  // ): TicketPriority {
+  //   return (
+  //     this.priorityNameById.get(
+  //       priorityId,
+  //     ) ?? 'Medium'
+  //   );
+  // }
+
   openAddModal(): void {
     this.editingCategoryId = null;
     this.categoryForm = this.createEmptyForm();
@@ -258,8 +410,12 @@ export class TicketCategoryMaster {
 
     this.categoryForm = {
       categoryName: category.categoryName,
-      targetDepartmentId: category.targetDepartmentId,
-      defaultPriority: category.defaultPriority,
+      description:
+        category.description ?? '',
+      targetDepartmentId:
+        category.targetDepartmentId,
+      // defaultPriority:
+      //   category.defaultPriority,
       status: category.status,
     };
 
@@ -281,8 +437,13 @@ export class TicketCategoryMaster {
     const categoryName =
       this.categoryForm.categoryName.trim();
 
+    const description =
+      this.categoryForm.description.trim();
+    
+
     if (!categoryName) {
-      this.formError = 'Category name is required.';
+      this.formError =
+        'Category name is required.';
       return;
     }
 
@@ -292,91 +453,123 @@ export class TicketCategoryMaster {
       return;
     }
 
-    if (!this.categoryForm.targetDepartmentId) {
+    if (
+      !this.categoryForm
+        .targetDepartmentId
+    ) {
       this.formError =
         'Please select a target department.';
       return;
     }
 
-    if (!this.categoryForm.defaultPriority) {
+    if (!description) {
       this.formError =
-        'Please select a default priority.';
+        'Description is required.';
       return;
     }
-
-    const duplicateCategory = this.categories.some(
-      category =>
-        category.categoryName.toLowerCase() ===
-          categoryName.toLowerCase() &&
-        category.id !== this.editingCategoryId,
-    );
-
-    if (duplicateCategory) {
-      this.formError =
-        'A ticket category with this name already exists.';
-      return;
-    }
-
-    const targetDepartment = this.departments.find(
-      department =>
-        department.id ===
-        this.categoryForm.targetDepartmentId,
-    );
-
-    if (!targetDepartment) {
-      this.formError =
-        'The selected target department could not be found.';
-      return;
-    }
-
-    const currentDate = new Date().toISOString();
 
     if (this.editingCategoryId) {
-      this.categories = this.categories.map(category => {
-        if (category.id !== this.editingCategoryId) {
-          return category;
-        }
+      const categoryId =
+        Number(this.editingCategoryId);
 
-        return {
-          ...category,
-          categoryName,
-          targetDepartmentId: targetDepartment.id,
-          targetDepartmentName: targetDepartment.name,
-          defaultPriority:
+      if (!categoryId) {
+        this.formError =
+          'Invalid category ID.';
+        return;
+      }
+
+      this.isSaving = true;
+
+      this.ticketCategoryApiService
+        .updateCategory(categoryId, {
+          category_name: categoryName,
+          department_id:
             this.categoryForm
-              .defaultPriority as TicketPriority,
-          status: this.categoryForm.status,
-          updatedAt: currentDate,
-        };
-      });
+              .targetDepartmentId,
+          description,
+          status:
+            this.categoryForm.status,
+        })
+        .subscribe({
+          next: response => {
+            this.isSaving = false;
 
-      this.successMessage =
-        `${categoryName} has been updated successfully.`;
-    } else {
-      const newCategory: TicketCategoryRecord = {
-        id: this.generateCategoryId(),
-        categoryName,
-        targetDepartmentId: targetDepartment.id,
-        targetDepartmentName: targetDepartment.name,
-        defaultPriority:
-          this.categoryForm
-            .defaultPriority as TicketPriority,
-        status: this.categoryForm.status,
-        ticketCount: 0,
-        createdAt: currentDate,
-        updatedAt: currentDate,
-      };
+            if (!response.success) {
+              this.formError =
+                response.message ||
+                'Unable to update category.';
 
-      this.categories = [
-        newCategory,
-        ...this.categories,
-      ];
+              return;
+            }
 
-      this.successMessage =
-        `${categoryName} has been created successfully.`;
+            this.successMessage =
+              response.message ||
+              `${categoryName} has been updated successfully.`;
+
+            this.closeModal();
+
+            this.loadCategories(
+              this.currentPage,
+            );
+          },
+
+          error: (
+            error: HttpErrorResponse,
+          ) => {
+            this.isSaving = false;
+
+            this.formError =
+              error.error?.message ||
+              'Unable to update category. Please try again.';
+          },
+        });
+
+      return;
     }
 
-    this.closeModal();
+    this.isSaving = true;
+
+    this.ticketCategoryApiService
+      .createCategory({
+        category_name: categoryName,
+        department_id:
+          this.categoryForm
+            .targetDepartmentId,
+        description,
+        status:
+          this.categoryForm.status,
+      })
+      .subscribe({
+        next: response => {
+          this.isSaving = false;
+
+          if (!response.success) {
+            this.formError =
+              response.message ||
+              'Unable to create category.';
+
+            return;
+          }
+
+          this.successMessage =
+            response.message ||
+            `${categoryName} has been created successfully.`;
+
+          this.closeModal();
+
+          this.loadCategories(1);
+        },
+
+        error: (
+          error: HttpErrorResponse,
+        ) => {
+          this.isSaving = false;
+
+          this.formError =
+            error.error?.message ||
+            'Unable to create category. Please try again.';
+        },
+      });
   }
 
   toggleCategoryStatus(
@@ -424,27 +617,28 @@ export class TicketCategoryMaster {
   private createEmptyForm(): TicketCategoryFormModel {
     return {
       categoryName: '',
+      description: '',
       targetDepartmentId: 0,
-      defaultPriority: '',
+      // defaultPriority: '',
       status: true,
     };
   }
 
-  private generateCategoryId(): string {
-    const highestId = this.categories.reduce(
-      (maximumId, category) => {
-        const numericId = Number(
-          category.id.replace('CAT-', ''),
-        );
+  // private generateCategoryId(): string {
+  //   const highestId = this.categories.reduce(
+  //     (maximumId, category) => {
+  //       const numericId = Number(
+  //         category.id.replace('CAT-', ''),
+  //       );
 
-        return Math.max(maximumId, numericId);
-      },
-      0,
-    );
+  //       return Math.max(maximumId, numericId);
+  //     },
+  //     0,
+  //   );
 
-    return `CAT-${String(highestId + 1).padStart(
-      3,
-      '0',
-    )}`;
-  }
+  //   return `CAT-${String(highestId + 1).padStart(
+  //     3,
+  //     '0',
+  //   )}`;
+  // }
 }
