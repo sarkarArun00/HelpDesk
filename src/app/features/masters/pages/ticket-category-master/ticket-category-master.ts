@@ -37,6 +37,8 @@ interface TicketCategoryFormModel {
   status: boolean;
 }
 
+
+
 @Component({
   selector: 'app-ticket-category-master',
   imports: [FormsModule, RouterLink],
@@ -62,6 +64,11 @@ export class TicketCategoryMaster
 
   formError = '';
 
+  deletingCategoryId: string | null =
+    null;
+  
+  categoryPendingDelete:
+    TicketCategoryRecord | null = null;
   // priorities: TicketPriority[] = [];
 
   // private readonly priorityNameById =
@@ -397,6 +404,89 @@ export class TicketCategoryMaster
   //     ) ?? 'Medium'
   //   );
   // }
+
+  openDeleteConfirmation(
+    category: TicketCategoryRecord,
+  ): void {
+    this.categoryPendingDelete =
+      category;
+  }
+
+  closeDeleteConfirmation(): void {
+    if (this.deletingCategoryId) {
+      return;
+    }
+
+    this.categoryPendingDelete =
+      null;
+  }
+
+  confirmDeleteCategory(): void {
+    const category =
+      this.categoryPendingDelete;
+
+    if (!category) {
+      return;
+    }
+
+    const categoryId =
+      Number(category.id);
+
+    if (!categoryId) {
+      this.formError =
+        'Invalid category ID.';
+
+      this.categoryPendingDelete =
+        null;
+
+      return;
+    }
+
+    this.deletingCategoryId =
+      category.id;
+
+    this.successMessage = '';
+    this.formError = '';
+
+    this.ticketCategoryApiService
+      .deleteCategory(categoryId)
+      .subscribe({
+        next: response => {
+          this.deletingCategoryId =
+            null;
+
+          if (!response.success) {
+            this.formError =
+              response.message ||
+              'Unable to delete category.';
+
+            return;
+          }
+
+          this.successMessage =
+            response.message ||
+            `${category.categoryName} has been deleted successfully.`;
+
+          this.categoryPendingDelete =
+            null;
+
+          this.loadCategories(
+            this.currentPage,
+          );
+        },
+
+        error: (
+          error: HttpErrorResponse,
+        ) => {
+          this.deletingCategoryId =
+            null;
+
+          this.formError =
+            error.error?.message ||
+            'Unable to delete category. Please try again.';
+        },
+      });
+  }
 
   openAddModal(): void {
     this.editingCategoryId = null;

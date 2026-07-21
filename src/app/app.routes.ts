@@ -68,21 +68,21 @@ export const routes: Routes = [
             './features/tickets/pages/my-action-items/my-action-items'
             ).then(component => component.MyActionItems),
         },
-        {
-          path: 'tickets/team-pool',
-          title: 'Team Pool | ISD Ticketing System',
-          canActivate: [roleGuard],
-          data: {
-            roles: [
-              'System Admin',
-              'Department Manager',
-            ],
-          },
-          loadComponent: () =>
-            import(
-              './features/tickets/pages/team-pool/team-pool'
-            ).then(component => component.TeamPool),
-        },
+        // {
+        //   path: 'tickets/team-pool',
+        //   title: 'Team Pool | ISD Ticketing System',
+        //   canActivate: [roleGuard],
+        //   data: {
+        //     roles: [
+        //       'System Admin',
+        //       'Department Manager',
+        //     ],
+        //   },
+        //   loadComponent: () =>
+        //     import(
+        //       './features/tickets/pages/team-pool/team-pool'
+        //     ).then(component => component.TeamPool),
+        // },
         {
         path: 'tickets/:ticketId',
         title: 'Ticket Details | ISD Ticketing System',
