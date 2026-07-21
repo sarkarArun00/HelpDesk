@@ -19,6 +19,7 @@ import {
 import { GetTicketPrioritiesResponse } from '../models/ticket-priority-api.model';
 import { GetDepartmentsResponse } from '../models/department-api.model';
 import { GetCentresResponse } from '../models/centre-api.model';
+import { ConfigurationCountResponse } from '../models/configuration-count-api.model';
 
 
 @Injectable({
@@ -82,6 +83,27 @@ export class TicketCategoryApiService {
         Observable<GetCentresResponse> {
         return this.http.get<GetCentresResponse>(
             `${this.apiBaseUrl}/centre`,
+        );
+    }
+
+    getRecordCounts():
+        Observable<ConfigurationCountResponse> {
+        return this.http.get<ConfigurationCountResponse>(
+            `${this.apiBaseUrl}/centre/count-records`,
+        );
+    }
+
+    deleteCategory(
+        categoryId: number,
+    ): Observable<{
+        success: boolean;
+        message: string;
+    }> {
+        return this.http.delete<{
+            success: boolean;
+            message: string;
+        }>(
+            `${this.apiBaseUrl}/ticket-category/delete/${categoryId}`,
         );
     }
 

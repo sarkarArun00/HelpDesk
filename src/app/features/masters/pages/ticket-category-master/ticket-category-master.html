@@ -345,6 +345,28 @@
                       Edit
                     </button>
 
+                    <button
+                  type="button"
+                  class="delete-button"
+                  [disabled]="
+                    deletingCategoryId === category.id
+                  "
+                (click)="openDeleteConfirmation(category)"
+                >
+                  @if (
+                    deletingCategoryId === category.id
+                  ) {
+                    <span
+                      class="spinner-border spinner-border-sm"
+                      aria-hidden="true"
+                    ></span>
+
+                    Deleting...
+                  } @else {
+                    <i class="bi bi-trash"></i>
+                    Delete
+                  }
+                </button>
                     <!-- <button
                       type="button"
                       class="status-button"
@@ -547,7 +569,7 @@
                 }}/500 characters
               </div>
             </div>
-        <div class="col-12">
+        <!-- <div class="col-12">
           <section class="routing-preview">
             <span class="routing-preview-icon">
               <i class="bi bi-signpost-split"></i>
@@ -568,16 +590,16 @@
                 }
               </strong>
 
-              <!-- <small>
+              <small>
                 Default priority:
                 {{
                   categoryForm.defaultPriority ||
                     'Not selected'
                 }}
-              </small> -->
+              </small>
             </div>
           </section>
-        </div>
+        </div> -->
 
         <div class="col-12">
           <div class="status-setting">
@@ -628,6 +650,84 @@
             ? 'Update Category'
             : 'Create Category'
         }}
+      </button>
+    </footer>
+  </section>
+}
+
+@if (categoryPendingDelete) {
+  <div
+    class="delete-modal-backdrop"
+    (click)="closeDeleteConfirmation()"
+  ></div>
+
+  <section
+    class="delete-confirmation-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="deleteCategoryTitle"
+  >
+    <div class="delete-modal-icon">
+      <i class="bi bi-trash"></i>
+    </div>
+
+    <div class="delete-modal-content">
+      <h2 id="deleteCategoryTitle">
+        Delete ticket category?
+      </h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>
+          {{
+            categoryPendingDelete.categoryName
+          }}
+        </strong>?
+      </p>
+
+      <div class="delete-warning">
+        <i class="bi bi-exclamation-triangle"></i>
+
+        <span>
+          This category will no longer be
+          available for new tickets.
+        </span>
+      </div>
+    </div>
+
+    <footer class="delete-modal-actions">
+      <button
+        type="button"
+        class="cancel-delete-button"
+        [disabled]="
+          deletingCategoryId !== null
+        "
+        (click)="closeDeleteConfirmation()"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="confirm-delete-button"
+        [disabled]="
+          deletingCategoryId !== null
+        "
+        (click)="confirmDeleteCategory()"
+      >
+        @if (
+          deletingCategoryId !== null
+        ) {
+          <span
+            class="spinner-border spinner-border-sm"
+            aria-hidden="true"
+          ></span>
+
+          Deleting...
+        } @else {
+          <i class="bi bi-trash"></i>
+          Yes, Delete
+        }
       </button>
     </footer>
   </section>

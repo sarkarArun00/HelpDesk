@@ -1,5 +1,13 @@
-import { Component } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  Component,
+  inject,
+  OnInit,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
+
+import { RecordCount } from '../../models/configuration-count-api.model';
+import { TicketCategoryApiService } from '../../services/ticket-category-api.service.js';
 
 interface MasterModule {
   id: string;
@@ -17,17 +25,25 @@ interface MasterModule {
   templateUrl: './master-dashboard.html',
   styleUrl: './master-dashboard.scss',
 })
-export class MasterDashboard {
-  readonly masterModules: MasterModule[] = [
+export class MasterDashboard
+  implements OnInit {
+  private readonly ticketCategoryApiService =
+    inject(TicketCategoryApiService);
+
+  isLoadingCounts = false;
+
+  countError = '';
+
+  masterModules: MasterModule[] = [
     // {
     //   id: 'departments',
     //   title: 'Department / Team Master',
     //   description:
     //     'Manage organizational departments, supervisors and department availability.',
     //   icon: 'bi-diagram-3',
-    //   totalRecords: 12,
-    //   activeRecords: 10,
-    //   inactiveRecords: 2,
+    //   totalRecords: 0,
+    //   activeRecords: 0,
+    //   inactiveRecords: 0,
     // },
     // {
     //   id: 'users',
@@ -35,18 +51,18 @@ export class MasterDashboard {
     //   description:
     //     'Map employees to departments and configure their system roles.',
     //   icon: 'bi-people',
-    //   totalRecords: 85,
-    //   activeRecords: 80,
-    //   inactiveRecords: 5,
+    //   totalRecords: 0,
+    //   activeRecords: 0,
+    //   inactiveRecords: 0,
     // },
     // {
     //   id: 'priorities',
     //   title: 'Priority Master',
     //   description:
-    //     'Configure the Critical, High, Medium and Low ticket priorities.',
+    //     'View the Critical, High, Medium and Low ticket priorities.',
     //   icon: 'bi-flag',
-    //   totalRecords: 4,
-    //   activeRecords: 4,
+    //   totalRecords: 0,
+    //   activeRecords: 0,
     //   inactiveRecords: 0,
     // },
     {
@@ -55,40 +71,115 @@ export class MasterDashboard {
       description:
         'Configure issue categories and map them to their target departments.',
       icon: 'bi-tags',
-      totalRecords: 24,
-      activeRecords: 21,
-      inactiveRecords: 3,
+      totalRecords: 0,
+      activeRecords: 0,
+      inactiveRecords: 0,
     },
     {
       id: 'centres',
       title: 'Centre / Facility Master',
       description:
-        'Manage laboratories, collection points and office locations.',
+        'View laboratories, collection points and office locations.',
       icon: 'bi-building',
-      totalRecords: 18,
-      activeRecords: 17,
-      inactiveRecords: 1,
+      totalRecords: 0,
+      activeRecords: 0,
+      inactiveRecords: 0,
     },
   ];
 
   get totalRecords(): number {
     return this.masterModules.reduce(
-      (total, master) => total + master.totalRecords,
+      (total, master) =>
+        total + master.totalRecords,
       0,
     );
   }
 
   get activeRecords(): number {
     return this.masterModules.reduce(
-      (total, master) => total + master.activeRecords,
+      (total, master) =>
+        total + master.activeRecords,
       0,
     );
   }
 
   get inactiveRecords(): number {
     return this.masterModules.reduce(
-      (total, master) => total + master.inactiveRecords,
+      (total, master) =>
+        total + master.inactiveRecords,
       0,
     );
+  }
+
+  ngOnInit(): void {
+    this.loadRecordCounts();
+  }
+
+  loadRecordCounts(): void {
+    this.isLoadingCounts = true;
+    this.countError = '';
+
+    this.ticketCategoryApiService
+      .getRecordCounts()
+      .subscribe({
+        next: response => {
+          this.isLoadingCounts = false;
+
+          if (!response.success) {
+            this.countError =
+              response.message ||
+              'Unable to load record counts.';
+
+            return;
+          }
+
+          const countByModuleId:
+            Partial<
+              Record<string, RecordCount>
+            > = {
+            categories:
+              response.data
+                .ticketCategoryCount,
+
+            centres:
+              response.data
+                .centreCount,
+          };
+
+          this.masterModules =
+            this.masterModules.map(
+              module => {
+                const apiCount =
+                  countByModuleId[
+                  module.id
+                  ];
+
+                if (!apiCount) {
+                  return module;
+                }
+
+                return {
+                  ...module,
+                  totalRecords:
+                    apiCount.totalRecords,
+                  activeRecords:
+                    apiCount.activeRecords,
+                  inactiveRecords:
+                    apiCount.inactiveRecords,
+                };
+              },
+            );
+        },
+
+        error: (
+          error: HttpErrorResponse,
+        ) => {
+          this.isLoadingCounts = false;
+
+          this.countError =
+            error.error?.message ||
+            'Unable to load record counts.';
+        },
+      });
   }
 }
