@@ -10,6 +10,8 @@ export interface AuthUser {
   email: string;
   department: string;
   role: AppRole;
+  userName?: string;
+  employeePhoto?: string | null;
 }
 
 export interface DemoAccount extends AuthUser {

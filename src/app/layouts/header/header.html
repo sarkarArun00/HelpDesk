@@ -224,11 +224,25 @@
           aria-haspopup="menu"
           (click)="toggleProfileMenu()"
         >
-          <span class="profile-avatar">
-            {{
-              getInitials(currentUser.fullName)
-            }}
-          </span>
+      <span class="profile-avatar">
+        @if (
+          getProfilePhotoUrl(
+            currentUser.employeePhoto
+          );
+          as profilePhotoUrl
+        ) {
+          <img
+            [src]="profilePhotoUrl"
+            [alt]="currentUser.fullName"
+          />
+        } @else {
+          {{
+            getInitials(
+              currentUser.fullName
+            )
+          }}
+        }
+      </span>
 
           <span class="profile-content">
             <strong>
@@ -264,13 +278,25 @@
             role="menu"
           >
             <header class="profile-menu-header">
-              <span class="menu-avatar">
-                {{
-                  getInitials(
-                    currentUser.fullName
-                  )
-                }}
-              </span>
+        <span class="menu-avatar">
+          @if (
+            getProfilePhotoUrl(
+              currentUser.employeePhoto
+            );
+            as profilePhotoUrl
+          ) {
+            <img
+              [src]="profilePhotoUrl"
+              [alt]="currentUser.fullName"
+            />
+          } @else {
+            {{
+              getInitials(
+                currentUser.fullName
+              )
+            }}
+          }
+        </span>
 
               <div>
                 <strong>

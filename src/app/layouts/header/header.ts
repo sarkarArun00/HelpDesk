@@ -3,17 +3,19 @@ import {
   Component,
   EventEmitter,
   HostListener,
+  OnInit,
   Output,
   inject,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-
+import { AuthApiService } from '../../features/auth/services/auth-api.service';
 import { AuthService } from '../../core/auth/services/auth.service';
 import {
   NotificationType,
   ServiceDeskNotification,
 } from '../../core/notifications/models/notification.model';
 import { NotificationService } from '../../core/notifications/services/notification.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-header',
@@ -24,7 +26,8 @@ import { NotificationService } from '../../core/notifications/services/notificat
   templateUrl: './header.html',
   styleUrl: './header.scss',
 })
-export class Header {
+export class Header
+  implements OnInit {
   readonly authService = inject(AuthService);
 
   readonly notificationService =
@@ -40,10 +43,72 @@ export class Header {
   @Output()
   readonly mobileMenuClicked =
     new EventEmitter<void>();
+  
+  private readonly authApiService =
+    inject(AuthApiService);
 
   isProfileMenuVisible = false;
   isNotificationMenuVisible = false;
 
+
+  ngOnInit(): void {
+    this.loadProfile();
+  }
+
+  loadProfile(): void {
+    this.authApiService
+      .getProfile()
+      .subscribe({
+        next: response => {
+          if (
+            response.success &&
+            response.data
+          ) {
+            this.authService
+              .updateUserProfile(
+                response.data,
+              );
+          }
+        },
+
+        error: error => {
+          console.error(
+            'Unable to load profile:',
+            error,
+          );
+        },
+      });
+  }
+
+  getProfilePhotoUrl(
+    employeePhoto: string | null | undefined,
+  ): string | null {
+    if (!employeePhoto) {
+      return null;
+    }
+
+    if (
+      employeePhoto.startsWith('http://') ||
+      employeePhoto.startsWith('https://')
+    ) {
+      return employeePhoto;
+    }
+
+    const baseUrl =
+      environment.apiBaseUrl.replace(
+        /\/$/,
+        '',
+      );
+
+    const photoPath =
+      employeePhoto.replace(
+        /^\//,
+        '',
+      );
+
+    return `${baseUrl}/${photoPath}`;
+  }
+  
   openMobileMenu(): void {
     this.mobileMenuClicked.emit();
   }

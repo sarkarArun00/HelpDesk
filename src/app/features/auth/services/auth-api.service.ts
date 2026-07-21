@@ -71,4 +71,36 @@ export class AuthApiService {
             payload,
         );
     }
+
+    getProfile(): Observable<{
+        success: boolean;
+        message: string;
+        data: {
+            id: number;
+            employee_code: string;
+            employee_name: string;
+            email_id: string | null;
+            user_name: string;
+            employeePhoto: string | null;
+            user_type: string;
+            deparments: string[];
+        };
+    }> {
+        return this.http.get<{
+            success: boolean;
+            message: string;
+            data: {
+                id: number;
+                employee_code: string;
+                employee_name: string;
+                email_id: string | null;
+                user_name: string;
+                employeePhoto: string | null;
+                user_type: string;
+                deparments: string[];
+            };
+        }>(
+            `${this.apiBaseUrl}/auth/profile`,
+        );
+    }
 }

@@ -198,6 +198,97 @@ export class AuthService {
     );
   }
 
+  updateUserProfile(
+    profile: {
+      id: number;
+      employee_code: string;
+      employee_name: string;
+      email_id: string | null;
+      user_name: string;
+      employeePhoto: string | null;
+      user_type: string;
+      deparments: string[];
+    },
+  ): void {
+    const currentUser =
+      this.currentUserSignal();
+
+    if (!currentUser) {
+      return;
+    }
+
+    const normalizedUserType =
+      profile.user_type
+        ?.trim()
+        .toLowerCase();
+
+    let role: AppRole = 'Employee';
+
+    if (
+      normalizedUserType === 'admin' ||
+      normalizedUserType ===
+      'system admin'
+    ) {
+      role = 'System Admin';
+    } else if (
+      normalizedUserType ===
+      'manager' ||
+      normalizedUserType ===
+      'department manager'
+    ) {
+      role = 'Department Manager';
+    }
+
+    const department =
+      Array.isArray(profile.deparments)
+        ? profile.deparments
+          .filter(Boolean)
+          .join(', ')
+        : '';
+
+    const updatedUser: AuthUser = {
+      ...currentUser,
+      id: profile.id,
+      employeeCode:
+        profile.employee_code,
+      fullName:
+        profile.employee_name,
+      email:
+        profile.email_id ?? '',
+      userName:
+        profile.user_name,
+      employeePhoto:
+        profile.employeePhoto,
+      department,
+      role,
+    };
+
+    this.currentUserSignal.set(
+      updatedUser,
+    );
+
+    if (!this.isBrowser()) {
+      return;
+    }
+
+    if (
+      localStorage.getItem(
+        this.localStorageKey,
+      )
+    ) {
+      localStorage.setItem(
+        this.localStorageKey,
+        JSON.stringify(updatedUser),
+      );
+
+      return;
+    }
+
+    sessionStorage.setItem(
+      this.sessionStorageKey,
+      JSON.stringify(updatedUser),
+    );
+  }
   logout(): void {
     this.currentUserSignal.set(null);
     this.clearStoredUser();
