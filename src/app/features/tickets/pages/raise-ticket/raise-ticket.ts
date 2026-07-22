@@ -1,11 +1,18 @@
-import { Component, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  Component,
+  inject,
+  OnInit,
+} from '@angular/core';
+import { forkJoin } from 'rxjs';
 import {
   FormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-
+import { TicketCategoryApiService } from '../../../masters/services/ticket-category-api.service';
+import { TicketApiService } from '../../services/ticket-api.service';
 
 import { AuthService } from '../../../../core/auth/services/auth.service';
 import {
@@ -19,14 +26,15 @@ import { TicketStoreService } from '../../../../core/tickets/services/ticket-sto
 interface TicketCategory {
   id: number;
   name: string;
+  departmentId: number;
   targetDepartment: string;
   defaultPriority: TicketPriority;
 }
 
 interface Centre {
   id: number;
+  code: string;
   name: string;
-  type: 'Lab' | 'Collection Point' | 'Office';
 }
 
 @Component({
@@ -35,15 +43,25 @@ interface Centre {
   templateUrl: './raise-ticket.html',
   styleUrl: './raise-ticket.scss',
 })
-export class RaiseTicket {
+export class RaiseTicket
+  implements OnInit {
+  private readonly ticketApiService =
+    inject(TicketApiService);
+
+  private readonly ticketCategoryApiService =
+    inject(TicketCategoryApiService);
+
+  private readonly centreApiService =
+    inject(TicketCategoryApiService);
   private readonly formBuilder = inject(FormBuilder);
 
-  readonly priorities: TicketPriority[] = [
-    'Critical',
-    'High',
-    'Medium',
-    'Low',
-  ];
+
+
+  isLoadingMasters = false;
+
+  masterLoadError = '';
+
+  isSubmitting = false;
 
   private readonly authService =
   inject(AuthService);
@@ -53,64 +71,16 @@ private readonly ticketStore =
 
   createdTicketId = '';
 
-submissionError = '';
+  submissionError = '';
 
-  readonly categories: TicketCategory[] = [
-    {
-      id: 1,
-      name: 'Sample Collection Delay',
-      targetDepartment: 'Logistics',
-      defaultPriority: 'Critical',
-    },
-    {
-      id: 2,
-      name: 'Invoice Discrepancy',
-      targetDepartment: 'Accounts',
-      defaultPriority: 'High',
-    },
-    {
-      id: 3,
-      name: 'Report Correction',
-      targetDepartment: 'Technical',
-      defaultPriority: 'Medium',
-    },
-    {
-      id: 4,
-      name: 'Reagent Requirement',
-      targetDepartment: 'Laboratory',
-      defaultPriority: 'High',
-    },
-    {
-      id: 5,
-      name: 'CRM Support Request',
-      targetDepartment:
-        'Customer Relationship Management',
-      defaultPriority: 'Medium',
-    },
-  ];
+  priorities: TicketPriority[] = [];
 
-  readonly centres: Centre[] = [
-    {
-      id: 1,
-      name: 'Main Laboratory - Block A',
-      type: 'Lab',
-    },
-    {
-      id: 2,
-      name: 'South Satellite Centre',
-      type: 'Collection Point',
-    },
-    {
-      id: 3,
-      name: 'Corporate Office',
-      type: 'Office',
-    },
-    {
-      id: 4,
-      name: 'New Town Collection Centre',
-      type: 'Collection Point',
-    },
-  ];
+  categories: TicketCategory[] = [];
+
+  centres: Centre[] = [];
+
+  private readonly priorityIdByName =
+    new Map<TicketPriority, number>();
 
   private mapAttachments(
   files: File[],
@@ -199,6 +169,136 @@ submissionError = '';
     'image/jpeg',
   ];
 
+
+  ngOnInit(): void {
+    this.loadTicketMasters();
+  }
+
+  loadTicketMasters(): void {
+    this.isLoadingMasters = true;
+    this.masterLoadError = '';
+
+    forkJoin({
+      categories:
+        this.ticketCategoryApiService
+          .getAllCategories(1, 100),
+
+      priorities:
+        this.ticketCategoryApiService
+          .getAllPriorities(),
+
+      centres:
+        this.centreApiService
+          .getAllCentres(),
+    }).subscribe({
+      next: response => {
+        this.isLoadingMasters = false;
+
+        if (
+          !response.categories.success ||
+          !response.priorities.success ||
+          !response.centres.success
+        ) {
+          this.masterLoadError =
+            'Unable to load ticket form data.';
+
+          return;
+        }
+
+        const activePriorities =
+          response.priorities.data.filter(
+            priority => priority.status,
+          );
+
+        this.priorityIdByName.clear();
+
+        this.priorities =
+          activePriorities
+            .sort(
+              (first, second) =>
+                second.priority_level -
+                first.priority_level,
+            )
+            .map(priority => {
+              const priorityName =
+                priority.priority_name as
+                TicketPriority;
+
+              this.priorityIdByName.set(
+                priorityName,
+                priority.id,
+              );
+
+              return priorityName;
+            });
+
+        this.categories =
+          response.categories.data
+            .filter(category =>
+              Boolean(category.status),
+            )
+            .map(category => {
+              const departmentId =
+                category.department?.id ??
+                category.department_id ??
+                0;
+
+              const defaultPriority =
+                activePriorities.find(
+                  priority =>
+                    priority.id ===
+                    category.default_priority,
+                );
+
+              return {
+                id: category.id,
+                name:
+                  category.category_name,
+                departmentId,
+                targetDepartment:
+                  category.department
+                    ?.departmentName ??
+                  'Not assigned',
+                defaultPriority:
+                  (defaultPriority
+                    ?.priority_name ??
+                    'Medium') as
+                  TicketPriority,
+              };
+            })
+            .sort((first, second) =>
+              first.name.localeCompare(
+                second.name,
+              ),
+            );
+
+        this.centres =
+          response.centres.data
+            .map(centre => ({
+              id: centre.id,
+              code: centre.centreCode,
+              name:
+                centre.centreName.trim(),
+            }))
+            .sort((first, second) =>
+              first.name.localeCompare(
+                second.name,
+              ),
+            );
+      },
+
+      error: (
+        error: HttpErrorResponse,
+      ) => {
+        this.isLoadingMasters = false;
+
+        this.masterLoadError =
+          error.error?.message ||
+          'Unable to load ticket form data.';
+      },
+    });
+  }
+
   onCategoryChange(categoryId: number): void {
     const selectedCategory = this.categories.find(
       category => category.id === categoryId,
@@ -286,102 +386,162 @@ submissionError = '';
   }
 
   onSubmit(): void {
-  this.createdTicketId = '';
-  this.submissionError = '';
-  this.submissionMessage = '';
+    this.createdTicketId = '';
+    this.submissionError = '';
+    this.submissionMessage = '';
 
-  if (this.ticketForm.invalid) {
-    this.ticketForm.markAllAsTouched();
-    return;
-  }
+    if (this.ticketForm.invalid) {
+      this.ticketForm.markAllAsTouched();
+      return;
+    }
 
-  const currentUser =
-    this.authService.currentUser();
+    const currentUser =
+      this.authService.currentUser();
 
-  if (!currentUser) {
-    this.submissionError =
-      'Your login session is unavailable. Please sign in again.';
+    if (!currentUser?.id) {
+      this.submissionError =
+        'Your login profile is unavailable. Please sign in again.';
 
-    return;
-  }
+      return;
+    }
 
-  const formValue =
-    this.ticketForm.getRawValue();
+    const formValue =
+      this.ticketForm.getRawValue();
 
-  const selectedCategory =
-    this.categories.find(
-      category =>
-        category.id === formValue.categoryId,
+    const selectedCategory =
+      this.categories.find(
+        category =>
+          category.id ===
+          formValue.categoryId,
+      );
+
+    if (
+      !selectedCategory ||
+      !selectedCategory.departmentId
+    ) {
+      this.submissionError =
+        'The selected category does not have a valid department.';
+
+      return;
+    }
+
+    const selectedCentre =
+      this.centres.find(
+        centre =>
+          centre.id ===
+          formValue.centreId,
+      );
+
+    if (!selectedCentre) {
+      this.submissionError =
+        'Please select a valid centre.';
+      return;
+    }
+
+    const priorityId =
+      this.priorityIdByName.get(
+        formValue.priority as
+        TicketPriority,
+      );
+
+    if (!priorityId) {
+      this.submissionError =
+        'Please select a valid priority.';
+      return;
+    }
+
+    this.isSubmitting = true;
+
+    const formData = new FormData();
+
+    formData.append(
+      'subject',
+      formValue.subject.trim(),
     );
 
-  if (!selectedCategory) {
-    this.submissionError =
-      'Please select a valid ticket category.';
-
-    return;
-  }
-
-  const selectedCentre =
-    this.centres.find(
-      centre =>
-        centre.id === formValue.centreId,
+    formData.append(
+      'description',
+      formValue.description.trim(),
     );
 
-  if (!selectedCentre) {
-    this.submissionError =
-      'Please select a valid centre or facility.';
+    formData.append(
+      'requester_id',
+      String(currentUser.id),
+    );
 
-    return;
-  }
+    formData.append(
+      'category_id',
+      String(selectedCategory.id),
+    );
 
-  if (!formValue.targetDepartment) {
-    this.submissionError =
-      'The selected category does not have a target department.';
-
-    return;
-  }
-
-  if (!formValue.priority) {
-    this.submissionError =
-      'Please select a ticket priority.';
-
-    return;
-  }
-
-  const createdTicket =
-    this.ticketStore.createTicket({
-      subject: formValue.subject,
-      category: selectedCategory.name,
-      description: formValue.description,
-
-      priority:
-        formValue.priority as TicketPriority,
-
-      centre: selectedCentre.name,
-
-      originatingDepartment:
-        currentUser.department,
-
-      targetDepartment:
-        formValue.targetDepartment,
-
-      createdById: currentUser.id,
-      createdByName: currentUser.fullName,
-
-      attachments: this.mapAttachments(
-        this.selectedFiles,
-        currentUser.fullName,
+    formData.append(
+      'department_id',
+      String(
+        selectedCategory.departmentId,
       ),
+    );
+
+    formData.append(
+      'centre_id',
+      String(selectedCentre.id),
+    );
+
+    formData.append(
+      'priority_id',
+      String(priorityId),
+    );
+
+    formData.append(
+      'status',
+      'ASSIGNED',
+    );
+
+    this.selectedFiles.forEach(file => {
+      formData.append(
+        'attachments',
+        file,
+        file.name,
+      );
     });
 
-  this.createdTicketId =
-    createdTicket.ticketId;
+    this.isSubmitting = true;
 
-  this.submissionMessage =
-    `${createdTicket.ticketId} has been created successfully.`;
+    this.ticketApiService
+      .createTicket(formData)
+      .subscribe({
+        next: response => {
+          this.isSubmitting = false;
 
-  this.resetForm(false);
-}
+          if (!response.success) {
+            this.submissionError =
+              response.message ||
+              'Unable to create ticket.';
+
+            return;
+          }
+
+          this.createdTicketId =
+            response.data
+              ?.ticket_number ?? '';
+
+          this.submissionMessage =
+            response.message ||
+            'Ticket created successfully.';
+
+          this.resetForm(false);
+        },
+
+        error: (
+          error: HttpErrorResponse,
+        ) => {
+          this.isSubmitting = false;
+
+          this.submissionError =
+            error.error?.message ||
+            'Unable to create ticket. Please try again.';
+        },
+      });
+  }
 
   resetForm(
   clearFeedback = true,

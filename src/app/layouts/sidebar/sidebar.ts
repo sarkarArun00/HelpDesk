@@ -26,7 +26,7 @@ export class Sidebar {
 
   get canViewTeamPool(): boolean {
     return this.authService.hasRole(
-      'System Admin',
+      'Admin',
       'Department Manager',
     );
   }
@@ -44,12 +44,12 @@ closeAfterNavigation(): void {
 
   get canViewReports(): boolean {
     return this.authService.hasRole(
-      'System Admin',
+      'Admin',
       'Department Manager',
     );
   }
 
   get canViewMasters(): boolean {
-    return this.authService.hasRole('System Admin');
+    return this.authService.hasRole('Admin');
   }
 }

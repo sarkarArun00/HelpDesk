@@ -41,9 +41,14 @@
   min-height: 44px;
   padding: 0 20px;
   color: #ffffff !important;
-  background: #1976d2 !important;
+  background: #00a651 !important;
   border-radius: 10px !important;
   font-weight: 600;
+  transition:all 0.3s;
+  &:hover {
+    background: #087b40 !important;
+    border-color: #087b40 !important;
+  }
 }
 
 .button-plus {
@@ -178,7 +183,7 @@
 
 .queue-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
 }
 
@@ -248,9 +253,9 @@
 
 .view-all-button {
   padding: 8px 13px;
-  color: #1976d2;
+  color: #00a651;
   background: transparent;
-  border: 1px solid #cfd8e3;
+  border: 1px solid #00a651;
   border-radius: 8px;
   cursor: pointer;
   font-size: 13px;
@@ -303,7 +308,7 @@
 
 .ticket-id {
   padding: 0;
-  color: #1976d2;
+  color: #00a651;
   background: none;
   border: 0;
   cursor: pointer;

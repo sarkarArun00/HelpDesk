@@ -20,6 +20,16 @@
           </div>
 
           <div class="heading-badges">
+            @if (canEditTicket) {
+              <button
+                type="button"
+                class="edit-ticket-button"
+                (click)="openEditModal()"
+              >
+                <i class="bi bi-pencil"></i>
+                Edit Ticket
+              </button>
+            }
             <span
               class="priority-badge"
               [class]="
@@ -239,6 +249,9 @@
                       type="button"
                       class="download-button"
                       aria-label="Download attachment"
+                      (click)="
+                    downloadAttachment(attachment)
+                  "
                     >
                       <i class="bi bi-download"></i>
                     </button>
@@ -417,5 +430,257 @@
         </section>
       </div>
     </div>
+
+    @if (isEditModalVisible) {
+  <div
+    class="edit-modal-backdrop"
+    (click)="closeEditModal()"
+  ></div>
+
+  <section
+    class="edit-ticket-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="editTicketTitle"
+  >
+    <header class="edit-modal-header">
+      <div>
+        <span class="edit-modal-icon">
+          <i class="bi bi-pencil-square"></i>
+        </span>
+
+        <div>
+          <h2 id="editTicketTitle">
+            Edit Ticket
+          </h2>
+
+          <p>{{ ticket.ticketId }}</p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="close-modal-button"
+        aria-label="Close edit ticket"
+        [disabled]="isUpdatingTicket"
+        (click)="closeEditModal()"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </header>
+
+    <div class="edit-modal-body">
+      @if (editError) {
+        <div
+          class="alert alert-danger edit-error"
+          role="alert"
+        >
+          <i class="bi bi-exclamation-circle-fill"></i>
+          {{ editError }}
+        </div>
+      }
+
+      @if (isLoadingEditMasters) {
+        <div class="edit-loading-state">
+          <span
+            class="spinner-border text-primary"
+            aria-hidden="true"
+          ></span>
+
+          <p>Loading ticket information...</p>
+        </div>
+      } @else {
+        <div class="edit-form-grid">
+          <div class="edit-form-group full-width">
+            <label
+              for="editSubject"
+              class="form-label"
+            >
+              Subject
+            </label>
+
+            <input
+              id="editSubject"
+              type="text"
+              class="form-control"
+              maxlength="120"
+              [(ngModel)]="editTicketForm.subject"
+              name="editSubject"
+              placeholder="Enter ticket subject"
+            />
+
+            <div class="form-hint">
+              {{ editTicketForm.subject.length }}/120
+            </div>
+          </div>
+
+          <div class="edit-form-group">
+            <label
+              for="editCategory"
+              class="form-label"
+            >
+              Category
+            </label>
+
+            <select
+              id="editCategory"
+              class="form-select"
+              [(ngModel)]="editTicketForm.categoryId"
+              name="editCategory"
+              (ngModelChange)="
+                onEditCategoryChange($event)
+              "
+            >
+              <option [ngValue]="0">
+                Select category
+              </option>
+
+              @for (
+                category of editCategories;
+                track category.id
+              ) {
+                <option [ngValue]="category.id">
+                  {{ category.name }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="edit-form-group">
+            <label
+              for="editDepartment"
+              class="form-label"
+            >
+              Department
+            </label>
+
+            <input
+              id="editDepartment"
+              type="text"
+              class="form-control readonly-control"
+              [value]="editTicketForm.departmentName"
+              readonly
+            />
+          </div>
+
+          <div class="edit-form-group">
+            <label
+              for="editCentre"
+              class="form-label"
+            >
+              Centre
+            </label>
+
+            <select
+              id="editCentre"
+              class="form-select"
+              [(ngModel)]="editTicketForm.centreId"
+              name="editCentre"
+            >
+              <option [ngValue]="0">
+                Select centre
+              </option>
+
+              @for (
+                centre of editCentres;
+                track centre.id
+              ) {
+                <option [ngValue]="centre.id">
+                  {{ centre.name }}
+                  ({{ centre.code }})
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="edit-form-group">
+            <label
+              for="editPriority"
+              class="form-label"
+            >
+              Priority
+            </label>
+
+            <select
+              id="editPriority"
+              class="form-select"
+              [(ngModel)]="editTicketForm.priorityId"
+              name="editPriority"
+            >
+              <option [ngValue]="0">
+                Select priority
+              </option>
+
+              @for (
+                priority of editPriorities;
+                track priority.id
+              ) {
+                <option [ngValue]="priority.id">
+                  {{ priority.name }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="edit-form-group full-width">
+            <label
+              for="editDescription"
+              class="form-label"
+            >
+              Description
+            </label>
+
+            <textarea
+              id="editDescription"
+              class="form-control"
+              rows="6"
+              maxlength="2000"
+              [(ngModel)]="editTicketForm.description"
+              name="editDescription"
+              placeholder="Describe the issue"
+            ></textarea>
+
+            <div class="form-hint">
+              {{ editTicketForm.description.length }}/2000
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <footer class="edit-modal-footer">
+      <button
+        type="button"
+        class="btn cancel-edit-button"
+        [disabled]="isUpdatingTicket"
+        (click)="closeEditModal()"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="btn save-edit-button"
+        [disabled]="
+          isUpdatingTicket ||
+          isLoadingEditMasters
+        "
+        (click)="updateTicket()"
+      >
+        @if (isUpdatingTicket) {
+          <span
+            class="spinner-border spinner-border-sm"
+            aria-hidden="true"
+          ></span>
+
+          Updating...
+        } @else {
+          <i class="bi bi-check-lg"></i>
+          Update Ticket
+        }
+      </button>
+    </footer>
+  </section>
+}
   </section>
 }

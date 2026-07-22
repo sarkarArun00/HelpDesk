@@ -43,7 +43,7 @@ export class AuthService {
       email: 'admin@nirnayanhealthcare.com',
       password: 'Admin@123',
       department: 'Information Technology',
-      role: 'System Admin',
+      role: 'Admin',
     },
     {
       id: 2,
@@ -130,7 +130,7 @@ export class AuthService {
       // The current login response does not provide these fields.
       email: '',
       department: '',
-      role: 'System Admin',
+      role: 'Admin',
     };
 
     this.currentUserSignal.set(
@@ -227,9 +227,9 @@ export class AuthService {
     if (
       normalizedUserType === 'admin' ||
       normalizedUserType ===
-      'system admin'
+      'Admin'
     ) {
-      role = 'System Admin';
+      role = 'Admin';
     } else if (
       normalizedUserType ===
       'manager' ||
@@ -307,7 +307,7 @@ export class AuthService {
   }
 
   isSystemAdmin(): boolean {
-    return this.hasRole('System Admin');
+    return this.hasRole('Admin');
   }
 
   isDepartmentManager(): boolean {
