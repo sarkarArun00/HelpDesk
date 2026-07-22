@@ -13,10 +13,7 @@
       </p>
     </div>
 
-    <a
-      routerLink="/masters"
-      class="btn back-button"
-    >
+    <a routerLink="/masters" class="btn back-button">
       <i class="bi bi-arrow-left"></i>
       Back to Masters
     </a>
@@ -40,24 +37,17 @@
   </div>
 
   @if (loadError) {
-    <div
-      class="alert alert-danger"
-      role="alert"
-    >
-      <i class="bi bi-exclamation-circle-fill"></i>
-      {{ loadError }}
+  <div class="alert alert-danger" role="alert">
+    <i class="bi bi-exclamation-circle-fill"></i>
+    {{ loadError }}
 
-      <button
-        type="button"
-        class="btn btn-sm btn-outline-danger ms-3"
-        (click)="loadCentres()"
-      >
-        Retry
-      </button>
-    </div>
+    <button type="button" class="btn btn-sm btn-outline-danger ms-3" (click)="loadCentres()">
+      Retry
+    </button>
+  </div>
   }
 
-  <section class="summary-grid">
+  <!-- <section class="summary-grid">
     <article class="summary-card">
       <span class="summary-icon total-icon">
         <i class="bi bi-buildings"></i>
@@ -68,61 +58,49 @@
         <strong>{{ centres.length }}</strong>
       </div>
     </article>
-  </section>
+  </section> -->
 
   <section class="filter-card">
-    <header class="filter-header">
-      <div>
-        <h2>Search Centres</h2>
+    <div class="filter-body">
+      <header class="filter-header">
+        <div>
+          <h3>Search Centres</h3>
 
-        <p>
-          Find a centre using its name,
-          code, or ID.
-        </p>
-      </div>
+          <p>
+            Find a centre using its name,
+            code, or ID.
+          </p>
+        </div>
 
-      @if (searchTerm) {
-        <button
-          type="button"
-          class="clear-filter-button"
-          (click)="clearFilters()"
-        >
+        @if (searchTerm) {
+        <button type="button" class="clear-filter-button" (click)="clearFilters()">
           <i class="bi bi-x-circle"></i>
           Clear search
         </button>
-      }
-    </header>
+        }
+      </header>
 
-<div class="filter-body">
-  <div class="filter-grid">
-    <div class="filter-group">
-        <label
-          for="centreSearch"
-          class="form-label"
-        >
-          Search
-        </label>
+      <div class="filter-grid">
+        <div class="filter-group">
+          <label for="centreSearch" class="form-label">
+            Search
+          </label>
 
-        <div class="input-group">
-          <span class="input-group-text">
-            <i class="bi bi-search"></i>
-          </span>
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-search"></i>
+            </span>
 
-          <input
-            id="centreSearch"
-            type="search"
-            class="form-control"
-            [(ngModel)]="searchTerm"
-            placeholder="Search by centre name, code or ID"
-          />
+            <input id="centreSearch" type="search" class="form-control" [(ngModel)]="searchTerm"
+              placeholder="Search by centre name, code or ID" />
+          </div>
         </div>
       </div>
-    </div>
     </div>
   </section>
 
   <section class="centre-list-card">
-  <header class="section-header">
+    <header class="section-header">
       <div>
         <h2>Centre Directory</h2>
 
@@ -144,89 +122,80 @@
     </header>
 
     @if (isLoading) {
-      <div class="loading-state">
-        <span
-          class="spinner-border text-primary"
-          aria-hidden="true"
-        ></span>
+    <div class="loading-state">
+      <span class="spinner-border text-primary" aria-hidden="true"></span>
 
-        <p>Loading centres...</p>
-      </div>
+      <p>Loading centres...</p>
+    </div>
     } @else if (filteredCentres.length) {
-      <div class="table-responsive">
-        <table
-          class="table centre-table align-middle"
-        >
-          <thead>
-            <tr>
-              <th>SL No.</th>
-              <th>Centre ID</th>
-              <th>Centre Code</th>
-              <th>Centre Name</th>
-            </tr>
-          </thead>
+    <div class="table-responsive">
+      <table class="table centre-table align-middle">
+        <thead>
+          <tr>
+            <th>SL No.</th>
+            <!-- <th>Centre ID</th> -->
+            <th>Centre Code</th>
+            <th>Centre Name</th>
+          </tr>
+        </thead>
 
-          <tbody>
-            @for (
-              centre of filteredCentres;
-              track centre.id;
-              let index = $index
-            ) {
-              <tr>
-                <td>
-                  {{ index + 1 }}
-                </td>
+        <tbody>
+          @for (
+          centre of filteredCentres;
+          track centre.id;
+          let index = $index
+          ) {
+          <tr>
+            <td>
+              {{ index + 1 }}
+            </td>
 
-                <td>
+            <!-- <td>
                   <span class="centre-id">
                     {{ centre.id }}
                   </span>
-                </td>
+                </td> -->
 
-                <td>
-                  <span class="code-badge">
-                    {{ centre.centreCode }}
-                  </span>
-                </td>
+            <td>
+              <span class="code-badge">
+                {{ centre.centreCode }}
+              </span>
+            </td>
 
-                <td>
-                  <div class="centre-primary">
-                    <span class="centre-icon">
-                      <i class="bi bi-building"></i>
-                    </span>
+            <td>
+              <div class="centre-primary">
+                <span class="centre-icon">
+                  <i class="bi bi-building"></i>
+                </span>
 
-                    <strong>
-                      {{ centre.centreName }}
-                    </strong>
-                  </div>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+                <strong>
+                  {{ centre.centreName }}
+                </strong>
+              </div>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
     } @else {
-      <div class="empty-state">
-        <span>
-          <i class="bi bi-building-x"></i>
-        </span>
+    <div class="empty-state">
+      <span>
+        <i class="bi bi-building-x"></i>
+      </span>
 
-        <h3>No centres found</h3>
+      <h3>No centres found</h3>
 
-        <p>
-          No centres match your current search.
-        </p>
+      <p>
+        No centres match your current search.
+      </p>
 
-        @if (searchTerm) {
-          <button
-            type="button"
-            class="btn btn-outline-primary"
-            (click)="clearFilters()"
-          >
-            Clear search
-          </button>
-        }
-      </div>
+      @if (searchTerm) {
+      <button type="button" class="btn btn-outline-primary" (click)="clearFilters()">
+        Clear search
+      </button>
+      }
+    </div>
     }
   </section>
 </section>

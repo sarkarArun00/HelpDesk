@@ -1,4 +1,12 @@
-import { Component } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  Component,
+  inject,
+  OnInit,
+} from '@angular/core';
+import { forkJoin } from 'rxjs';
+import { TicketCategoryApiService } from '../../../masters/services/ticket-category-api.service';
+import { TicketApiService } from '../../services/ticket-api.service';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -29,7 +37,17 @@ interface ActionTicket {
   templateUrl: './my-action-items.html',
   styleUrl: './my-action-items.scss',
 })
-export class MyActionItems {
+export class MyActionItems
+  implements OnInit {
+  private readonly ticketApiService =
+    inject(TicketApiService);
+
+  private readonly ticketCategoryApiService =
+    inject(TicketCategoryApiService);
+
+  isLoading = false;
+
+  loadError = '';
   searchTerm = '';
 
   selectedStatus = '';
@@ -53,80 +71,10 @@ export class MyActionItems {
     'Low',
   ];
 
-  readonly centres = [
-    'Main Laboratory - Block A',
-    'South Satellite Centre',
-    'Corporate Office',
-    'New Town Collection Centre',
-  ];
+  centres: string[] = [];
 
-  tickets: ActionTicket[] = [
-    {
-      id: 1,
-      ticketId: 'ISD-2026-0142',
-      subject: 'Urgent home collection pickup has been delayed',
-      category: 'Sample Collection Delay',
-      createdBy: 'Ananya Ghosh',
-      originatingDepartment: 'CRM',
-      centre: 'Main Laboratory - Block A',
-      priority: 'Critical',
-      status: 'Assigned',
-      createdAt: '2026-07-18T09:15:00',
-      lastUpdatedAt: '2026-07-18T09:25:00',
-    },
-    {
-      id: 2,
-      ticketId: 'ISD-2026-0139',
-      subject: 'Invoice total does not match approved quotation',
-      category: 'Invoice Discrepancy',
-      createdBy: 'Sourav Dey',
-      originatingDepartment: 'Operations',
-      centre: 'Corporate Office',
-      priority: 'High',
-      status: 'In Progress',
-      createdAt: '2026-07-17T16:30:00',
-      lastUpdatedAt: '2026-07-18T08:40:00',
-    },
-    {
-      id: 3,
-      ticketId: 'ISD-2026-0136',
-      subject: 'Corrected report has not been published',
-      category: 'Report Correction',
-      createdBy: 'Puja Singh',
-      originatingDepartment: 'CRM',
-      centre: 'South Satellite Centre',
-      priority: 'Medium',
-      status: 'Reopened',
-      createdAt: '2026-07-17T12:10:00',
-      lastUpdatedAt: '2026-07-18T10:05:00',
-    },
-    {
-      id: 4,
-      ticketId: 'ISD-2026-0134',
-      subject: 'Required reagent stock is below minimum quantity',
-      category: 'Reagent Requirement',
-      createdBy: 'Riya Das',
-      originatingDepartment: 'Laboratory',
-      centre: 'Main Laboratory - Block A',
-      priority: 'High',
-      status: 'In Progress',
-      createdAt: '2026-07-16T15:45:00',
-      lastUpdatedAt: '2026-07-17T11:20:00',
-    },
-    {
-      id: 5,
-      ticketId: 'ISD-2026-0131',
-      subject: 'Collection task is not visible to field executive',
-      category: 'CRM Support Request',
-      createdBy: 'Abhishek Roy',
-      originatingDepartment: 'Logistics',
-      centre: 'New Town Collection Centre',
-      priority: 'Low',
-      status: 'Assigned',
-      createdAt: '2026-07-16T10:30:00',
-      lastUpdatedAt: '2026-07-16T10:45:00',
-    },
-  ];
+
+  tickets: ActionTicket[] = [];
 
   get filteredTickets(): ActionTicket[] {
     const normalizedSearch = this.searchTerm
@@ -189,6 +137,194 @@ export class MyActionItems {
     ).length;
   }
 
+  ngOnInit(): void {
+    this.loadAssignedTickets();
+  }
+
+  loadAssignedTickets(): void {
+    this.isLoading = true;
+    this.loadError = '';
+
+    forkJoin({
+      tickets:
+        this.ticketApiService
+          .getAllTickets({
+            type: 'assigned',
+          }),
+
+      departments:
+        this.ticketCategoryApiService
+          .getAllDepartments(),
+    }).subscribe({
+      next: response => {
+        this.isLoading = false;
+
+        if (
+          !response.tickets.success ||
+          !response.departments.success
+        ) {
+          this.loadError =
+            'Unable to load assigned tickets.';
+
+          return;
+        }
+
+        const departmentNameById =
+          new Map<number, string>();
+
+        response.departments.data
+          .forEach(department => {
+            departmentNameById.set(
+              department.id,
+              department.departmentName,
+            );
+          });
+
+        this.tickets =
+          response.tickets.data
+            .filter(ticket =>
+              !ticket.is_deleted,
+            )
+            .map(ticket => {
+              const assignments =
+                ticket.assignments ?? [];
+
+              const latestAssignment =
+                assignments.length
+                  ? assignments[
+                  assignments.length - 1
+                  ]
+                  : null;
+
+              return {
+                id: ticket.id,
+
+                ticketId:
+                  ticket.ticket_number,
+
+                subject:
+                  ticket.subject,
+
+                category:
+                  ticket.category
+                    ?.category_name ??
+                  'Not available',
+
+                createdBy:
+                  ticket.requester
+                    ?.employee_name ??
+                  'Not available',
+
+                originatingDepartment:
+                  departmentNameById.get(
+                    ticket.department_id,
+                  ) ??
+                  `Department ${ticket.department_id}`,
+
+                centre:
+                  ticket.centre
+                    ?.centreName ??
+                  'Not available',
+
+                priority:
+                  this.mapPriority(
+                    ticket.priority
+                      ?.priority_name,
+                  ),
+
+                status:
+                  this.mapActionStatus(
+                    latestAssignment
+                      ?.status ??
+                    ticket.status,
+                  ),
+
+                createdAt:
+                  ticket.created_at,
+
+                lastUpdatedAt:
+                  latestAssignment
+                    ?.updated_at ??
+                  ticket.updated_at,
+              };
+            })
+            .sort(
+              (first, second) =>
+                new Date(
+                  second.lastUpdatedAt,
+                ).getTime() -
+                new Date(
+                  first.lastUpdatedAt,
+                ).getTime(),
+            );
+
+        this.centres = [
+          ...new Set(
+            this.tickets
+              .map(ticket => ticket.centre)
+              .filter(
+                centre =>
+                  centre !==
+                  'Not available',
+              ),
+          ),
+        ].sort();
+      },
+
+      error: (
+        error: HttpErrorResponse,
+      ) => {
+        this.isLoading = false;
+
+        this.loadError =
+          error.error?.message ||
+          'Unable to load assigned tickets.';
+      },
+    });
+  }
+
+
+  private mapPriority(
+    priority:
+      string | null | undefined,
+  ): TicketPriority {
+    const allowed:
+      TicketPriority[] = [
+        'Critical',
+        'High',
+        'Medium',
+        'Low',
+      ];
+
+    return allowed.includes(
+      priority as TicketPriority,
+    )
+      ? priority as TicketPriority
+      : 'Medium';
+  }
+
+  private mapActionStatus(
+    status:
+      string | null | undefined,
+  ): ActionTicketStatus {
+    switch (
+    status
+      ?.trim()
+      .toUpperCase()
+    ) {
+      case 'IN_PROGRESS':
+      case 'IN PROGRESS':
+        return 'In Progress';
+
+      case 'REOPENED':
+        return 'Reopened';
+
+      case 'ASSIGNED':
+      default:
+        return 'Assigned';
+    }
+  }
+  
   clearFilters(): void {
     this.searchTerm = '';
     this.selectedStatus = '';

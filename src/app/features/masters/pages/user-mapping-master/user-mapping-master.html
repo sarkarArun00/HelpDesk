@@ -18,14 +18,14 @@
       </p>
     </div>
 
-    <button
+    <!-- <button
       type="button"
       class="btn add-user-button"
       (click)="openAddModal()"
     >
       <i class="bi bi-person-plus"></i>
       Add Employee
-    </button>
+    </button> -->
   </header>
 
   <section class="summary-grid">
@@ -296,7 +296,7 @@
                       Edit
                     </button>
 
-                    <button
+                    <!-- <button
                       type="button"
                       class="status-button"
                       [class.activate-button]="!user.status"
@@ -310,7 +310,7 @@
                       ></i>
 
                       {{ user.status ? 'Deactivate' : 'Activate' }}
-                    </button>
+                    </button> -->
                   </div>
                 </td>
               </tr>
@@ -358,13 +358,9 @@
       <div>
         <span>USER MAPPING</span>
 
-        <h2 id="userModalTitle">
-          {{
-            editingUserId
-              ? 'Edit Employee'
-              : 'Add Employee'
-          }}
-        </h2>
+      <h2 id="userModalTitle">
+        Update User Access
+      </h2>
       </div>
 
       <button
@@ -396,6 +392,7 @@
             type="text"
             class="form-control text-uppercase"
             maxlength="20"
+            readonly
             [(ngModel)]="userForm.employeeCode"
             placeholder="Example: EMP-0108"
           />
@@ -412,6 +409,7 @@
             type="text"
             class="form-control"
             maxlength="100"
+            readonly
             [(ngModel)]="userForm.fullName"
             placeholder="Enter employee full name"
           />
@@ -428,6 +426,7 @@
             type="email"
             class="form-control"
             maxlength="150"
+            readonly
             [(ngModel)]="userForm.corporateEmail"
             placeholder="employee@nirnayanhealthcare.com"
           />
@@ -443,6 +442,7 @@
             id="userDepartment"
             class="form-select"
             [(ngModel)]="userForm.departmentId"
+            disabled
           >
             <option [ngValue]="0" disabled>
               Select department
@@ -512,19 +512,20 @@
       <button
         type="button"
         class="btn btn-primary"
+        [disabled]="isUpdating"
         (click)="saveUser()"
       >
-        <i
-          class="bi"
-          [class.bi-person-plus]="!editingUserId"
-          [class.bi-check-lg]="editingUserId"
-        ></i>
+        @if (isUpdating) {
+          <span
+            class="spinner-border spinner-border-sm"
+            aria-hidden="true"
+          ></span>
 
-        {{
-          editingUserId
-            ? 'Update Mapping'
-            : 'Create Mapping'
-        }}
+          Updating...
+        } @else {
+          <i class="bi bi-check-lg"></i>
+          Update User
+        }
       </button>
     </footer>
   </section>

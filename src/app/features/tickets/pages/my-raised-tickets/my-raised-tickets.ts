@@ -34,6 +34,8 @@ interface RaisedTicket {
   createdAt: string;
 }
 
+
+
 @Component({
   selector: 'app-my-raised-tickets',
   imports: [FormsModule, RouterLink],
@@ -148,18 +150,25 @@ export class MyRaisedTickets
     forkJoin({
       tickets:
         this.ticketApiService
-          .getAllTickets(),
+          .getAllTickets({
+            type: 'created',
+          }),
 
       departments:
         this.ticketCategoryApiService
           .getAllDepartments(),
+
+      employees:
+        this.ticketApiService
+          .getEmployeeList(),
     }).subscribe({
       next: response => {
         this.isLoading = false;
 
         if (
           !response.tickets.success ||
-          !response.departments.success
+          !response.departments.success ||
+          !response.employees.success
         ) {
           this.loadError =
             'Unable to load your tickets.';
@@ -169,6 +178,17 @@ export class MyRaisedTickets
 
         const departmentNameById =
           new Map<number, string>();
+        
+        const employeeNameById =
+          new Map<number, string>();
+
+        response.employees.data
+          .forEach(employee => {
+            employeeNameById.set(
+              employee.id,
+              employee.employee_name,
+            );
+          });
 
         response.departments.data
           .forEach(department => {
@@ -228,6 +248,11 @@ export class MyRaisedTickets
               // The current API response does
               // not contain an assignee object.
               assignee:
+                employeeNameById.get(
+                  ticket.assignments?.[
+                    ticket.assignments.length - 1
+                  ]?.assigned_to ?? 0,
+                ) ??
                 'Not assigned',
 
               createdAt:

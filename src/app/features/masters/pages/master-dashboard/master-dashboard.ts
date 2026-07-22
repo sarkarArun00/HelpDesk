@@ -144,6 +144,10 @@ export class MasterDashboard
             centres:
               response.data
                 .centreCount,
+            
+            users:
+              response.data
+                .centreCount,
           };
 
           this.masterModules =
