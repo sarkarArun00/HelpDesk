@@ -46,7 +46,7 @@
 }
 
 .ticket-number {
-  color: #175cd3;
+  color: #00a651;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.4px;
@@ -220,8 +220,12 @@
 .resolve-button,
 .close-ticket-button {
   color: #ffffff;
-  background: #039855;
-  border-color: #039855;
+  background: #00a651;
+  border-color: #00a651;
+  &:hover {
+    background: #087b40 !important;
+    border-color: #087b40 !important;
+  }
 }
 
 .reopen-button {
@@ -478,8 +482,8 @@
   gap: 6px;
   padding: 0 13px;
   color: #ffffff;
-  background: #1976d2;
-  border-color: #1976d2;
+  background: #00a651;
+  border-color: #00a651;
   border-radius: 8px;
   font-size: 11px;
   font-weight: 700;
@@ -489,6 +493,11 @@
     background: #f2f4f7;
     border-color: #e4e7ec;
   }
+  &:hover {
+    background: #087b40 !important;
+    border-color: #087b40 !important;
+  }
+
 }
 
 .comments-list {

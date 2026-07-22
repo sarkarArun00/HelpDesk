@@ -80,8 +80,8 @@ select {
 
   &.active {
     color: #ffffff;
-    background: #174b7d;
-    border-color: #225f97;
+    background: #00a651;
+    border-color: #00a651;
   }
 }
 
@@ -127,3 +127,10 @@ select {
   --brand-gradient-middle: #075f35;
   --brand-gradient-end: #008a44;
 }
+
+
+.page-eyebrow{ color:#00a651 !important; }
+.sidebar-brand{ display:flex; align-items:center; gap:0 10px; }
+.sidebar-brand img{ max-width:40px; }
+
+.sidebar-brand h4{ font-family: "Arima", system-ui; font-weight: 600; color:#33a651; margin:0; }
