@@ -192,7 +192,35 @@
       </div>
     </div>
 
-    @if (filteredTickets.length > 0) {
+@if (isLoading) {
+  <div class="loading-state">
+    <span
+      class="spinner-border text-primary"
+      aria-hidden="true"
+    ></span>
+
+    <p>Loading your tickets...</p>
+  </div>
+} @else if (loadError) {
+  <div class="api-error-state">
+    <span>
+      <i class="bi bi-exclamation-circle"></i>
+    </span>
+
+    <h3>Unable to load tickets</h3>
+
+    <p>{{ loadError }}</p>
+
+    <button
+      type="button"
+      class="btn btn-outline-primary"
+      (click)="loadTickets()"
+    >
+      <i class="bi bi-arrow-clockwise"></i>
+      Retry
+    </button>
+  </div>
+} @else if (filteredTickets.length > 0) {
       <div class="table-responsive">
         <table class="table ticket-table align-middle">
           <thead>
@@ -288,7 +316,7 @@
 
                 <td>
                   <a
-                  [routerLink]="['/tickets', ticket.ticketId]"
+                  [routerLink]="['/tickets',ticket.id]"
                   class="view-ticket-button"
                   [attr.aria-label]="'View ticket ' + ticket.ticketId"
                 >

@@ -45,16 +45,16 @@ export class MasterDashboard
     //   activeRecords: 0,
     //   inactiveRecords: 0,
     // },
-    // {
-    //   id: 'users',
-    //   title: 'User & Department Mapping',
-    //   description:
-    //     'Map employees to departments and configure their system roles.',
-    //   icon: 'bi-people',
-    //   totalRecords: 0,
-    //   activeRecords: 0,
-    //   inactiveRecords: 0,
-    // },
+    {
+      id: 'users',
+      title: 'Employee Master',
+      description:
+        'Manage employees and configure their system roles.',
+      icon: 'bi-people',
+      totalRecords: 0,
+      activeRecords: 0,
+      inactiveRecords: 0,
+    },
     // {
     //   id: 'priorities',
     //   title: 'Priority Master',

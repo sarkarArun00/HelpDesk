@@ -327,7 +327,7 @@ export class NotificationService {
         message:
           'The LIMS application access ticket has been assigned to you.',
         ticketId: 'ISD-2026-0153',
-        actorName: 'System Admin',
+        actorName: 'Admin',
         isRead: false,
         createdAt:
           '2026-07-17T10:30:00',

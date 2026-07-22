@@ -253,7 +253,7 @@
 
               @for (centre of centres; track centre.id) {
                 <option [ngValue]="centre.id">
-                  {{ centre.name }} — {{ centre.type }}
+                  {{ centre.name }} ({{ centre.code }})
                 </option>
               }
             </select>
@@ -481,23 +481,37 @@
       </div>
     }
 
-    <footer class="form-actions">
-      <button
-        type="button"
-        class="btn btn-outline-secondary action-button"
-        (click)="resetForm()"
-      >
-        <i class="bi bi-arrow-counterclockwise"></i>
-        Reset Form
-      </button>
+<footer class="form-actions">
+  <button
+    type="button"
+    class="btn btn-outline-secondary action-button"
+    [disabled]="isSubmitting"
+    (click)="resetForm()"
+  >
+    <i class="bi bi-arrow-counterclockwise"></i>
+    Reset Form
+  </button>
 
-      <button
-        type="submit"
-        class="btn btn-primary action-button submit-button"
-      >
-        <i class="bi bi-send"></i>
-        Submit Ticket
-      </button>
-    </footer>
+  <button
+    type="submit"
+    class="btn btn-primary action-button submit-button"
+    [disabled]="
+      isSubmitting ||
+      isLoadingMasters
+    "
+  >
+    @if (isSubmitting) {
+      <span
+        class="spinner-border spinner-border-sm"
+        aria-hidden="true"
+      ></span>
+
+      Creating Ticket...
+    } @else {
+      <i class="bi bi-send"></i>
+      Submit Ticket
+    }
+  </button>
+</footer>
   </form>
 </section>
