@@ -45,7 +45,7 @@ export interface TicketListItem {
     } | null;
 
     category_id: number;
-
+    assignments?: TicketAssignmentApi[];
     category: {
         id: number;
         category_name: string;
@@ -115,6 +115,79 @@ export interface UpdateTicketResponse {
     data?: TicketListItem;
 }
 
+export interface EmployeeListItem {
+    id: number;
+    employee_code: string;
+    employee_name: string;
+    email_id: string | null;
+    user_name: string;
+    employeePhoto: string | null;
+    user_type: string;
+    status: boolean;
+    departments: string[];
+}
+
+export interface GetEmployeeListResponse {
+    success: boolean;
+    message: string;
+    data: EmployeeListItem[];
+}
+
+export interface UpdateEmployeePayload {
+    id: number;
+    user_type: string;
+    is_active: boolean;
+}
+
+export interface UpdateEmployeeResponse {
+    success: boolean;
+    message: string;
+    data?: EmployeeListItem;
+}
+
+export type TicketListType =
+    | 'created'
+    | 'assigned';
+
+export interface GetTicketsPayload {
+    type: TicketListType;
+}
+
+export interface TicketAssignmentApi {
+    id: number;
+    ticket_id: number;
+    assigned_to: number;
+    assigned_by: number;
+    department_id: number;
+    assignment_type: string;
+    status: string;
+    assigned_at: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface TicketActivityLog {
+    id: number;
+    category: string;
+    ticketId: number;
+    entityType: string | null;
+    entityId: number | null;
+    userId: number;
+    userName: string;
+    activityType: string;
+    message: string;
+    metaData:
+    Record<string, unknown> | null;
+    createdAt: string;
+}
+
+export interface GetTicketActivityLogsResponse {
+    success: boolean;
+    message: string;
+    data: TicketActivityLog[];
+}
+
+
 @Injectable({
     providedIn: 'root',
 })
@@ -134,10 +207,12 @@ export class TicketApiService {
         );
     }
 
-    getAllTickets():
-        Observable<GetTicketsResponse> {
-        return this.http.get<GetTicketsResponse>(
+    getAllTickets(
+        payload: GetTicketsPayload,
+    ): Observable<GetTicketsResponse> {
+        return this.http.post<GetTicketsResponse>(
             `${this.apiBaseUrl}/ticket/get-all`,
+            payload,
         );
     }
 
@@ -155,6 +230,30 @@ export class TicketApiService {
         return this.http.post<UpdateTicketResponse>(
             `${this.apiBaseUrl}/ticket/update`,
             payload,
+        );
+    }
+
+    getEmployeeList():
+        Observable<GetEmployeeListResponse> {
+        return this.http.get<GetEmployeeListResponse>(
+            `${this.apiBaseUrl}/employee/get-employee-list`,
+        );
+    }
+
+    updateEmployee(
+        payload: UpdateEmployeePayload,
+    ): Observable<UpdateEmployeeResponse> {
+        return this.http.post<UpdateEmployeeResponse>(
+            `${this.apiBaseUrl}/employee/update-employee`,
+            payload,
+        );
+    }
+
+    getTicketActivityLogs(
+        ticketId: number,
+    ): Observable<GetTicketActivityLogsResponse> {
+        return this.http.get<GetTicketActivityLogsResponse>(
+            `${this.apiBaseUrl}/activity-log/ticket/${ticketId}`,
         );
     }
 }

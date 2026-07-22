@@ -95,9 +95,12 @@
                 <p>Latest tickets available according to your role.</p>
             </div>
 
-            <button type="button" class="view-all-button">
-                View all tickets
-            </button>
+            <a
+            routerLink="/tickets/my-raised"
+            class="view-all-button"
+            >
+            View all tickets
+            </a>
         </div>
 
         <div class="table-container">
@@ -153,12 +156,19 @@
 
                         
                         <td>
-                            <button type="button" class="row-action"
-                                [routerLink]="['/tickets', ticket.ticketId]"
-                                [attr.aria-label]="'View ticket ' + ticket.ticketId"
-                                >
-                                ›
-                            </button>
+                            <a
+                            class="row-action"
+                            [routerLink]="[
+                                '/tickets',
+                                ticket.id
+                            ]"
+                            [attr.aria-label]="
+                                'View ticket ' +
+                                ticket.ticketId
+                            "
+                            >
+                            ›
+                            </a>
                         </td>
                     </tr>
                     }

@@ -30,6 +30,17 @@
   }
 }
 
+.readonly-control {
+  color: #667085;
+  background: #f9fafb;
+  cursor: not-allowed;
+
+  &:focus {
+    border-color: #d0d5dd;
+    box-shadow: none;
+  }
+}
+
 .back-link {
   display: inline-flex;
   align-items: center;

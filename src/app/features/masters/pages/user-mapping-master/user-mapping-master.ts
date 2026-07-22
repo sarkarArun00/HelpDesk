@@ -1,4 +1,10 @@
-import { Component } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  Component,
+  inject,
+  OnInit,
+} from '@angular/core';
+import { TicketApiService } from '../../../tickets/services/ticket-api.service';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -17,6 +23,7 @@ interface UserMappingRecord {
   id: string;
   employeeCode: string;
   fullName: string;
+  employeePhoto?: string | null;
   corporateEmail: string;
   departmentId: number;
   departmentName: string;
@@ -29,6 +36,7 @@ interface UserMappingForm {
   employeeCode: string;
   fullName: string;
   corporateEmail: string;
+  departmentName: string;
   departmentId: number;
   systemRole: SystemRole | '';
   status: boolean;
@@ -40,7 +48,16 @@ interface UserMappingForm {
   templateUrl: './user-mapping-master.html',
   styleUrl: './user-mapping-master.scss',
 })
-export class UserMappingMaster {
+export class UserMappingMaster
+  implements OnInit {
+  private readonly ticketApiService =
+    inject(TicketApiService);
+
+  isLoading = false;
+
+  loadError = '';
+
+  isUpdating = false;
   searchTerm = '';
 
   selectedDepartmentId = 0;
@@ -63,117 +80,10 @@ export class UserMappingMaster {
     'Employee',
   ];
 
-  readonly departments: DepartmentOption[] = [
-    {
-      id: 1,
-      code: 'IT',
-      name: 'Information Technology',
-    },
-    {
-      id: 2,
-      code: 'LOG',
-      name: 'Logistics',
-    },
-    {
-      id: 3,
-      code: 'ACC',
-      name: 'Accounts',
-    },
-    {
-      id: 4,
-      code: 'TECH',
-      name: 'Technical',
-    },
-    {
-      id: 5,
-      code: 'LAB',
-      name: 'Laboratory',
-    },
-    {
-      id: 6,
-      code: 'CRM',
-      name: 'Customer Relationship Management',
-    },
-  ];
+  departments:
+    DepartmentOption[] = [];
 
   users: UserMappingRecord[] = [
-    {
-      id: 'USR-001',
-      employeeCode: 'EMP-0101',
-      fullName: 'Arun Sarkar',
-      corporateEmail: 'arun.sarkar@nirnayanhealthcare.com',
-      departmentId: 1,
-      departmentName: 'Information Technology',
-      systemRole: 'Admin',
-      status: true,
-      updatedAt: '2026-07-17T12:20:00',
-    },
-    {
-      id: 'USR-002',
-      employeeCode: 'EMP-0102',
-      fullName: 'Rahul Sharma',
-      corporateEmail: 'rahul.sharma@nirnayanhealthcare.com',
-      departmentId: 2,
-      departmentName: 'Logistics',
-      systemRole: 'Department Manager',
-      status: true,
-      updatedAt: '2026-07-16T15:45:00',
-    },
-    {
-      id: 'USR-003',
-      employeeCode: 'EMP-0103',
-      fullName: 'Priya Sen',
-      corporateEmail: 'priya.sen@nirnayanhealthcare.com',
-      departmentId: 3,
-      departmentName: 'Accounts',
-      systemRole: 'Department Manager',
-      status: true,
-      updatedAt: '2026-07-16T11:30:00',
-    },
-    {
-      id: 'USR-004',
-      employeeCode: 'EMP-0104',
-      fullName: 'Amit Das',
-      corporateEmail: 'amit.das@nirnayanhealthcare.com',
-      departmentId: 4,
-      departmentName: 'Technical',
-      systemRole: 'Department Manager',
-      status: true,
-      updatedAt: '2026-07-15T17:10:00',
-    },
-    {
-      id: 'USR-005',
-      employeeCode: 'EMP-0105',
-      fullName: 'Sneha Roy',
-      corporateEmail: 'sneha.roy@nirnayanhealthcare.com',
-      departmentId: 5,
-      departmentName: 'Laboratory',
-      systemRole: 'Department Manager',
-      status: true,
-      updatedAt: '2026-07-15T10:05:00',
-    },
-    {
-      id: 'USR-006',
-      employeeCode: 'EMP-0106',
-      fullName: 'Sourav Dey',
-      corporateEmail: 'sourav.dey@nirnayanhealthcare.com',
-      departmentId: 6,
-      departmentName: 'Customer Relationship Management',
-      systemRole: 'Employee',
-      status: true,
-      updatedAt: '2026-07-14T14:25:00',
-    },
-    {
-      id: 'USR-007',
-      employeeCode: 'EMP-0107',
-      fullName: 'Ankit Kumar',
-      corporateEmail: 'ankit.kumar@nirnayanhealthcare.com',
-      departmentId: 2,
-      departmentName: 'Logistics',
-      systemRole: 'Employee',
-      status: false,
-      updatedAt: '2026-07-10T09:40:00',
-    },
   ];
 
   userForm: UserMappingForm = this.createEmptyForm();
@@ -233,6 +143,146 @@ export class UserMappingMaster {
     );
   }
 
+
+  ngOnInit(): void {
+    this.loadEmployees();
+  }
+
+  loadEmployees(): void {
+    this.isLoading = true;
+    this.loadError = '';
+
+    this.ticketApiService
+      .getEmployeeList()
+      .subscribe({
+        next: response => {
+          this.isLoading = false;
+
+          if (!response.success) {
+            this.users = [];
+
+            this.loadError =
+              response.message ||
+              'Unable to load employees.';
+
+            return;
+          }
+
+          const departmentNames = [
+            ...new Set(
+              response.data.flatMap(
+                employee =>
+                  employee.departments ?? [],
+              ),
+            ),
+          ].sort();
+
+          this.departments =
+            departmentNames.map(
+              (departmentName, index) => ({
+                id: index + 1,
+                code: departmentName,
+                name: departmentName,
+              }),
+            );
+
+          this.users =
+            response.data
+              .map(employee => {
+                const firstDepartment =
+                  employee.departments?.[0] ??
+                  '';
+
+                const department =
+                  this.departments.find(
+                    item =>
+                      item.name ===
+                      firstDepartment,
+                  );
+
+                return {
+                  id: String(employee.id),
+
+                  employeeCode:
+                    employee.employee_code,
+
+                  fullName:
+                    employee.employee_name,
+
+                  corporateEmail:
+                    employee.email_id ?? '',
+
+                  employeePhoto:
+                    employee.employeePhoto,
+
+                  departmentId:
+                    department?.id ?? 0,
+
+                  departmentName:
+                    employee.departments
+                      ?.filter(Boolean)
+                      .join(', ') ||
+                    'Not assigned',
+
+                  systemRole:
+                    this.mapUserType(
+                      employee.user_type,
+                    ),
+
+                  status:
+                    employee.status,
+
+                  // The current API does not
+                  // provide an updated date.
+                  updatedAt: '',
+                };
+              })
+              .sort((first, second) =>
+                first.fullName.localeCompare(
+                  second.fullName,
+                ),
+              );
+        },
+
+        error: (
+          error: HttpErrorResponse,
+        ) => {
+          this.isLoading = false;
+          this.users = [];
+
+          this.loadError =
+            error.error?.message ||
+            'Unable to load employees.';
+        },
+      });
+  }
+
+  private mapUserType(
+    userType: string,
+  ): SystemRole {
+    const normalized =
+      userType
+        ?.trim()
+        .toLowerCase();
+
+    if (
+      normalized === 'admin' ||
+      normalized === 'system admin'
+    ) {
+      return 'Admin';
+    }
+
+    if (
+      normalized === 'manager' ||
+      normalized ===
+      'department manager'
+    ) {
+      return 'Department Manager';
+    }
+
+    return 'Employee';
+  }
+
   openAddModal(): void {
     this.editingUserId = null;
     this.userForm = this.createEmptyForm();
@@ -247,6 +297,8 @@ export class UserMappingMaster {
       employeeCode: user.employeeCode,
       fullName: user.fullName,
       corporateEmail: user.corporateEmail,
+      departmentName:
+        user.departmentName,
       departmentId: user.departmentId,
       systemRole: user.systemRole,
       status: user.status,
@@ -257,9 +309,14 @@ export class UserMappingMaster {
   }
 
   closeModal(): void {
+    if (this.isUpdating) {
+      return;
+    }
+
     this.isModalVisible = false;
     this.editingUserId = null;
-    this.userForm = this.createEmptyForm();
+    this.userForm =
+      this.createEmptyForm();
     this.formError = '';
   }
 
@@ -267,119 +324,93 @@ export class UserMappingMaster {
     this.formError = '';
     this.successMessage = '';
 
-    const employeeCode =
-      this.userForm.employeeCode.trim().toUpperCase();
-
-    const fullName = this.userForm.fullName.trim();
-
-    const corporateEmail =
-      this.userForm.corporateEmail.trim().toLowerCase();
-
-    if (!employeeCode) {
-      this.formError = 'Employee code is required.';
-      return;
-    }
-
-    if (!fullName) {
-      this.formError = 'Employee full name is required.';
-      return;
-    }
-
-    if (!this.isValidEmail(corporateEmail)) {
+    if (!this.editingUserId) {
       this.formError =
-        'Enter a valid corporate email address.';
-      return;
-    }
+        'Please select an employee to update.';
 
-    if (!this.userForm.departmentId) {
-      this.formError = 'Please select a department.';
       return;
     }
 
     if (!this.userForm.systemRole) {
-      this.formError = 'Please select a system role.';
-      return;
-    }
-
-    const duplicateEmployeeCode = this.users.some(
-      user =>
-        user.employeeCode.toLowerCase() ===
-          employeeCode.toLowerCase() &&
-        user.id !== this.editingUserId,
-    );
-
-    if (duplicateEmployeeCode) {
       this.formError =
-        'This employee code is already mapped.';
+        'Please select a system role.';
+
       return;
     }
 
-    const duplicateEmail = this.users.some(
-      user =>
-        user.corporateEmail.toLowerCase() ===
-          corporateEmail &&
-        user.id !== this.editingUserId,
-    );
+    const employeeId =
+      Number(this.editingUserId);
 
-    if (duplicateEmail) {
+    if (!employeeId) {
       this.formError =
-        'This corporate email is already mapped.';
+        'Invalid employee ID.';
+
       return;
     }
 
-    const department = this.departments.find(
-      item => item.id === this.userForm.departmentId,
-    );
+    const userType =
+      this.mapRoleToUserType(
+        this.userForm.systemRole,
+      );
 
-    if (!department) {
-      this.formError =
-        'The selected department could not be found.';
-      return;
-    }
+    this.isUpdating = true;
 
-    const updatedAt = new Date().toISOString();
+    this.ticketApiService
+      .updateEmployee({
+        id: employeeId,
+        user_type: userType,
+        is_active:
+          this.userForm.status,
+      })
+      .subscribe({
+        next: response => {
+          this.isUpdating = false;
 
-    if (this.editingUserId) {
-      this.users = this.users.map(user => {
-        if (user.id !== this.editingUserId) {
-          return user;
-        }
+          if (!response.success) {
+            this.formError =
+              response.message ||
+              'Unable to update employee.';
 
-        return {
-          ...user,
-          employeeCode,
-          fullName,
-          corporateEmail,
-          departmentId: department.id,
-          departmentName: department.name,
-          systemRole: this.userForm.systemRole as SystemRole,
-          status: this.userForm.status,
-          updatedAt,
-        };
+            return;
+          }
+
+          const employeeName =
+            this.userForm.fullName;
+
+          this.closeModal();
+
+          this.successMessage =
+            response.message ||
+            `${employeeName} has been updated successfully.`;
+
+          this.loadEmployees();
+        },
+
+        error: (
+          error: HttpErrorResponse,
+        ) => {
+          this.isUpdating = false;
+
+          this.formError =
+            error.error?.message ||
+            'Unable to update employee. Please try again.';
+        },
       });
+  }
 
-      this.successMessage =
-        `${fullName}'s user mapping has been updated.`;
-    } else {
-      const newUser: UserMappingRecord = {
-        id: this.generateUserId(),
-        employeeCode,
-        fullName,
-        corporateEmail,
-        departmentId: department.id,
-        departmentName: department.name,
-        systemRole: this.userForm.systemRole as SystemRole,
-        status: this.userForm.status,
-        updatedAt,
-      };
+  private mapRoleToUserType(
+    role: SystemRole,
+  ): string {
+    switch (role) {
+      case 'Admin':
+        return 'Admin';
 
-      this.users = [newUser, ...this.users];
+      case 'Department Manager':
+        return 'Manager';
 
-      this.successMessage =
-        `${fullName} has been mapped successfully.`;
+      default:
+        return 'Employee';
     }
-
-    this.closeModal();
   }
 
   toggleUserStatus(user: UserMappingRecord): void {
@@ -433,15 +464,36 @@ export class UserMappingMaster {
     }
   }
 
-  formatDate(date: string): string {
-    return new Intl.DateTimeFormat('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    }).format(new Date(date));
+  formatDate(
+    dateValue:
+      string | null | undefined,
+  ): string {
+    if (!dateValue) {
+      return 'Not available';
+    }
+
+    const date =
+      new Date(dateValue);
+
+    if (
+      Number.isNaN(
+        date.getTime(),
+      )
+    ) {
+      return 'Not available';
+    }
+
+    return new Intl.DateTimeFormat(
+      'en-IN',
+      {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      },
+    ).format(date);
   }
 
   private createEmptyForm(): UserMappingForm {
@@ -449,6 +501,7 @@ export class UserMappingMaster {
       employeeCode: '',
       fullName: '',
       corporateEmail: '',
+      departmentName: '',
       departmentId: 0,
       systemRole: '',
       status: true,

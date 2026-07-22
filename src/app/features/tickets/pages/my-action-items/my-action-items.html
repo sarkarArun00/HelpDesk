@@ -238,7 +238,10 @@
                 <td>
                   <div class="ticket-primary">
                     <a
-                        [routerLink]="['/tickets', ticket.ticketId]"
+                        [routerLink]="[
+                          '/tickets',
+                          ticket.id
+                        ]"
                         class="ticket-id"
                       >
                         {{ ticket.ticketId }}
@@ -311,7 +314,10 @@
                 <td>
                   <div class="action-buttons">
                     <a
-                        [routerLink]="['/tickets', ticket.ticketId]"
+                        [routerLink]="[
+                        '/tickets',
+                        ticket.id
+                      ]"
                         class="view-button"
                       >
                         <i class="bi bi-eye"></i>

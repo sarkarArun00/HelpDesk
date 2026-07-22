@@ -78,6 +78,17 @@ interface TicketHistory {
     | 'comment';
 }
 
+interface TicketAssignmentDetail {
+  id: number;
+  assignedTo: string;
+  assignedToCode: string;
+  assignedBy: string;
+  department: string;
+  assignmentType: string;
+  status: string;
+  assignedAt: string;
+}
+
 interface TicketDetail {
   id?: number;
   requesterId?: number;
@@ -90,6 +101,8 @@ interface TicketDetail {
   category: string;
   description: string;
   priority: TicketPriority;
+  assignments:
+  TicketAssignmentDetail[];
   status: TicketStatus;
   createdBy: string;
   originatingDepartment: string;
@@ -189,6 +202,92 @@ export class TicketDetails implements OnInit {
     );
   }
 
+  private getActivityTitle(
+    activityType: string,
+  ): string {
+    switch (
+    activityType
+      ?.trim()
+      .toUpperCase()
+    ) {
+      case 'CREATE':
+        return 'Ticket created';
+
+      case 'ASSIGN':
+      case 'ASSIGNED':
+        return 'Ticket assigned';
+
+      case 'START':
+      case 'IN_PROGRESS':
+        return 'Processing started';
+
+      case 'RESOLVE':
+      case 'RESOLVED':
+        return 'Ticket resolved';
+
+      case 'CLOSE':
+      case 'CLOSED':
+        return 'Ticket closed';
+
+      case 'REOPEN':
+      case 'REOPENED':
+        return 'Ticket reopened';
+
+      case 'COMMENT':
+        return 'Comment added';
+
+      case 'UPDATE':
+        return 'Ticket updated';
+
+      default:
+        return activityType
+          ? activityType
+            .replaceAll('_', ' ')
+            .toLowerCase()
+            .replace(
+              /^./,
+              character =>
+                character.toUpperCase(),
+            )
+          : 'Ticket activity';
+    }
+  }
+
+  private mapActivityType(
+    activityType: string,
+  ): TicketHistory['type'] {
+    switch (
+    activityType
+      ?.trim()
+      .toUpperCase()
+    ) {
+      case 'CREATE':
+        return 'created';
+
+      case 'ASSIGN':
+      case 'ASSIGNED':
+        return 'assigned';
+
+      case 'RESOLVE':
+      case 'RESOLVED':
+        return 'resolved';
+
+      case 'CLOSE':
+      case 'CLOSED':
+        return 'closed';
+
+      case 'REOPEN':
+      case 'REOPENED':
+        return 'reopened';
+
+      case 'COMMENT':
+        return 'comment';
+
+      default:
+        return 'progress';
+    }
+  }
+
   loadTicketDetails(
     ticketId: number,
   ): void {
@@ -203,6 +302,16 @@ export class TicketDetails implements OnInit {
       departments:
         this.ticketCategoryApiService
           .getAllDepartments(),
+
+      employees:
+        this.ticketApiService
+          .getEmployeeList(),
+
+      activity:
+        this.ticketApiService
+          .getTicketActivityLogs(
+            ticketId,
+          ),
     }).subscribe({
       next: response => {
         this.isLoading = false;
@@ -219,6 +328,130 @@ export class TicketDetails implements OnInit {
 
         const apiTicket =
           response.ticket.data;
+        const employeeById =
+          new Map<
+            number,
+            {
+              name: string;
+              code: string;
+            }
+          >();
+
+        response.employees.data
+          .forEach(employee => {
+            employeeById.set(
+              employee.id,
+              {
+                name:
+                  employee.employee_name,
+                code:
+                  employee.employee_code,
+              },
+            );
+          });
+
+        const departmentById =
+          new Map<number, string>();
+
+        response.departments.data
+          .forEach(department => {
+            departmentById.set(
+              department.id,
+              department.departmentName,
+            );
+          });
+
+        const assignments =
+          (apiTicket.assignments ?? [])
+            .map(assignment => {
+              const assignedTo =
+                employeeById.get(
+                  assignment.assigned_to,
+                );
+
+              const assignedBy =
+                employeeById.get(
+                  assignment.assigned_by,
+                );
+
+              return {
+                id: assignment.id,
+
+                assignedTo:
+                  assignedTo?.name ??
+                  `Employee ${assignment.assigned_to}`,
+
+                assignedToCode:
+                  assignedTo?.code ?? '',
+
+                assignedBy:
+                  assignedBy?.name ??
+                  `Employee ${assignment.assigned_by}`,
+
+                department:
+                  departmentById.get(
+                    assignment.department_id,
+                  ) ??
+                  `Department ${assignment.department_id}`,
+
+                assignmentType:
+                  assignment.assignment_type,
+
+                status:
+                  assignment.status,
+
+                assignedAt:
+                  assignment.assigned_at,
+              };
+            })
+            .sort(
+              (first, second) =>
+                new Date(
+                  second.assignedAt,
+                ).getTime() -
+                new Date(
+                  first.assignedAt,
+                ).getTime(),
+            );
+
+        const currentAssignment =
+          assignments[0] ?? null;
+        
+        const activityHistory:
+          TicketHistory[] =
+          response.activity.data
+            .map(activity => ({
+              id: activity.id,
+
+              title:
+                this.getActivityTitle(
+                  activity.activityType,
+                ),
+
+              description:
+                activity.message,
+
+              performedBy:
+                activity.userName ||
+                `User ${activity.userId}`,
+
+              createdAt:
+                activity.createdAt,
+
+              type:
+                this.mapActivityType(
+                  activity.activityType,
+                ),
+            }))
+            .sort(
+              (first, second) =>
+                new Date(
+                  second.createdAt,
+                ).getTime() -
+                new Date(
+                  first.createdAt,
+                ).getTime(),
+            );
 
         const targetDepartment =
           response.departments.data.find(
@@ -241,13 +474,15 @@ export class TicketDetails implements OnInit {
 
           description:
             apiTicket.description,
+          
+          history: activityHistory,
 
           priority:
             this.mapPriority(
               apiTicket.priority
                 ?.priority_name,
             ),
-
+          assignments: [],
           status:
             this.mapStatus(
               apiTicket.status,
@@ -274,9 +509,13 @@ export class TicketDetails implements OnInit {
           // Assignee is not included
           // in the current response.
           assignee:
+            currentAssignment
+              ?.assignedTo ??
             'Not assigned',
 
-          assigneeCode: '',
+          assigneeCode:
+            currentAssignment
+              ?.assignedToCode ?? '',
 
           createdAt:
             apiTicket.created_at,
@@ -297,21 +536,6 @@ export class TicketDetails implements OnInit {
 
           comments: [],
 
-          history: [
-            {
-              id: apiTicket.id,
-              title: 'Ticket created',
-              description:
-                'The ticket was created successfully.',
-              performedBy:
-                apiTicket.requester
-                  ?.employee_name ??
-                'Not available',
-              createdAt:
-                apiTicket.created_at,
-              type: 'created',
-            },
-          ],
 
           id: apiTicket.id,
 
@@ -456,6 +680,7 @@ export class TicketDetails implements OnInit {
       priority: 'Low',
       status: 'Open',
       createdBy: '',
+      assignments: [],
       originatingDepartment: '',
       targetDepartment: '',
       centre: '',
@@ -785,7 +1010,7 @@ export class TicketDetails implements OnInit {
         },
       });
   }
-  
+
   onEditCategoryChange(
     categoryId: number,
   ): void {
@@ -971,102 +1196,5 @@ export class TicketDetails implements OnInit {
     );
   }
 
-  private createMockTicket(ticketId: string): TicketDetail {
-    const statusByTicketId: Record<string, TicketStatus> = {
-      'ISD-2026-0128': 'In Progress',
-      'ISD-2026-0127': 'Assigned',
-      'ISD-2026-0126': 'Resolved',
-      'ISD-2026-0125': 'Closed',
-      'ISD-2026-0124': 'Reopened',
-      'ISD-2026-0142': 'Assigned',
-      'ISD-2026-0139': 'In Progress',
-      'ISD-2026-0136': 'Reopened',
-    };
 
-    const currentStatus =
-      statusByTicketId[ticketId] ?? 'Assigned';
-
-    return {
-      ticketId,
-      subject: 'Urgent sample pickup delayed from collection centre',
-      category: 'Sample Collection Delay',
-      description:
-        'The scheduled sample pickup has not been completed. The collection centre confirmed that the samples are packed and ready, but no field executive has arrived. Please coordinate with the logistics team and arrange immediate pickup.',
-      priority: 'Critical',
-      status: currentStatus,
-      createdBy: 'Arun Sarkar',
-      originatingDepartment: 'CRM',
-      targetDepartment: 'Logistics',
-      centre: 'South Satellite Centre',
-      assignee: 'Rahul Sharma',
-      assigneeCode: 'EMP-0102',
-      createdAt: '2026-07-18T09:15:00',
-      updatedAt: '2026-07-18T10:25:00',
-      attachments: [
-        {
-          id: 1,
-          name: 'sample-pickup-request.pdf',
-          type: 'PDF',
-          size: '428 KB',
-          uploadedBy: 'Arun Sarkar',
-          uploadedAt: '2026-07-18T09:15:00',
-        },
-        {
-          id: 2,
-          name: 'packed-sample-box.jpg',
-          type: 'JPG',
-          size: '1.2 MB',
-          uploadedBy: 'Arun Sarkar',
-          uploadedAt: '2026-07-18T09:16:00',
-        },
-      ],
-      comments: [
-        {
-          id: 1,
-          author: 'Rahul Sharma',
-          department: 'Logistics',
-          message:
-            'The nearest field executive has been contacted and is travelling to the collection centre.',
-          createdAt: '2026-07-18T10:05:00',
-        },
-        {
-          id: 2,
-          author: 'Arun Sarkar',
-          department: 'CRM',
-          message:
-            'Please prioritise this pickup because the samples are time-sensitive.',
-          createdAt: '2026-07-18T09:35:00',
-        },
-      ],
-      history: [
-        {
-          id: 1,
-          title: 'Processing started',
-          description:
-            'The assigned employee started processing the ticket.',
-          performedBy: 'Rahul Sharma',
-          createdAt: '2026-07-18T09:40:00',
-          type: 'progress',
-        },
-        {
-          id: 2,
-          title: 'Ticket assigned',
-          description:
-            'Ticket assigned to Rahul Sharma from the Logistics department.',
-          performedBy: 'Logistics Supervisor',
-          createdAt: '2026-07-18T09:25:00',
-          type: 'assigned',
-        },
-        {
-          id: 3,
-          title: 'Ticket created',
-          description:
-            'Ticket created and routed to the Logistics department.',
-          performedBy: 'Arun Sarkar',
-          createdAt: '2026-07-18T09:15:00',
-          type: 'created',
-        },
-      ],
-    };
-  }
 }
