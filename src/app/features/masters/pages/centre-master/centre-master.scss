@@ -116,6 +116,20 @@
     color: #00a651 !important;
   }
 }
+.filter-header{ padding-bottom:10px; }
+.filter-header h3{ 
+  margin: 0;
+  color: #101828;
+  font-size: 20px;
+  font-weight: 700;
+}
+.filter-header p{ 
+  margin: 7px 0 0;
+  color: #667085;
+  font-size: 14px;
+}
+.filter-header .clear-filter-button{ margin-top:5px; }
+
 
 .summary-grid {
   display: grid;
