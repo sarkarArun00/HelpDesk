@@ -74,7 +74,7 @@ export const routes: Routes = [
         //   canActivate: [roleGuard],
         //   data: {
         //     roles: [
-        //       'System Admin',
+        //       'Admin',
         //       'Department Manager',
         //     ],
         //   },
@@ -96,7 +96,7 @@ export const routes: Routes = [
           title: 'Configuration Masters | ISD Ticketing System',
           canActivate: [roleGuard],
           data: {
-            roles: ['System Admin'],
+            roles: ['Admin'],
           },
           loadComponent: () =>
             import(
@@ -108,7 +108,7 @@ export const routes: Routes = [
             title: 'Department Master | ISD Ticketing System',
             canActivate: [roleGuard],
             data: {
-              roles: ['System Admin'],
+              roles: ['Admin'],
             },
             loadComponent: () =>
               import(
@@ -120,7 +120,7 @@ export const routes: Routes = [
             title: 'User Mapping Master | ISD Ticketing System',
             canActivate: [roleGuard],
             data: {
-              roles: ['System Admin'],
+              roles: ['Admin'],
             },
             loadComponent: () =>
               import(
@@ -132,7 +132,7 @@ export const routes: Routes = [
           title: 'Priority Master | ISD Ticketing System',
           canActivate: [roleGuard],
           data: {
-            roles: ['System Admin'],
+            roles: ['Admin'],
           },
           loadComponent: () =>
             import(
@@ -144,7 +144,7 @@ export const routes: Routes = [
           title: 'Ticket Category Master | ISD Ticketing System',
           canActivate: [roleGuard],
           data: {
-            roles: ['System Admin'],
+            roles: ['Admin'],
           },
           loadComponent: () =>
             import(
@@ -156,7 +156,7 @@ export const routes: Routes = [
           title: 'Centre Master | ISD Ticketing System',
           canActivate: [roleGuard],
           data: {
-            roles: ['System Admin'],
+            roles: ['Admin'],
           },
           loadComponent: () =>
             import(
@@ -169,7 +169,7 @@ export const routes: Routes = [
           canActivate: [roleGuard],
           data: {
             roles: [
-              'System Admin',
+              'Admin',
               'Department Manager',
             ],
           },

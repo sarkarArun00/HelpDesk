@@ -1,5 +1,5 @@
 export type AppRole =
-  | 'System Admin'
+  | 'Admin'
   | 'Department Manager'
   | 'Employee';
 

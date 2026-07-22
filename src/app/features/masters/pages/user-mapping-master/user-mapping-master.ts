@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 type SystemRole =
-  | 'System Admin'
+  | 'Admin'
   | 'Department Manager'
   | 'Employee';
 
@@ -58,7 +58,7 @@ export class UserMappingMaster {
   formError = '';
 
   readonly roles: SystemRole[] = [
-    'System Admin',
+    'Admin',
     'Department Manager',
     'Employee',
   ];
@@ -104,7 +104,7 @@ export class UserMappingMaster {
       corporateEmail: 'arun.sarkar@nirnayanhealthcare.com',
       departmentId: 1,
       departmentName: 'Information Technology',
-      systemRole: 'System Admin',
+      systemRole: 'Admin',
       status: true,
       updatedAt: '2026-07-17T12:20:00',
     },
@@ -422,7 +422,7 @@ export class UserMappingMaster {
 
   getRoleClass(role: SystemRole): string {
     switch (role) {
-      case 'System Admin':
+      case 'Admin':
         return 'role-admin';
 
       case 'Department Manager':

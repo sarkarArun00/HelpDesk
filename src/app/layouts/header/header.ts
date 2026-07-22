@@ -60,10 +60,7 @@ export class Header
       .getProfile()
       .subscribe({
         next: response => {
-          if (
-            response.success &&
-            response.data
-          ) {
+          if (response.success && response.data) {
             this.authService
               .updateUserProfile(
                 response.data,
@@ -78,6 +75,9 @@ export class Header
           );
         },
       });
+    
+    
+    console.log('authService.currentUser()', this.authService.currentUser())
   }
 
   getProfilePhotoUrl(

@@ -1,10 +1,20 @@
-import { Component } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  Component,
+  inject,
+  OnInit,
+} from '@angular/core';
+import { forkJoin } from 'rxjs';
+import { AuthService } from '../../../../core/auth/services/auth.service';
+import { TicketCategoryApiService } from '../../../masters/services/ticket-category-api.service';
+import { TicketApiService } from '../../services/ticket-api.service';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 type TicketPriority = 'Critical' | 'High' | 'Medium' | 'Low';
 
 type TicketStatus =
+  | 'Open'
   | 'Assigned'
   | 'In Progress'
   | 'Resolved'
@@ -30,7 +40,20 @@ interface RaisedTicket {
   templateUrl: './my-raised-tickets.html',
   styleUrl: './my-raised-tickets.scss',
 })
-export class MyRaisedTickets {
+export class MyRaisedTickets
+  implements OnInit {
+  private readonly authService =
+    inject(AuthService);
+
+  private readonly ticketApiService =
+    inject(TicketApiService);
+
+  private readonly ticketCategoryApiService =
+    inject(TicketCategoryApiService);
+
+  isLoading = false;
+
+  loadError = '';
   searchTerm = '';
 
   selectedStatus = '';
@@ -40,6 +63,7 @@ export class MyRaisedTickets {
   selectedCentre = '';
 
   readonly statuses: TicketStatus[] = [
+    'Open',
     'Assigned',
     'In Progress',
     'Resolved',
@@ -55,99 +79,9 @@ export class MyRaisedTickets {
   ];
 
 
-  readonly tickets: RaisedTicket[] = [
-    {
-      id: 1,
-      ticketId: 'ISD-2026-0128',
-      subject: 'Urgent sample pickup delayed',
-      category: 'Sample Collection Delay',
-      targetDepartment: 'Logistics',
-      centre: 'Main Laboratory - Block A',
-      priority: 'Critical',
-      status: 'In Progress',
-      assignee: 'Rahul Sharma',
-      createdAt: '2026-07-18T09:30:00',
-    },
-    {
-      id: 2,
-      ticketId: 'ISD-2026-0127',
-      subject: 'Incorrect amount reflected on invoice',
-      category: 'Invoice Discrepancy',
-      targetDepartment: 'Accounts',
-      centre: 'Corporate Office',
-      priority: 'High',
-      status: 'Assigned',
-      assignee: 'Priya Sen',
-      createdAt: '2026-07-17T16:20:00',
-    },
-    {
-      id: 3,
-      ticketId: 'ISD-2026-0126',
-      subject: 'Patient report requires technical correction',
-      category: 'Report Correction',
-      targetDepartment: 'Technical',
-      centre: 'Main Laboratory - Block A',
-      priority: 'Medium',
-      status: 'Resolved',
-      assignee: 'Amit Das',
-      createdAt: '2026-07-17T11:45:00',
-    },
-    {
-      id: 4,
-      ticketId: 'ISD-2026-0125',
-      subject: 'Additional reagent stock required',
-      category: 'Reagent Requirement',
-      targetDepartment: 'Laboratory',
-      centre: 'South Satellite Centre',
-      priority: 'High',
-      status: 'Closed',
-      assignee: 'Sneha Roy',
-      createdAt: '2026-07-16T14:10:00',
-    },
-    {
-      id: 5,
-      ticketId: 'ISD-2026-0124',
-      subject: 'CRM customer callback workflow issue',
-      category: 'CRM Support Request',
-      targetDepartment: 'CRM',
-      centre: 'Corporate Office',
-      priority: 'Medium',
-      status: 'Reopened',
-      assignee: 'Sourav Dey',
-      createdAt: '2026-07-16T10:15:00',
-    },
-    {
-      id: 6,
-      ticketId: 'ISD-2026-0123',
-      subject: 'Collection executive has not received task',
-      category: 'Sample Collection Delay',
-      targetDepartment: 'Logistics',
-      centre: 'New Town Collection Centre',
-      priority: 'Critical',
-      status: 'Assigned',
-      assignee: 'Ankit Kumar',
-      createdAt: '2026-07-15T18:05:00',
-    },
-    {
-      id: 7,
-      ticketId: 'ISD-2026-0122',
-      subject: 'Final invoice contains duplicate line item',
-      category: 'Invoice Discrepancy',
-      targetDepartment: 'Accounts',
-      centre: 'Corporate Office',
-      priority: 'Low',
-      status: 'Closed',
-      assignee: 'Priya Sen',
-      createdAt: '2026-07-15T13:40:00',
-    },
-  ];
+  tickets: RaisedTicket[] = [];
 
-  readonly centres = [
-    'Main Laboratory - Block A',
-    'South Satellite Centre',
-    'Corporate Office',
-    'New Town Collection Centre',
-  ];
+  centres: string[] = [];
 
   get filteredTickets(): RaisedTicket[] {
     const normalizedSearch = this.searchTerm
@@ -191,6 +125,202 @@ export class MyRaisedTickets {
     );
   }
 
+  ngOnInit(): void {
+    this.loadTickets();
+  }
+
+  loadTickets(): void {
+    this.isLoading = true;
+    this.loadError = '';
+
+    const currentUser =
+      this.authService.currentUser();
+
+    if (!currentUser?.id) {
+      this.isLoading = false;
+
+      this.loadError =
+        'Your login profile is unavailable.';
+
+      return;
+    }
+
+    forkJoin({
+      tickets:
+        this.ticketApiService
+          .getAllTickets(),
+
+      departments:
+        this.ticketCategoryApiService
+          .getAllDepartments(),
+    }).subscribe({
+      next: response => {
+        this.isLoading = false;
+
+        if (
+          !response.tickets.success ||
+          !response.departments.success
+        ) {
+          this.loadError =
+            'Unable to load your tickets.';
+
+          return;
+        }
+
+        const departmentNameById =
+          new Map<number, string>();
+
+        response.departments.data
+          .forEach(department => {
+            departmentNameById.set(
+              department.id,
+              department.departmentName,
+            );
+          });
+
+        this.tickets =
+          response.tickets.data
+            .filter(ticket =>
+              !ticket.is_deleted &&
+              (
+                ticket.requester_id ===
+                currentUser.id ||
+                ticket.created_by ===
+                currentUser.id
+              ),
+            )
+            .map(ticket => ({
+              id: ticket.id,
+
+              ticketId:
+                ticket.ticket_number,
+
+              subject:
+                ticket.subject,
+
+              category:
+                ticket.category
+                  ?.category_name ??
+                'Not available',
+
+              targetDepartment:
+                departmentNameById.get(
+                  ticket.department_id,
+                ) ??
+                `Department ${ticket.department_id}`,
+
+              centre:
+                ticket.centre
+                  ?.centreName ??
+                'Not available',
+
+              priority:
+                this.mapPriority(
+                  ticket.priority
+                    ?.priority_name,
+                ),
+
+              status:
+                this.mapStatus(
+                  ticket.status,
+                ),
+
+              // The current API response does
+              // not contain an assignee object.
+              assignee:
+                'Not assigned',
+
+              createdAt:
+                ticket.created_at,
+            }))
+            .sort(
+              (first, second) =>
+                new Date(
+                  second.createdAt,
+                ).getTime() -
+                new Date(
+                  first.createdAt,
+                ).getTime(),
+            );
+
+        this.centres = [
+          ...new Set(
+            this.tickets
+              .map(ticket => ticket.centre)
+              .filter(
+                centre =>
+                  centre !==
+                  'Not available',
+              ),
+          ),
+        ].sort();
+      },
+
+      error: (
+        error: HttpErrorResponse,
+      ) => {
+        this.isLoading = false;
+
+        this.loadError =
+          error.error?.message ||
+          'Unable to load your tickets.';
+      },
+    });
+  }
+
+  private mapPriority(
+    priorityName:
+      string | null | undefined,
+  ): TicketPriority {
+    const allowedPriorities:
+      TicketPriority[] = [
+        'Critical',
+        'High',
+        'Medium',
+        'Low',
+      ];
+
+    return allowedPriorities.includes(
+      priorityName as TicketPriority,
+    )
+      ? priorityName as TicketPriority
+      : 'Medium';
+  }
+
+  private mapStatus(
+    status:
+      string | null | undefined,
+  ): TicketStatus {
+    const normalizedStatus =
+      status
+        ?.trim()
+        .toUpperCase();
+
+    switch (normalizedStatus) {
+      case 'OPEN':
+        return 'Open';
+
+      case 'ASSIGNED':
+        return 'Assigned';
+
+      case 'IN_PROGRESS':
+      case 'IN PROGRESS':
+        return 'In Progress';
+
+      case 'RESOLVED':
+        return 'Resolved';
+
+      case 'CLOSED':
+        return 'Closed';
+
+      case 'REOPENED':
+        return 'Reopened';
+
+      default:
+        return 'Open';
+    }
+  }
+  
   getStatusCount(status: TicketStatus | 'All'): number {
     if (status === 'All') {
       return this.tickets.length;

@@ -10,10 +10,10 @@
         CONFIGURATION MASTER
       </span>
 
-      <h1>User & Department Mapping</h1>
+      <h1>Employee Master</h1>
 
       <p>
-        Assign employees to departments and configure their ticketing
+        Manage employee and configure their ticketing
         system access roles.
       </p>
     </div>
@@ -24,7 +24,7 @@
       (click)="openAddModal()"
     >
       <i class="bi bi-person-plus"></i>
-      Add User Mapping
+      Add Employee
     </button>
   </header>
 
@@ -361,8 +361,8 @@
         <h2 id="userModalTitle">
           {{
             editingUserId
-              ? 'Edit User Mapping'
-              : 'Add User Mapping'
+              ? 'Edit Employee'
+              : 'Add Employee'
           }}
         </h2>
       </div>
