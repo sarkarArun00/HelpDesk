@@ -512,8 +512,8 @@
               track department.id
             ) {
               <option [ngValue]="department.id">
-                {{ department.code }}
-                —
+                <!-- {{ department.code }}
+                — -->
                 {{ department.name }}
               </option>
             }
@@ -569,7 +569,7 @@
                 }}/500 characters
               </div>
             </div>
-        <!-- <div class="col-12">
+        <div class="col-12">
           <section class="routing-preview">
             <span class="routing-preview-icon">
               <i class="bi bi-signpost-split"></i>
@@ -590,16 +590,16 @@
                 }
               </strong>
 
-              <small>
+              <!-- <small>
                 Default priority:
                 {{
                   categoryForm.defaultPriority ||
                     'Not selected'
                 }}
-              </small>
+              </small> -->
             </div>
           </section>
-        </div> -->
+        </div>
 
         <div class="col-12">
           <div class="status-setting">
