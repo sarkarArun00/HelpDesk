@@ -81,9 +81,9 @@
   gap: 13px;
   margin-bottom: 20px;
   padding: 15px 17px;
-  color: #1849a9;
+  color: #00a651;
   background: #eff8ff;
-  border: 1px solid #b2ddff;
+  border: 1px solid #00a651 !important;
   border-radius: 12px;
 
   > div {
@@ -93,11 +93,12 @@
 
   strong {
     font-size: 13px;
+    color: #00a651 !important;
   }
 
   p {
     margin: 3px 0 0;
-    color: #175cd3;
+    color: #00a651 !important;
     font-size: 11px;
   }
 }
@@ -111,6 +112,9 @@
   background: #ffffff;
   border-radius: 10px;
   font-size: 19px;
+  i{
+    color: #00a651 !important;
+  }
 }
 
 .summary-grid {

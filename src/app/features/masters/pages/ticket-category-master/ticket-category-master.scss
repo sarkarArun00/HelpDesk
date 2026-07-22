@@ -63,8 +63,8 @@
   gap: 8px;
   padding: 0 18px;
   color: #ffffff;
-  background: #1976d2;
-  border-color: #1976d2;
+  background: #00a651;
+  border-color: #00a651;
   border-radius: 9px;
   font-size: 13px;
   font-weight: 600;
@@ -81,9 +81,9 @@
   gap: 13px;
   margin-bottom: 20px;
   padding: 15px 17px;
-  color: #1849a9;
+  color: #00a651;
   background: #eff8ff;
-  border: 1px solid #b2ddff;
+  border: 1px solid #00a651;
   border-radius: 12px;
 
   > div {
@@ -97,7 +97,7 @@
 
   p {
     margin: 3px 0 0;
-    color: #175cd3;
+    color: #00a651;
     font-size: 11px;
   }
 }
@@ -529,7 +529,7 @@
   border-bottom: 1px solid #eaecf0;
 
   span {
-    color: #1976d2;
+    color: #00a651;
     font-size: 10px;
     font-weight: 700;
   }
@@ -693,6 +693,14 @@
     gap: 6px;
     font-size: 12px;
     font-weight: 600;
+  }
+  .btn.btn-primary{ 
+    background: #00a651;
+    border-color:#00a651;
+      &:hover {
+      background: #087b40 !important;
+      border-color: #087b40 !important;
+    }
   }
 }
 

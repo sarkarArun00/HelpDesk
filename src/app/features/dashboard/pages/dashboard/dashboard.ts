@@ -79,11 +79,11 @@ export class Dashboard {
       value: 12,
       description: 'Tickets currently assigned to you',
     },
-    {
-      label: 'Unassigned Team Pool',
-      value: 8,
-      description: 'Tickets waiting for team assignment',
-    },
+    // {
+    //   label: 'Unassigned Team Pool',
+    //   value: 8,
+    //   description: 'Tickets waiting for team assignment',
+    // },
     {
       label: 'Awaiting Confirmation',
       value: 5,

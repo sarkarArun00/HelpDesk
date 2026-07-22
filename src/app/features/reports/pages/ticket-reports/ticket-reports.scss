@@ -68,12 +68,12 @@
 
 .export-button {
   color: #ffffff;
-  background: #1976d2;
-  border: 1px solid #1976d2;
+  background: #00a651;
+  border: 1px solid #00a651;
 
   &:hover {
     color: #ffffff;
-    background: #1565c0;
+    background: #087b40;
   }
 
   &:disabled {
@@ -295,7 +295,7 @@
     }
 
     > i {
-      color: #175cd3;
+      color: #00a651;
       font-size: 18px;
     }
   }
@@ -417,7 +417,7 @@
   flex-direction: column;
 
   a {
-    color: #175cd3;
+    color: #00a651;
     font-size: 11px;
     font-weight: 700;
     text-decoration: none;
