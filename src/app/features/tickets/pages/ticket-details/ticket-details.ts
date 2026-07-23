@@ -1643,7 +1643,7 @@ export class TicketDetails implements OnInit {
 
   get canEditTicket(): boolean {
     return (
-      this.ticket.status === 'Assigned'
+      this.ticket.status === 'Assigned' && this.authService.currentUser()?.id === this.ticket.requesterId
     );
   }
 
