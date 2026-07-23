@@ -324,6 +324,24 @@
                         View
                       </a>
 
+                      <!-- @if (
+                      ticket.status === 'Assigned' ||
+                      ticket.status === 'Reopened'
+                    ) {
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        [disabled]="updatingTicketId !== null"
+                        (click)="startProcessing(ticket.id)"
+                      >
+                        @if (updatingTicketId === ticket.id) {
+                          Updating...
+                        } @else {
+                          Start Processing
+                        }
+                      </button>
+                    } -->
+
                     @if (
                       ticket.status === 'Assigned' ||
                       ticket.status === 'Reopened'
@@ -331,23 +349,47 @@
                       <button
                         type="button"
                         class="process-button"
+                        [disabled]="updatingTicketId !== null"
                         (click)="startProcessing(ticket.id)"
                       >
                         <i class="bi bi-play-fill"></i>
-                        Start
+                            @if (updatingTicketId === ticket.id) {
+                          Updating...
+                        } @else {
+                          Start Processing
+                        }
                       </button>
                     }
 
+                    <!-- @if (ticket.status === 'In Progress') {
+                  <button
+                    type="button"
+                    class="btn btn-success"
+                    [disabled]="updatingTicketId !== null"
+                    (click)="markResolved(ticket.id)"
+                  >
+                    @if (updatingTicketId === ticket.id) {
+                      Updating...
+                    } @else {
+                      Mark as Resolved
+                    }
+                  </button>
+                  } -->
                     @if (
                       ticket.status === 'In Progress'
                     ) {
                       <button
                         type="button"
                         class="resolve-button"
+                         [disabled]="updatingTicketId !== null"
                         (click)="markResolved(ticket.id)"
                       >
                         <i class="bi bi-check-lg"></i>
-                        Resolve
+                            @if (updatingTicketId === ticket.id) {
+                            Updating...
+                          } @else {
+                            Mark as Resolved
+                          }
                       </button>
                     }
                   </div>
