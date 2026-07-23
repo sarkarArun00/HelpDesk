@@ -17,6 +17,11 @@ import {
 import { NotificationService } from '../../core/notifications/services/notification.service';
 import { environment } from '../../../environments/environment';
 
+import {
+  FirebaseMessagingService,
+} from '../../core/notifications/services/firebase-messaging';
+
+
 @Component({
   selector: 'app-header',
   imports: [
@@ -47,9 +52,14 @@ export class Header
   private readonly authApiService =
     inject(AuthApiService);
 
+  private readonly firebaseMessagingService =
+    inject(FirebaseMessagingService);
+  
   isProfileMenuVisible = false;
   isNotificationMenuVisible = false;
 
+  isRequestingPushPermission = false;
+  fcmToken: string | null = null;
 
   ngOnInit(): void {
     this.loadProfile();
@@ -78,6 +88,73 @@ export class Header
     
     
     console.log('authService.currentUser()', this.authService.currentUser())
+  }
+
+  async enablePushNotifications():
+    Promise<void> {
+    
+    console.log(
+      'Starting Firebase push setup...',
+    );
+
+    console.log(
+      'Notification permission:',
+      'Notification' in window
+        ? Notification.permission
+        : 'unsupported',
+    );
+
+    console.log(
+      'Service worker supported:',
+      'serviceWorker' in navigator,
+    );
+
+    
+    if (
+      this.isRequestingPushPermission ||
+      !('serviceWorker' in navigator)
+    ) {
+      return;
+    }
+
+    this.isRequestingPushPermission = true;
+
+    try {
+      const registration =
+        await navigator.serviceWorker
+          .register(
+            '/firebase-messaging-sw.js',
+          );
+
+      await navigator.serviceWorker.ready;
+
+      const token =
+        await this.firebaseMessagingService
+          .requestPermissionAndGetToken(
+            registration,
+          );
+
+      if (!token) {
+        return;
+      }
+
+      this.fcmToken = token;
+
+      // Temporary test only.
+      // We will send this token to the API in the next step.
+      console.log(
+        'Firebase FCM token:',
+        token,
+      );
+    } catch (error) {
+      console.error(
+        'Unable to enable push notifications:',
+        error,
+      );
+    } finally {
+      this.isRequestingPushPermission =
+        false;
+    }
   }
 
   getProfilePhotoUrl(
@@ -120,12 +197,24 @@ export class Header
     this.isNotificationMenuVisible = false;
   }
 
-  toggleNotificationMenu(): void {
+  async toggleNotificationMenu():
+    Promise<void> {
+    if (
+      'Notification' in window &&
+      Notification.permission !==
+      'denied' &&
+      !this.fcmToken
+    ) {
+      await this.enablePushNotifications();
+    }
+
     this.isNotificationMenuVisible =
       !this.isNotificationMenuVisible;
 
     this.isProfileMenuVisible = false;
   }
+
+  
 
   closeProfileMenu(): void {
     this.isProfileMenuVisible = false;
