@@ -150,7 +150,7 @@ export type TicketListType =
     | 'assigned';
 
 export interface GetTicketsPayload {
-    type: TicketListType;
+    type?: TicketListType;
 }
 
 export interface TicketAssignmentApi {
@@ -208,7 +208,7 @@ export class TicketApiService {
     }
 
     getAllTickets(
-        payload: GetTicketsPayload,
+        payload: GetTicketsPayload = {},
     ): Observable<GetTicketsResponse> {
         return this.http.post<GetTicketsResponse>(
             `${this.apiBaseUrl}/ticket/get-all`,

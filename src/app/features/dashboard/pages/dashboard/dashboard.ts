@@ -153,15 +153,9 @@ constructor() {
     this.ticketLoadError = '';
 
     forkJoin({
-      created:
+      tickets:
         this.ticketApiService
-          .getAllTickets({
-            type: 'created',
-          }),
-
-      assigned:
-        this.ticketApiService
-          .getAllTickets({type: 'assigned'}),
+          .getAllTickets(),
 
       departments:
         this.ticketCategoryApiService
@@ -175,8 +169,8 @@ constructor() {
         this.isLoadingTickets = false;
 
         if (
-          !response.created.success ||
-          !response.assigned.success ||
+          // !response.created.success ||
+          // !response.assigned.success ||
           !response.departments.success ||
           !response.employees.success
         ) {
@@ -211,10 +205,8 @@ constructor() {
         const uniqueTicketMap =
           new Map<number, TicketListItem>();
 
-        [
-          ...response.created.data,
-          ...response.assigned.data,
-        ].forEach(ticket => {
+        response.tickets.data
+          .forEach(ticket => {
           if (!ticket.is_deleted) {
             uniqueTicketMap.set(
               ticket.id,
