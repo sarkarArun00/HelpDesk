@@ -12,6 +12,7 @@ import { TicketCategoryApiService } from '../../../masters/services/ticket-categ
 import {
   EmployeeListItem,
   TicketApiService,
+  TicketCommentApi,
   TicketAttachmentApi,
   TicketUpdateStatus,
 } from '../../services/ticket-api.service';
@@ -68,9 +69,11 @@ interface TicketAttachment {
 interface TicketComment {
   id: number;
   author: string;
-  department: string;
+  authorCode: string;
   message: string;
+  createdBy: number;
   createdAt: string;
+  replies: TicketComment[];
 }
 
 interface TicketHistory {
@@ -129,6 +132,16 @@ interface TicketDetail {
   history: TicketHistory[];
 }
 
+
+interface TicketComment {
+  id: number;
+  author: string;
+  authorCode: string;
+  message: string;
+  createdBy: number;
+  createdAt: string;
+  replies: TicketComment[];
+}
 
 
 @Component({
@@ -196,6 +209,10 @@ export class TicketDetails implements OnInit {
   isReassignEmployeeDropdownOpen = false;
 
   reassignEmployees: EmployeeListItem[] = [];
+
+  isAddingComment = false;
+  commentError = '';
+  commentSuccess = '';
   
   editCategories:
     EditCategoryOption[] = [];
@@ -351,6 +368,69 @@ export class TicketDetails implements OnInit {
     );
   }
 
+  private mapTicketComment(
+    comment: TicketCommentApi,
+  ): TicketComment {
+    return {
+      id:
+        comment.id,
+
+      author:
+        comment.createdByUser
+          ?.employee_name ??
+        `Employee ${comment.created_by}`,
+
+      authorCode:
+        comment.createdByUser
+          ?.employee_code ??
+        '',
+
+      message:
+        comment.comment,
+
+      createdBy:
+        comment.created_by,
+
+      createdAt:
+        comment.created_at,
+
+      replies:
+        (comment.replies ?? [])
+          .filter(reply =>
+            !reply.is_deleted,
+          )
+          .map(reply =>
+            this.mapTicketComment(
+              reply,
+            ),
+          )
+          .sort(
+            (first, second) =>
+              this.getSafeTimestamp(
+                first.createdAt,
+              ) -
+              this.getSafeTimestamp(
+                second.createdAt,
+              ),
+          ),
+    };
+  }
+
+  private getSafeTimestamp(
+    date: string | null | undefined,
+  ): number {
+    if (!date) {
+      return 0;
+    }
+
+    const timestamp =
+      new Date(date).getTime();
+
+    return Number.isNaN(timestamp)
+      ? 0
+      : timestamp;
+  }
+
   locationBack() {
     this.location.back();
   }
@@ -372,6 +452,10 @@ export class TicketDetails implements OnInit {
       employees:
         this.ticketApiService
           .getEmployeeList(),
+      
+      comments:
+        this.ticketApiService
+          .getAllTicketComments(ticketId),
 
       activity:
         this.ticketApiService
@@ -385,6 +469,7 @@ export class TicketDetails implements OnInit {
         if (
           !response.ticket.success ||
           !response.departments.success
+          
         ) {
           this.loadError =
             'Unable to load ticket details.';
@@ -527,6 +612,27 @@ export class TicketDetails implements OnInit {
               apiTicket.department_id,
           );
 
+        const ticketComments =
+          response.comments.data
+            .filter(comment =>
+              !comment.is_deleted &&
+              comment.parent_id === null,
+            )
+            .map(comment =>
+              this.mapTicketComment(
+                comment,
+              ),
+            )
+            .sort(
+              (first, second) =>
+                this.getSafeTimestamp(
+                  first.createdAt,
+                ) -
+                this.getSafeTimestamp(
+                  second.createdAt,
+                ),
+          );
+        
         this.ticket = {
           ticketId:
             apiTicket.ticket_number,
@@ -601,7 +707,7 @@ export class TicketDetails implements OnInit {
                 ),
             ),
 
-          comments: [],
+          comments: ticketComments,
 
 
           id: apiTicket.id,
@@ -1401,40 +1507,68 @@ export class TicketDetails implements OnInit {
   }
 
   addComment(): void {
-    const message = this.newComment.trim();
+    const message =
+      this.newComment.trim();
 
-    if (!message) {
+    if (
+      !message ||
+      !this.ticket.id ||
+      this.isAddingComment
+    ) {
       return;
     }
 
-    const createdAt = new Date().toISOString();
+    this.isAddingComment = true;
+    this.commentError = '';
+    this.commentSuccess = '';
 
-    this.ticket.comments = [
-      ...this.ticket.comments,
-      {
-        id: Date.now(),
-        author: this.currentUserName,
-        department: 'Information Technology',
-        message,
-        createdAt,
-      },
-    ];
+    this.ticketApiService
+      .createTicketComment({
+        ticket_id:
+          this.ticket.id,
 
-    this.ticket.history = [
-      {
-        id: Date.now() + 1,
-        title: 'Comment added',
-        description: message,
-        performedBy: this.currentUserName,
-        createdAt,
-        type: 'comment',
-      },
-      ...this.ticket.history,
-    ];
+        parent_id:
+          null,
 
-    this.ticket.updatedAt = createdAt;
-    this.newComment = '';
-    this.actionMessage = 'Your comment has been added successfully.';
+        comment:
+          message,
+      })
+      .subscribe({
+        next: response => {
+          this.isAddingComment = false;
+
+          if (!response.success) {
+            this.commentError =
+              response.message ||
+              'Unable to add comment.';
+
+            return;
+          }
+
+          this.newComment = '';
+
+          this.commentSuccess =
+            response.message ||
+            'Comment added successfully.';
+
+          this.actionMessage =
+            this.commentSuccess;
+
+          this.loadTicketDetails(
+            this.ticket.id!,
+          );
+        },
+
+        error: (
+          error: HttpErrorResponse,
+        ) => {
+          this.isAddingComment = false;
+
+          this.commentError =
+            error.error?.message ||
+            'Unable to add comment.';
+        },
+      });
   }
 
   getPriorityClass(priority: TicketPriority): string {
