@@ -21,6 +21,7 @@
         type="button"
         class="btn export-button"
         [disabled]="
+          isLoading ||
           isDateRangeInvalid ||
           filteredTickets.length === 0
         "
@@ -31,6 +32,33 @@
       </button>
     </div>
   </header>
+
+  @if (isLoading) {
+  <div class="report-state-card">
+    <span
+      class="spinner-border spinner-border-sm"
+      aria-hidden="true"
+    ></span>
+
+    <span>Loading ticket report...</span>
+  </div>
+}
+
+@if (loadError) {
+  <div class="alert alert-danger">
+    <i class="bi bi-exclamation-circle-fill"></i>
+
+    <span>{{ loadError }}</span>
+
+    <button
+      type="button"
+      class="btn btn-sm btn-outline-danger"
+      (click)="loadReportTickets()"
+    >
+      Retry
+    </button>
+  </div>
+}
 
   @if (exportMessage) {
     <div

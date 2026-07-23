@@ -8,13 +8,23 @@ import { forkJoin } from 'rxjs';
 import { AuthService } from '../../../../core/auth/services/auth.service';
 import { environment } from '../../../../../environments/environment.js';
 import { TicketCategoryApiService } from '../../../masters/services/ticket-category-api.service';
+
 import {
+  EmployeeListItem,
   TicketApiService,
   TicketAttachmentApi,
-  TicketUpdateStatus
+  TicketUpdateStatus,
 } from '../../services/ticket-api.service';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import {
+  ActivatedRoute,
+  Router
+} from '@angular/router';
+
+
+import {
+  Location,
+} from '@angular/common';
 
 
 type TicketPriority = 'Critical' | 'High' | 'Medium' | 'Low';
@@ -123,7 +133,7 @@ interface TicketDetail {
 
 @Component({
   selector: 'app-ticket-details',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule],
   templateUrl: './ticket-details.html',
   styleUrl: './ticket-details.scss',
 })
@@ -138,6 +148,11 @@ export class TicketDetails implements OnInit {
 
   private readonly ticketCategoryApiService =
     inject(TicketCategoryApiService);
+  
+  private readonly router =
+    inject(Router);
+  
+  private readonly location = inject(Location)
   
   get currentUserName(): string {
     return (
@@ -170,6 +185,17 @@ export class TicketDetails implements OnInit {
   statusUpdateError = '';
   statusUpdateSuccess = '';
 
+  isReassignModalVisible = false;
+  isLoadingReassignEmployees = false;
+  isReassigningTicket = false;
+
+  reassignError = '';
+  reassignSuccess = '';
+
+  selectedReassignEmployeeId = 0;
+  isReassignEmployeeDropdownOpen = false;
+
+  reassignEmployees: EmployeeListItem[] = [];
   
   editCategories:
     EditCategoryOption[] = [];
@@ -179,6 +205,8 @@ export class TicketDetails implements OnInit {
 
   editPriorities:
     EditPriorityOption[] = [];
+  
+  reassignEmployeeSearch = '';
 
   editTicketForm = {
     subject: '',
@@ -323,6 +351,9 @@ export class TicketDetails implements OnInit {
     );
   }
 
+  locationBack() {
+    this.location.back();
+  }
   loadTicketDetails(
     ticketId: number,
   ): void {
@@ -756,6 +787,229 @@ export class TicketDetails implements OnInit {
       this.ticket.status ===
       'Resolved'
     );
+  }
+
+  get canReassignTicket(): boolean {
+    return (
+      this.authService.isSystemAdmin() ||
+      this.authService.isDepartmentManager()
+    );
+  }
+
+  openReassignModal(): void {
+    if (
+      !this.canReassignTicket ||
+      !this.ticket.id
+    ) {
+      return;
+    }
+
+    this.isReassignModalVisible = true;
+    this.isLoadingReassignEmployees = true;
+
+    this.reassignError = '';
+    this.reassignSuccess = '';
+    this.selectedReassignEmployeeId = 0;
+    this.reassignEmployees = [];
+
+    const storedUser =
+      this.authService.currentUser();
+
+    if (!storedUser) {
+      this.isLoadingReassignEmployees = false;
+      this.reassignError =
+        'Logged-in user information is unavailable.';
+
+      return;
+    }
+
+    const employeeApiRole:
+      'Admin' | 'Manager' =
+      storedUser.role ===
+        'Department Manager'
+        ? 'Manager'
+        : 'Admin';
+
+    this.ticketApiService
+      .getFilteredEmployeeList({
+        status: true,
+        // page: this.reassignEmployeePage,
+        // limit: this.reassignEmployeeLimit,
+        role: employeeApiRole,
+      })
+      .subscribe({
+        next: response => {
+          this.isLoadingReassignEmployees = false;
+
+          if (!response.success) {
+            this.reassignError =
+              response.message ||
+              'Unable to load employees.';
+
+            return;
+          }
+
+          this.reassignEmployees =
+            response.data
+              .filter(employee =>
+                employee.status,
+              )
+              .sort((first, second) =>
+                first.employee_name.localeCompare(
+                  second.employee_name,
+                ),
+              );
+        },
+
+        error: (
+          error: HttpErrorResponse,
+        ) => {
+          this.isLoadingReassignEmployees = false;
+
+          this.reassignError =
+            error.error?.message ||
+            'Unable to load employees.';
+        },
+      });
+  }
+
+  closeReassignModal(): void {
+    if (this.isReassigningTicket) {
+      return;
+    }
+
+    this.isReassignModalVisible = false;
+    this.selectedReassignEmployeeId = 0;
+    this.reassignEmployees = [];
+    this.reassignError = '';
+  }
+
+  get filteredReassignEmployees():
+  EmployeeListItem[] {
+  const search =
+    this.reassignEmployeeSearch
+      .trim()
+      .toLowerCase();
+
+  if (!search) {
+    return this.reassignEmployees;
+  }
+
+  return this.reassignEmployees.filter(
+    employee => {
+      const departments =
+        employee.departments
+          .join(' ')
+          .toLowerCase();
+
+      return (
+        employee.employee_name
+          .toLowerCase()
+          .includes(search) ||
+        employee.employee_code
+          .toLowerCase()
+          .includes(search) ||
+        departments.includes(search)
+      );
+    },
+  );
+  }
+  
+  openReassignEmployeeDropdown(): void {
+    if (
+      !this.isLoadingReassignEmployees &&
+      !this.isReassigningTicket
+    ) {
+      this.isReassignEmployeeDropdownOpen = true;
+    }
+  }
+
+  selectReassignEmployee(
+    employee: EmployeeListItem,
+  ): void {
+    this.selectedReassignEmployeeId =
+      employee.id;
+
+    this.reassignEmployeeSearch =
+      `${employee.employee_name} (${employee.employee_code})`;
+
+    this.isReassignEmployeeDropdownOpen =
+      false;
+  }
+
+  clearReassignEmployee(): void {
+    this.selectedReassignEmployeeId = 0;
+    this.reassignEmployeeSearch = '';
+    this.isReassignEmployeeDropdownOpen =
+      true;
+  }
+  reassignTicket(): void {
+    if (
+      !this.canReassignTicket ||
+      !this.ticket.id ||
+      !this.selectedReassignEmployeeId ||
+      this.isReassigningTicket
+    ) {
+      return;
+    }
+
+    this.isReassigningTicket = true;
+    this.reassignError = '';
+    this.reassignSuccess = '';
+
+    this.ticketApiService
+      .reassignTicket(
+        this.ticket.id,
+        Number(
+          this.selectedReassignEmployeeId,
+        ),
+      )
+      .subscribe({
+        next: response => {
+          this.isReassigningTicket = false;
+
+          if (!response.success) {
+            this.reassignError =
+              response.message ||
+              'Unable to reassign ticket.';
+
+            return;
+          }
+
+          this.reassignSuccess =
+            response.message ||
+            'Ticket reassigned successfully.';
+          
+          this.actionMessage =
+            this.reassignSuccess;
+
+          this.isReassignModalVisible = false;
+          this.selectedReassignEmployeeId = 0;
+          this.reassignEmployees = [];
+
+          this.loadTicketDetails(
+            this.ticket.id!,
+          );
+
+          this.reassignSuccess =
+            response.message ||
+            'Ticket reassigned successfully.';
+
+          void this.router.navigate([
+            '/tickets/action-items',
+          ]);
+        },
+
+        error: (
+          error: HttpErrorResponse,
+        ) => {
+          this.isReassigningTicket = false;
+
+          this.reassignError =
+            error.error?.message ||
+            'Unable to reassign ticket.';
+        },
+      });
   }
 
   startProcessing(): void {

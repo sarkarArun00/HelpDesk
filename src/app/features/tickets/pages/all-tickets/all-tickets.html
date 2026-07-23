@@ -1,0 +1,426 @@
+<section class="all-tickets-page">
+  <header class="page-header">
+    <div>
+      <span class="page-eyebrow">
+        TICKET MANAGEMENT
+      </span>
+
+      <h1>All Tickets</h1>
+
+      <p>
+        View and manage all tickets available according to your role.
+      </p>
+    </div>
+
+    <a
+      routerLink="/dashboard"
+      class="back-button"
+    >
+      <i class="bi bi-arrow-left"></i>
+      Back to Dashboard
+    </a>
+  </header>
+
+  <section class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-icon total">
+        <i class="bi bi-ticket-perforated"></i>
+      </span>
+
+      <div>
+        <span>Total Tickets</span>
+        <strong>{{ totalTicketCount }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon assigned">
+        <i class="bi bi-person-check"></i>
+      </span>
+
+      <div>
+        <span>Assigned</span>
+
+            <strong>{{ assignedTicketCount }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon progress">
+        <i class="bi bi-arrow-repeat"></i>
+      </span>
+
+      <div>
+        <span>In Progress</span>
+
+        <strong>{{ inProgressTicketCount }}</strong>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-icon resolved">
+        <i class="bi bi-check-circle"></i>
+      </span>
+
+      <div>
+        <span>Resolved / Closed</span>
+
+        <strong>{{ resolvedClosedTicketCount }}</strong>
+      </div>
+    </article>
+  </section>
+
+  <section class="filter-card">
+    <header class="filter-header">
+      <div>
+        <h2>Search and Filter</h2>
+        <p>
+          Find tickets by ticket number, subject, category,
+          requester or assignee.
+        </p>
+      </div>
+
+      @if (hasActiveFilters) {
+        <button
+          type="button"
+          class="reset-button"
+          (click)="resetFilters()"
+        >
+          <i class="bi bi-x-circle"></i>
+          Reset Filters
+        </button>
+      }
+    </header>
+
+    <div class="filter-grid">
+      <div class="search-field">
+        <label for="ticketSearch">
+          Search
+        </label>
+
+        <div class="search-input">
+          <i class="bi bi-search"></i>
+
+          <input
+            id="ticketSearch"
+            type="search"
+            placeholder="Search tickets..."
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onFiltersChanged()"
+          />
+        </div>
+      </div>
+
+      <div class="filter-field">
+        <label for="departmentFilter">
+          Department
+        </label>
+
+        <select
+          id="departmentFilter"
+          [(ngModel)]="selectedDepartment"
+          (ngModelChange)="onFiltersChanged()"
+        >
+          <option value="">
+            All Departments
+          </option>
+
+          @for (
+            department of departments;
+            track department
+          ) {
+            <option [value]="department">
+              {{ department }}
+            </option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="centreFilter">
+          Centre
+        </label>
+
+        <select
+          id="centreFilter"
+          [(ngModel)]="selectedCentre"
+          (ngModelChange)="onFiltersChanged()"
+        >
+          <option value="">
+            All Centres
+          </option>
+
+          @for (
+            centre of centres;
+            track centre
+          ) {
+            <option [value]="centre">
+              {{ centre }}
+            </option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="priorityFilter">
+          Priority
+        </label>
+
+        <select
+          id="priorityFilter"
+          [(ngModel)]="selectedPriority"
+          (ngModelChange)="onFiltersChanged()"
+        >
+          <option value="">
+            All Priorities
+          </option>
+
+          @for (
+            priority of priorities;
+            track priority
+          ) {
+            <option [value]="priority">
+              {{ priority }}
+            </option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="statusFilter">
+          Status
+        </label>
+
+        <select
+          id="statusFilter"
+          [(ngModel)]="selectedStatus"
+          (ngModelChange)="onFiltersChanged()"
+        >
+          <option value="">
+            All Statuses
+          </option>
+
+          @for (
+            status of statuses;
+            track status
+          ) {
+            <option [value]="status">
+              {{ status }}
+            </option>
+          }
+        </select>
+      </div>
+    </div>
+  </section>
+
+  @if (isLoading) {
+    <section class="state-card">
+      <span
+        class="spinner-border"
+        aria-hidden="true"
+      ></span>
+
+      <h2>Loading tickets</h2>
+      <p>Please wait while ticket records are fetched.</p>
+    </section>
+  } @else if (loadError) {
+    <section class="state-card error-state">
+      <i class="bi bi-exclamation-circle"></i>
+
+      <h2>Unable to load tickets</h2>
+      <p>{{ loadError }}</p>
+
+      <button
+        type="button"
+        class="retry-button"
+        (click)="loadTickets()"
+      >
+        Try Again
+      </button>
+    </section>
+  } @else {
+    <section class="ticket-list-card">
+      <header class="list-header">
+        <div>
+          <h2>Ticket Directory</h2>
+
+          <p>
+            Showing
+            <strong>{{ paginatedTickets.length }}</strong>
+            of
+            <strong>{{ filteredTickets.length }}</strong>
+            matching tickets
+          </p>
+        </div>
+      </header>
+
+      @if (paginatedTickets.length) {
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Ticket</th>
+                <th>Raised By</th>
+                <th>Category</th>
+                <th>Department</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Assigned To</th>
+                <th>Last Updated</th>
+                <th aria-label="Actions"></th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (
+                ticket of paginatedTickets;
+                track ticket.id
+              ) {
+                <tr>
+                  <td>
+                    <a
+                      [routerLink]="[
+                        '/tickets',
+                        ticket.id
+                      ]"
+                      class="ticket-number"
+                    >
+                      {{ ticket.ticketId }}
+                    </a>
+
+                    <strong class="ticket-subject">
+                      {{ ticket.subject }}
+                    </strong>
+
+                    <span class="ticket-centre">
+                      <i class="bi bi-geo-alt"></i>
+                      {{ ticket.centre }}
+                    </span>
+                  </td>
+
+                  <td>{{ ticket.raisedBy }}</td>
+
+                  <td>{{ ticket.category }}</td>
+
+                  <td>{{ ticket.department }}</td>
+
+                  <td>
+                    <span
+                      class="priority-badge"
+                      [class]="
+                        'priority-badge ' +
+                        getPriorityClass(
+                          ticket.priority
+                        )
+                      "
+                    >
+                      {{ ticket.priority }}
+                    </span>
+                  </td>
+
+                  <td>
+                    <span
+                      class="status-badge"
+                      [class]="
+                        'status-badge ' +
+                        getStatusClass(
+                          ticket.status
+                        )
+                      "
+                    >
+                      {{ ticket.status }}
+                    </span>
+                  </td>
+
+                  <td>
+                    <span class="assignee-name">
+                      {{ ticket.assignee }}
+                    </span>
+                  </td>
+
+                  <td>
+                    {{ formatDate(ticket.updatedAt) }}
+                  </td>
+
+                  <td>
+                    <a
+                      [routerLink]="[
+                        '/tickets',
+                        ticket.id
+                      ]"
+                      class="view-button"
+                    >
+                      <i class="bi bi-eye"></i>
+                      View
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (totalPages > 1) {
+          <footer class="pagination">
+            <button
+              type="button"
+              [disabled]="currentPage === 1"
+              (click)="changePage(currentPage - 1)"
+            >
+              <i class="bi bi-chevron-left"></i>
+              Previous
+            </button>
+
+            <div class="page-numbers">
+              @for (
+                page of pageNumbers;
+                track page
+              ) {
+                <button
+                  type="button"
+                  [class.active]="
+                    currentPage === page
+                  "
+                  (click)="changePage(page)"
+                >
+                  {{ page }}
+                </button>
+              }
+            </div>
+
+            <button
+              type="button"
+              [disabled]="
+                currentPage === totalPages
+              "
+              (click)="changePage(currentPage + 1)"
+            >
+              Next
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </footer>
+        }
+      } @else {
+        <div class="empty-state">
+          <i class="bi bi-inbox"></i>
+
+          <h3>No tickets found</h3>
+
+          <p>
+            No ticket matches the selected search or filters.
+          </p>
+
+          @if (hasActiveFilters) {
+            <button
+              type="button"
+              class="reset-button"
+              (click)="resetFilters()"
+            >
+              Clear Filters
+            </button>
+          }
+        </div>
+      }
+    </section>
+  }
+</section>

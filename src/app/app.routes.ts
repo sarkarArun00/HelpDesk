@@ -67,7 +67,22 @@ export const routes: Routes = [
             import(
             './features/tickets/pages/my-action-items/my-action-items'
             ).then(component => component.MyActionItems),
+      },
+      {
+        path: 'tickets/all',
+        title: 'All Tickets | ISD Ticketing System',
+        canActivate: [roleGuard],
+        data: {
+          roles: [
+            'Admin',
+            'Department Manager',
+          ],
         },
+        loadComponent: () =>
+          import(
+            './features/tickets/pages/all-tickets/all-tickets'
+          ).then(component => component.AllTickets),
+      },
         // {
         //   path: 'tickets/team-pool',
         //   title: 'Team Pool | ISD Ticketing System',
@@ -177,7 +192,9 @@ export const routes: Routes = [
             import(
               './features/reports/pages/ticket-reports/ticket-reports'
             ).then(component => component.TicketReports),
-        },
+      },
+        
+      
     ],
   },
   {

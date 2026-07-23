@@ -24,7 +24,7 @@ interface DashboardStat {
   value: number;
   description: string;
   icon: string;
-  type: 'total' | 'assigned' | 'progress' | 'resolved';
+  type: 'total' | 'assigned' | 'progress' | 'resolved' | 'closed';
 }
 
 interface QueueSummary {
@@ -100,19 +100,26 @@ export class Dashboard
       icon: '✓',
       type: 'resolved',
     },
+    {
+      label: 'Closed',
+      value: 63,
+      description: 'Resolution has been submitted',
+      icon: '✓',
+      type: 'closed',
+    },
   ];
 
   readonly queueSummaries: QueueSummary[] = [
     {
-      label: 'My Action Items',
+      label: 'Assigned to Me',
       value: 12,
       description: 'Tickets currently assigned to you',
     },
-    // {
-    //   label: 'Unassigned Team Pool',
-    //   value: 8,
-    //   description: 'Tickets waiting for team assignment',
-    // },
+    {
+      label: 'Raised by Me',
+      value: 8,
+      description: 'Tickets currently Raised by you',
+    },
     {
       label: 'Awaiting Confirmation',
       value: 5,

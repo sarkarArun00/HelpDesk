@@ -3,7 +3,7 @@
     <header class="page-header">
       <div>
         <a
-          routerLink="/tickets/my-raised"
+          (click)="locationBack()"
           class="back-link"
         >
           <i class="bi bi-arrow-left"></i>
@@ -30,6 +30,16 @@
                 Edit Ticket
               </button>
             }
+            @if (canReassignTicket) {
+            <button
+              type="button"
+              class="reassign-ticket-button"
+              (click)="openReassignModal()"
+            >
+              <i class="bi bi-person-check"></i>
+              Reassign Ticket
+            </button>
+          }
             <span
               class="priority-badge"
               [class]="
@@ -750,6 +760,211 @@
       </button>
     </footer>
   </section>
+}
+
+@if (isReassignModalVisible) {
+  <div
+    class="reassign-modal-backdrop"
+    (click)="closeReassignModal()"
+  >
+    <section
+      class="reassign-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="reassignTicketTitle"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="reassign-modal-header">
+        <div>
+          <span class="modal-eyebrow">
+            TICKET ASSIGNMENT
+          </span>
+
+          <h2 id="reassignTicketTitle">
+            Reassign Ticket
+          </h2>
+
+          <p>
+            {{ ticket.ticketId }} —
+            {{ ticket.subject }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close-button"
+          aria-label="Close"
+          [disabled]="isReassigningTicket"
+          (click)="closeReassignModal()"
+        >
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </header>
+
+      <div class="reassign-modal-body">
+        @if (reassignError) {
+          <div class="alert alert-danger">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            {{ reassignError }}
+          </div>
+        }
+
+        @if (isLoadingReassignEmployees) {
+          <div class="employee-loading-state">
+            <span
+              class="spinner-border spinner-border-sm"
+              aria-hidden="true"
+            ></span>
+
+            Loading employees...
+          </div>
+        } @else {
+          <div class="form-group">
+            <label
+              for="reassignEmployee"
+              class="form-label"
+            >
+              Assign to employee
+              <span class="required">*</span>
+            </label>
+
+          <div
+  class="searchable-employee-dropdown"
+  (click)="$event.stopPropagation()"
+>
+  <div class="employee-search-wrapper">
+    <i class="bi bi-search"></i>
+
+    <input
+      type="search"
+      class="form-control employee-search-input"
+      placeholder="Search employee by name, code or department"
+      [(ngModel)]="reassignEmployeeSearch"
+      [disabled]="isReassigningTicket"
+      autocomplete="off"
+      (focus)="openReassignEmployeeDropdown()"
+      (input)="
+        selectedReassignEmployeeId = 0;
+        isReassignEmployeeDropdownOpen = true
+      "
+    />
+
+    @if (reassignEmployeeSearch) {
+      <button
+        type="button"
+        class="clear-employee-search"
+        aria-label="Clear employee"
+        (click)="clearReassignEmployee()"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+    }
+  </div>
+
+  @if (isReassignEmployeeDropdownOpen) {
+    <div class="employee-dropdown-menu">
+      @if (filteredReassignEmployees.length) {
+        @for (
+          employee of filteredReassignEmployees;
+          track employee.id
+        ) {
+          <button
+            type="button"
+            class="employee-dropdown-option"
+            [class.selected]="
+              selectedReassignEmployeeId === employee.id
+            "
+            (click)="selectReassignEmployee(employee)"
+          >
+            <span class="employee-option-avatar">
+              {{
+                employee.employee_name
+                  .charAt(0)
+                  .toUpperCase()
+              }}
+            </span>
+
+            <span class="employee-option-details">
+              <strong>
+                {{ employee.employee_name }}
+              </strong>
+
+              <small>
+                {{ employee.employee_code }}
+
+                @if (employee.departments.length) {
+                  · {{ employee.departments.join(', ') }}
+                }
+              </small>
+            </span>
+
+            @if (
+              selectedReassignEmployeeId === employee.id
+            ) {
+              <i class="bi bi-check-lg"></i>
+            }
+          </button>
+        }
+      } @else {
+        <div class="employee-dropdown-empty">
+          No matching employee found.
+        </div>
+      }
+    </div>
+  }
+</div>
+
+          @if (
+            reassignEmployeeSearch &&
+            !filteredReassignEmployees.length
+          ) {
+            <p class="empty-employee-message">
+              No employee matches
+              “{{ reassignEmployeeSearch }}”.
+            </p>
+          } @else if (!reassignEmployees.length) {
+            <p class="empty-employee-message">
+              No active employees are available for reassignment.
+            </p>
+          }
+          </div>
+        }
+      </div>
+
+      <footer class="reassign-modal-footer">
+        <button
+          type="button"
+          class="btn cancel-button"
+          [disabled]="isReassigningTicket"
+          (click)="closeReassignModal()"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="btn confirm-reassign-button"
+          [disabled]="
+            isLoadingReassignEmployees ||
+            isReassigningTicket ||
+            !selectedReassignEmployeeId
+          "
+          (click)="reassignTicket()"
+        >
+          @if (isReassigningTicket) {
+            <span
+              class="spinner-border spinner-border-sm"
+              aria-hidden="true"
+            ></span>
+            Reassigning...
+          } @else {
+            <i class="bi bi-person-check"></i>
+            Confirm Reassignment
+          }
+        </button>
+      </footer>
+    </section>
+  </div>
 }
   </section>
 }

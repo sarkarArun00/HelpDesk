@@ -199,6 +199,24 @@ export interface UpdateTicketStatusResponse {
     data?: TicketListItem;
 }
 
+export interface ReassignTicketResponse {
+    success: boolean;
+    message: string;
+    data?: TicketListItem;
+}
+
+
+export type EmployeeListRole =
+    | 'Admin'
+    | 'Manager';
+
+export interface EmployeeListParams {
+    status: boolean;
+    // page: number;
+    // limit: number;
+    role: EmployeeListRole;
+}
+
 @Injectable({
     providedIn: 'root',
 })
@@ -279,4 +297,35 @@ export class TicketApiService {
             payload,
         );
     }
+
+    reassignTicket(
+        ticketId: number,
+        assignedToId: number,
+    ): Observable<ReassignTicketResponse> {
+        return this.http.post<ReassignTicketResponse>(
+            `${this.apiBaseUrl}/ticket/update`,
+            {
+                id: ticketId,
+                status: 'ASSIGNED',
+                assigned_to_id: assignedToId,
+            },
+        );
+    }
+
+    getFilteredEmployeeList(
+        params: EmployeeListParams,
+    ): Observable<GetEmployeeListResponse> {
+        return this.http.get<GetEmployeeListResponse>(
+            `${this.apiBaseUrl}/employee/get-employee-list`,
+            {
+                params: {
+                    status: params.status,
+                    // page: params.page,
+                    // limit: params.limit,
+                    role: params.role,
+                },
+            },
+        );
+    }
+    
 }
