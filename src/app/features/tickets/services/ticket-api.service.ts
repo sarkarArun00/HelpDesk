@@ -217,6 +217,58 @@ export interface EmployeeListParams {
     role: EmployeeListRole;
 }
 
+export interface CreateTicketCommentPayload {
+    ticket_id: number;
+    parent_id: number | null;
+    comment: string;
+}
+
+export interface DeleteTicketCommentPayload {
+    id: number;
+}
+
+export interface TicketCommentUserApi {
+    id: number;
+    employee_code: string;
+    employee_name: string;
+    email_id: string | null;
+    user_name: string;
+    status: string;
+    employeePhoto: string | null;
+    delete_status: boolean | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface TicketCommentApi {
+    id: number;
+    ticket_id: number;
+    parent_id: number | null;
+    replies: TicketCommentApi[];
+    comment: string;
+    created_by: number;
+    createdByUser:
+    TicketCommentUserApi | null;
+    updated_by: number | null;
+    is_internal: boolean;
+    is_deleted: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface GetTicketCommentsResponse {
+    success: boolean;
+    message?: string;
+    data: TicketCommentApi[];
+}
+
+export interface TicketCommentActionResponse {
+    success: boolean;
+    message: string;
+    data?: TicketCommentApi;
+}
+
+
 @Injectable({
     providedIn: 'root',
 })
@@ -324,6 +376,37 @@ export class TicketApiService {
                     // limit: params.limit,
                     role: params.role,
                 },
+            },
+        );
+    }
+
+    createTicketComment(
+        payload: CreateTicketCommentPayload,
+    ): Observable<TicketCommentActionResponse> {
+        return this.http.post<TicketCommentActionResponse>(
+            `${this.apiBaseUrl}/ticket/comment/create`,
+            payload,
+        );
+    }
+
+    getAllTicketComments(
+        ticketId: number,
+    ): Observable<GetTicketCommentsResponse> {
+        return this.http.post<GetTicketCommentsResponse>(
+            `${this.apiBaseUrl}/ticket/comment/get-all`,
+            {
+                ticket_id: ticketId,
+            },
+        );
+    }
+
+    deleteTicketComment(
+        commentId: number,
+    ): Observable<TicketCommentActionResponse> {
+        return this.http.post<TicketCommentActionResponse>(
+            `${this.apiBaseUrl}/ticket/comment/delete`,
+            {
+                id: commentId,
             },
         );
     }
