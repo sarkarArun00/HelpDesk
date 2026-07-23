@@ -111,7 +111,7 @@ export class Dashboard
 
   readonly queueSummaries: QueueSummary[] = [
     {
-      label: 'Assigned to You',
+      label: 'Assigned to Me',
       value: 12,
       description: 'Tickets currently assigned to you',
     },
