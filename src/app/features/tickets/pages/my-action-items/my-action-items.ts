@@ -15,7 +15,9 @@ type TicketPriority = 'Critical' | 'High' | 'Medium' | 'Low';
 type ActionTicketStatus =
   | 'Assigned'
   | 'In Progress'
-  | 'Reopened';
+  | 'Resolved'
+  | 'Reopened'
+  | 'Closed';
 
 interface ActionTicket {
   id: number;
@@ -58,10 +60,16 @@ export class MyActionItems
 
   actionMessage = '';
 
+  updatingTicketId: number | null = null;
+  statusUpdateError = '';
+  statusUpdateSuccess = '';
+
   readonly statuses: ActionTicketStatus[] = [
     'Assigned',
     'In Progress',
+    'Resolved',
     'Reopened',
+    'Closed',
   ];
 
   readonly priorities: TicketPriority[] = [
@@ -232,19 +240,14 @@ export class MyActionItems
                       ?.priority_name,
                   ),
 
-                status:
-                  this.mapActionStatus(
-                    latestAssignment
-                      ?.status ??
-                    ticket.status,
+                status: this.mapActionStatus(
+                  ticket.status,
                   ),
 
                 createdAt:
                   ticket.created_at,
 
                 lastUpdatedAt:
-                  latestAssignment
-                    ?.updated_at ??
                   ticket.updated_at,
               };
             })
@@ -304,8 +307,7 @@ export class MyActionItems
   }
 
   private mapActionStatus(
-    status:
-      string | null | undefined,
+    status: string | null | undefined,
   ): ActionTicketStatus {
     switch (
     status
@@ -316,8 +318,14 @@ export class MyActionItems
       case 'IN PROGRESS':
         return 'In Progress';
 
+      case 'RESOLVED':
+        return 'Resolved';
+
       case 'REOPENED':
         return 'Reopened';
+
+      case 'CLOSED':
+        return 'Closed';
 
       case 'ASSIGNED':
       default:
@@ -333,37 +341,65 @@ export class MyActionItems
   }
 
   startProcessing(ticketId: number): void {
-    this.tickets = this.tickets.map(ticket => {
-      if (ticket.id !== ticketId) {
-        return ticket;
-      }
-
-      return {
-        ...ticket,
-        status: 'In Progress',
-        lastUpdatedAt: new Date().toISOString(),
-      };
-    });
-
-    this.actionMessage =
-      'Ticket status updated to In Progress.';
+    this.updateAssignedTicketStatus(
+      ticketId,
+      'IN_PROGRESS',
+    );
   }
 
   markResolved(ticketId: number): void {
-    const resolvedTicket = this.tickets.find(
-      ticket => ticket.id === ticketId,
+    this.updateAssignedTicketStatus(
+      ticketId,
+      'RESOLVED',
     );
+  }
 
-    if (!resolvedTicket) {
+  private updateAssignedTicketStatus(
+    ticketId: number,
+    status: 'IN_PROGRESS' | 'RESOLVED',
+  ): void {
+    if (this.updatingTicketId !== null) {
       return;
     }
 
-    this.tickets = this.tickets.filter(
-      ticket => ticket.id !== ticketId,
-    );
+    this.updatingTicketId = ticketId;
+    this.statusUpdateError = '';
+    this.statusUpdateSuccess = '';
 
-    this.actionMessage =
-      `${resolvedTicket.ticketId} has been marked as resolved and removed from your active action items.`;
+    this.ticketApiService
+      .updateTicketStatus({
+        id: ticketId,
+        status,
+      })
+      .subscribe({
+        next: response => {
+          this.updatingTicketId = null;
+
+          if (!response.success) {
+            this.statusUpdateError =
+              response.message ||
+              'Unable to update ticket status.';
+
+            return;
+          }
+
+          this.statusUpdateSuccess =
+            response.message ||
+            'Ticket status updated successfully.';
+
+          this.loadAssignedTickets();
+        },
+
+        error: (
+          error: HttpErrorResponse,
+        ) => {
+          this.updatingTicketId = null;
+
+          this.statusUpdateError =
+            error.error?.message ||
+            'Unable to update ticket status.';
+        },
+      });
   }
 
   getInitials(fullName: string): string {

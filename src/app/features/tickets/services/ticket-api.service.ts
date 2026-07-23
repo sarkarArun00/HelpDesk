@@ -187,6 +187,17 @@ export interface GetTicketActivityLogsResponse {
     data: TicketActivityLog[];
 }
 
+export type TicketUpdateStatus =
+    | 'IN_PROGRESS'
+    | 'RESOLVED'
+    | 'REOPENED'
+    | 'CLOSED';
+
+export interface UpdateTicketStatusResponse {
+    success: boolean;
+    message: string;
+    data?: TicketListItem;
+}
 
 @Injectable({
     providedIn: 'root',
@@ -254,6 +265,18 @@ export class TicketApiService {
     ): Observable<GetTicketActivityLogsResponse> {
         return this.http.get<GetTicketActivityLogsResponse>(
             `${this.apiBaseUrl}/activity-log/ticket/${ticketId}`,
+        );
+    }
+
+    updateTicketStatus(
+        payload: {
+            id: number;
+            status: TicketUpdateStatus;
+        },
+    ): Observable<UpdateTicketStatusResponse> {
+        return this.http.post<UpdateTicketStatusResponse>(
+            `${this.apiBaseUrl}/ticket/update`,
+            payload,
         );
     }
 }

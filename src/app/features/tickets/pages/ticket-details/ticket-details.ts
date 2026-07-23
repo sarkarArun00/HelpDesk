@@ -11,6 +11,7 @@ import { TicketCategoryApiService } from '../../../masters/services/ticket-categ
 import {
   TicketApiService,
   TicketAttachmentApi,
+  TicketUpdateStatus
 } from '../../services/ticket-api.service';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -83,6 +84,7 @@ interface TicketAssignmentDetail {
   assignedTo: string;
   assignedToCode: string;
   assignedBy: string;
+  assignedToId: number;
   department: string;
   assignmentType: string;
   status: string;
@@ -144,7 +146,7 @@ export class TicketDetails implements OnInit {
       'Current User'
     );
   }
-
+  pendingStatus: TicketUpdateStatus | null = null;
   ticket: TicketDetail =
     this.createEmptyTicket();
 
@@ -164,6 +166,11 @@ export class TicketDetails implements OnInit {
 
   editError = '';
 
+  isUpdatingStatus = false;
+  statusUpdateError = '';
+  statusUpdateSuccess = '';
+
+  
   editCategories:
     EditCategoryOption[] = [];
 
@@ -288,6 +295,34 @@ export class TicketDetails implements OnInit {
     }
   }
 
+  get isCurrentUserAssignee(): boolean {
+    const currentUser =
+      this.authService.currentUser();
+
+    if (!currentUser) {
+      return false;
+    }
+
+    const currentAssignment =
+      this.ticket.assignments[0];
+
+    return (
+      currentAssignment?.assignedToId ===
+      currentUser.id
+    );
+  }
+
+  get isTicketCreator(): boolean {
+    const currentUser =
+      this.authService.currentUser();
+
+    return Boolean(
+      currentUser &&
+      this.ticket.requesterId ===
+      currentUser.id,
+    );
+  }
+
   loadTicketDetails(
     ticketId: number,
   ): void {
@@ -376,7 +411,8 @@ export class TicketDetails implements OnInit {
 
               return {
                 id: assignment.id,
-
+                assignedToId:
+                  assignment.assigned_to,
                 assignedTo:
                   assignedTo?.name ??
                   `Employee ${assignment.assigned_to}`,
@@ -482,7 +518,7 @@ export class TicketDetails implements OnInit {
               apiTicket.priority
                 ?.priority_name,
             ),
-          assignments: [],
+          assignments,
           status:
             this.mapStatus(
               apiTicket.status,
@@ -696,53 +732,134 @@ export class TicketDetails implements OnInit {
 
   get canStartProcessing(): boolean {
     return (
-      this.ticket.status === 'Assigned' ||
-      this.ticket.status === 'Reopened'
+      this.isCurrentUserAssignee &&
+      (
+        this.ticket.status ===
+        'Assigned' ||
+        this.ticket.status ===
+        'Reopened'
+      )
     );
   }
 
   get canResolve(): boolean {
-    return this.ticket.status === 'In Progress';
+    return (
+      this.isCurrentUserAssignee &&
+      this.ticket.status ===
+      'In Progress'
+    );
   }
 
   get canConfirmResolution(): boolean {
-    return this.ticket.status === 'Resolved';
+    return (
+      this.isTicketCreator &&
+      this.ticket.status ===
+      'Resolved'
+    );
   }
 
   startProcessing(): void {
+    if (!this.canStartProcessing) {
+      return;
+    }
+
     this.updateTicketStatus(
+      'IN_PROGRESS',
       'In Progress',
-      'Ticket processing started',
-      'The assigned employee started working on the ticket.',
-      'progress',
     );
   }
 
   markResolved(): void {
-    this.updateTicketStatus(
-      'Resolved',
-      'Ticket marked as resolved',
-      'The assigned employee submitted the ticket resolution.',
-      'resolved',
-    );
-  }
+    if (!this.canResolve) {
+      return;
+    }
 
-  closeTicket(): void {
     this.updateTicketStatus(
-      'Closed',
-      'Resolution confirmed and ticket closed',
-      'The ticket creator confirmed the submitted resolution.',
-      'closed',
+      'RESOLVED',
+      'Resolved',
     );
   }
 
   reopenTicket(): void {
+    if (!this.canConfirmResolution) {
+      return;
+    }
+
     this.updateTicketStatus(
+      'REOPENED',
       'Reopened',
-      'Ticket reopened',
-      'The ticket creator rejected the resolution and reopened the ticket.',
-      'reopened',
     );
+  }
+
+  closeTicket(): void {
+    if (!this.canConfirmResolution) {
+      return;
+    }
+
+    this.updateTicketStatus(
+      'CLOSED',
+      'Closed',
+    );
+  }
+
+  private updateTicketStatus(
+    apiStatus: TicketUpdateStatus,
+    displayStatus: TicketStatus,
+  ): void {
+    if (
+      !this.ticket.id ||
+      this.isUpdatingStatus
+    ) {
+      return;
+    }
+
+    this.isUpdatingStatus = true;
+    this.pendingStatus = apiStatus;
+    this.statusUpdateError = '';
+    this.statusUpdateSuccess = '';
+    this.actionMessage = '';
+
+    this.ticketApiService
+      .updateTicketStatus({
+        id: this.ticket.id,
+        status: apiStatus,
+      })
+      .subscribe({
+        next: response => {
+          this.isUpdatingStatus = false;
+          this.pendingStatus = null;
+
+          if (!response.success) {
+            this.statusUpdateError =
+              response.message ||
+              'Unable to update ticket status.';
+
+            return;
+          }
+
+          this.statusUpdateSuccess =
+            response.message ||
+            `Ticket status updated to ${displayStatus}.`;
+
+          this.actionMessage =
+            this.statusUpdateSuccess;
+
+          this.loadTicketDetails(
+            this.ticket.id!,
+          );
+        },
+
+        error: (
+          error: HttpErrorResponse,
+        ) => {
+          this.isUpdatingStatus = false;
+          this.pendingStatus = null;
+
+          this.statusUpdateError =
+            error.error?.message ||
+            'Unable to update ticket status.';
+        },
+      });
   }
 
   openEditModal(): void {
@@ -1102,6 +1219,7 @@ export class TicketDetails implements OnInit {
       .join('')
       .slice(0, 2);
   }
+  
 
   formatDate(
     dateValue:
@@ -1135,49 +1253,29 @@ export class TicketDetails implements OnInit {
     ).format(date);
   }
 
-  private updateTicketStatus(
-    status: TicketStatus,
-    title: string,
-    description: string,
-    historyType: TicketHistory['type'],
-  ): void {
-    const updatedAt = new Date().toISOString();
-
-    this.ticket.status = status;
-    this.ticket.updatedAt = updatedAt;
-
-    this.ticket.history = [
-      {
-        id: Date.now(),
-        title,
-        description,
-        performedBy: this.currentUserName,
-        createdAt: updatedAt,
-        type: historyType,
-      },
-      ...this.ticket.history,
-    ];
-
-    this.actionMessage = `${this.ticket.ticketId} status updated to ${status}.`;
-  }
-
   get canEditTicket(): boolean {
-    const currentUser =
-      this.authService.currentUser();
-
-    if (
-      !currentUser ||
-      !this.ticket.requesterId
-    ) {
-      return false;
-    }
-
     return (
-      currentUser.id ===
-      this.ticket.requesterId &&
-      this.ticket.status !== 'Closed'
+      this.ticket.status === 'Assigned'
     );
   }
+
+  // get canEditTicket(): boolean {
+  //   const currentUser =
+  //     this.authService.currentUser();
+
+  //   if (
+  //     !currentUser ||
+  //     !this.ticket.requesterId
+  //   ) {
+  //     return false;
+  //   }
+
+  //   return (
+  //     currentUser.id ===
+  //     this.ticket.requesterId &&
+  //     this.ticket.status !== 'Closed'
+  //   );
+  // }
 
   downloadAttachment(
     attachment: TicketAttachment,

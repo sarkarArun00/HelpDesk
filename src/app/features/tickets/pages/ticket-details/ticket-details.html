@@ -75,6 +75,75 @@
       </div>
     }
 
+    <!-- @if (statusUpdateError) {
+      <div class="alert alert-error">
+        {{ statusUpdateError }}
+      </div>
+    }
+
+    @if (statusUpdateSuccess) {
+      <div class="alert alert-success">
+        {{ statusUpdateSuccess }}
+      </div>
+    } -->
+
+    <!-- @if (canStartProcessing) {
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="isUpdatingStatus"
+        (click)="startProcessing()"
+      >
+        @if (pendingStatus === 'IN_PROGRESS') {
+          Updating...
+        } @else {
+          Start Processing
+        }
+      </button>
+    } -->
+    <!-- @if (canResolve) {
+      <button
+        type="button"
+        class="btn btn-success"
+        [disabled]="isUpdatingStatus"
+        (click)="markResolved()"
+      >
+        @if (pendingStatus === 'RESOLVED') {
+          Updating...
+        } @else {
+          Mark as Resolved
+        }
+      </button>
+    } -->
+
+    <!-- @if (canConfirmResolution) {
+  <button
+    type="button"
+    class="btn btn-secondary"
+    [disabled]="isUpdatingStatus"
+    (click)="reopenTicket()"
+  >
+    @if (pendingStatus === 'REOPENED') {
+      Updating...
+    } @else {
+      Reopen Ticket
+    }
+  </button>
+
+  <button
+    type="button"
+    class="btn btn-danger"
+    [disabled]="isUpdatingStatus"
+    (click)="closeTicket()"
+  >
+    @if (pendingStatus === 'CLOSED') {
+      Updating...
+    } @else {
+      Confirm and Close
+    }
+  </button>
+} -->
+
     @if (ticket.status !== 'Closed') {
       <section class="workflow-card">
         <div class="workflow-content">
