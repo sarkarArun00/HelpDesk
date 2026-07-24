@@ -224,9 +224,10 @@
               <tr>
                 <td>
                   <div class="employee-cell">
-                    <span class="employee-avatar">
+                    <img  class="employee-avatar" [src]="user.employeePhoto" [alt]="user.employeePhoto">
+                    <!-- <span class="employee-avatar">
                       {{ getInitials(user.fullName) }}
-                    </span>
+                    </span> -->
 
                     <div>
                       <strong>{{ user.fullName }}</strong>
