@@ -16,6 +16,20 @@ import {
     VerifyOtpResponse,
 } from '../models/login-api.model';
 
+
+
+export interface SaveDeviceTokenPayload {
+    token: string;
+    device_type: 'web';
+}
+
+export interface SaveDeviceTokenResponse {
+    success: boolean;
+    message: string;
+}
+
+
+
 @Injectable({
     providedIn: 'root',
 })
@@ -68,6 +82,15 @@ export class AuthApiService {
     ): Observable<ResetPasswordResponse> {
         return this.http.post<ResetPasswordResponse>(
             `${this.apiBaseUrl}/auth/reset-password`,
+            payload,
+        );
+    }
+
+    saveDeviceToken(
+        payload: SaveDeviceTokenPayload,
+    ): Observable<SaveDeviceTokenResponse> {
+        return this.http.post<SaveDeviceTokenResponse>(
+            `${this.apiBaseUrl}/employee/save-device-token`,
             payload,
         );
     }

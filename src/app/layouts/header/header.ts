@@ -21,7 +21,9 @@ import { environment } from '../../../environments/environment';
 import {
   FirebaseMessagingService,
 } from '../../core/notifications/services/firebase-messaging';
-
+import {
+  firstValueFrom,
+} from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -169,6 +171,8 @@ export class Header
     );
 
     
+
+    
     if (
       this.isRequestingPushPermission ||
       !('serviceWorker' in navigator)
@@ -197,13 +201,29 @@ export class Header
         return;
       }
 
+      const saveTokenResponse =
+        await firstValueFrom(
+          this.authApiService
+            .saveDeviceToken({
+              token,
+              device_type:
+                'web',
+            }),
+        );
+
+      if (
+        !saveTokenResponse.success
+      ) {
+        throw new Error(
+          saveTokenResponse.message ||
+          'Unable to save device token.',
+        );
+      }
+
       this.fcmToken = token;
 
-      // Temporary test only.
-      // We will send this token to the API in the next step.
       console.log(
-        'Firebase FCM token:',
-        token,
+        'FCM token saved successfully.',
       );
     } catch (error) {
       console.error(
