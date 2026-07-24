@@ -3,6 +3,7 @@ import {
   Component,
   EventEmitter,
   HostListener,
+  OnDestroy,
   OnInit,
   Output,
   inject,
@@ -32,7 +33,7 @@ import {
   styleUrl: './header.scss',
 })
 export class Header
-  implements OnInit {
+  implements OnInit, OnDestroy {
   readonly authService = inject(AuthService);
 
   readonly notificationService =
@@ -44,6 +45,27 @@ export class Header
 
   readonly unreadCount =
     this.notificationService.unreadCount;
+  
+  readonly isLoadingNotifications =
+    this.notificationService.isLoading;
+
+  readonly notificationLoadError =
+    this.notificationService.loadError;
+  
+  readonly hasMoreNotifications =
+    this.notificationService
+      .hasMoreNotifications;
+
+  readonly isLoadingMoreNotifications =
+    this.notificationService
+      .isLoadingMore;
+
+  readonly notificationPagination =
+    this.notificationService
+      .pagination;
+  
+  private foregroundMessageUnsubscribe:
+    (() => void) | null = null;
 
   @Output()
   readonly mobileMenuClicked =
@@ -63,6 +85,15 @@ export class Header
 
   ngOnInit(): void {
     this.loadProfile();
+
+    this.notificationService
+      .loadNotifications();
+
+    this.notificationService
+      .refreshUnreadCount();
+
+    void this
+      .listenForFirebaseMessages();
   }
 
   loadProfile(): void {
@@ -88,6 +119,34 @@ export class Header
     
     
     console.log('authService.currentUser()', this.authService.currentUser())
+  }
+
+  private async listenForFirebaseMessages():
+    Promise<void> {
+    this.foregroundMessageUnsubscribe =
+      await this.firebaseMessagingService
+        .listenForForegroundMessages(
+          payload => {
+            console.log(
+              'Foreground notification received:',
+              payload,
+            );
+
+            this.notificationService
+              .loadNotifications();
+
+            this.notificationService
+              .refreshUnreadCount();
+          },
+        );
+  }
+
+  ngOnDestroy(): void {
+    this.foregroundMessageUnsubscribe
+      ?.();
+
+    this.foregroundMessageUnsubscribe =
+      null;
   }
 
   async enablePushNotifications():
@@ -197,6 +256,7 @@ export class Header
     this.isNotificationMenuVisible = false;
   }
 
+  
   async toggleNotificationMenu():
     Promise<void> {
     if (
@@ -206,6 +266,17 @@ export class Header
       !this.fcmToken
     ) {
       await this.enablePushNotifications();
+    }
+
+    const willOpen =
+      !this.isNotificationMenuVisible;
+
+    if (willOpen) {
+      this.notificationService
+        .refreshUnreadCount();
+
+      this.notificationService
+        .loadNotifications();
     }
 
     this.isNotificationMenuVisible =

@@ -96,8 +96,9 @@ interface TicketAssignmentDetail {
   id: number;
   assignedTo: string;
   assignedToCode: string;
-  assignedBy: string;
   assignedToId: number;
+  assignedToPhoto: string | null;
+  assignedBy: string;
   department: string;
   assignmentType: string;
   status: string;
@@ -119,6 +120,8 @@ interface TicketDetail {
   assignments:
   TicketAssignmentDetail[];
   status: TicketStatus;
+  createdByPhoto: string | null;
+  assigneePhoto: string | null;
   createdBy: string;
   originatingDepartment: string;
   targetDepartment: string;
@@ -137,11 +140,15 @@ interface TicketComment {
   id: number;
   author: string;
   authorCode: string;
+  authorPhoto: string | null;
   message: string;
   createdBy: number;
   createdAt: string;
   replies: TicketComment[];
+  // createdByUser: []
 }
+
+
 
 
 @Component({
@@ -174,6 +181,14 @@ export class TicketDetails implements OnInit {
       'Current User'
     );
   }
+  get currentUserProfile(): string {
+    return (
+      this.authService.currentUser()
+        ?.employeePhoto ??
+      'User Profile'
+    );
+  }
+
   pendingStatus: TicketUpdateStatus | null = null;
   ticket: TicketDetail =
     this.createEmptyTicket();
@@ -225,6 +240,15 @@ export class TicketDetails implements OnInit {
   
   reassignEmployeeSearch = '';
 
+  editingCommentId: number | null = null;
+  editingCommentText = '';
+
+  updatingCommentId: number | null = null;
+  deletingCommentId: number | null = null;
+
+  commentPendingDelete:
+    TicketComment | null = null;
+
   editTicketForm = {
     subject: '',
     description: '',
@@ -245,7 +269,6 @@ export class TicketDetails implements OnInit {
     if (!routeTicketId) {
       this.loadError =
         'Invalid ticket ID.';
-
       return;
     }
 
@@ -379,6 +402,9 @@ export class TicketDetails implements OnInit {
         comment.createdByUser
           ?.employee_name ??
         `Employee ${comment.created_by}`,
+      authorPhoto:
+        comment.createdByUser
+          ?.employeePhoto ?? null,
 
       authorCode:
         comment.createdByUser
@@ -488,6 +514,9 @@ export class TicketDetails implements OnInit {
             }
           >();
 
+        const employeePhotoBaseUrl =
+          response.ticket.base_url;
+        
         response.employees.data
           .forEach(employee => {
             employeeById.set(
@@ -529,12 +558,25 @@ export class TicketDetails implements OnInit {
                 id: assignment.id,
                 assignedToId:
                   assignment.assigned_to,
+                
                 assignedTo:
+                  assignment.assignedEmployee
+                    ?.employee_name ??
                   assignedTo?.name ??
                   `Employee ${assignment.assigned_to}`,
 
                 assignedToCode:
-                  assignedTo?.code ?? '',
+                  assignment.assignedEmployee
+                    ?.employee_code ??
+                  assignedTo?.code ??
+                  '',
+
+                assignedToPhoto:
+                  this.resolveEmployeePhotoUrl(
+                    assignment.assignedEmployee
+                      ?.employeePhoto,
+                    employeePhotoBaseUrl,
+                  ),
 
                 assignedBy:
                   assignedBy?.name ??
@@ -647,6 +689,18 @@ export class TicketDetails implements OnInit {
 
           description:
             apiTicket.description,
+          
+          createdByPhoto:
+            this.resolveEmployeePhotoUrl(
+              apiTicket.requester
+                ?.employeePhoto,
+              employeePhotoBaseUrl,
+            ),
+          
+          assigneePhoto:
+            currentAssignment
+              ?.assignedToPhoto ??
+            null,
           
           history: activityHistory,
 
@@ -852,6 +906,8 @@ export class TicketDetails implements OnInit {
       description: '',
       priority: 'Low',
       status: 'Open',
+      createdByPhoto: null,
+      assigneePhoto: null,
       createdBy: '',
       assignments: [],
       originatingDepartment: '',
@@ -1053,7 +1109,7 @@ export class TicketDetails implements OnInit {
     this.isReassignEmployeeDropdownOpen =
       true;
   }
-  
+
   reassignTicket(): void {
     if (
       !this.canReassignTicket ||
@@ -1228,6 +1284,49 @@ export class TicketDetails implements OnInit {
       });
   }
 
+  private resolveEmployeePhotoUrl(
+    employeePhoto:
+      string | null | undefined,
+    baseUrl:
+      string | null | undefined,
+  ): string | null {
+    if (!employeePhoto) {
+      return null;
+    }
+
+    if (
+      employeePhoto.startsWith(
+        'http://',
+      ) ||
+      employeePhoto.startsWith(
+        'https://',
+      )
+    ) {
+      return employeePhoto;
+    }
+
+    if (!baseUrl) {
+      return null;
+    }
+
+    const normalizedBaseUrl =
+      baseUrl.replace(
+        /\/$/,
+        '',
+      );
+
+    const normalizedPhotoPath =
+      employeePhoto.replace(
+        /^\//,
+        '',
+      );
+
+    return (
+      `${normalizedBaseUrl}/` +
+      normalizedPhotoPath
+    );
+  }
+  
   openEditModal(): void {
     if (!this.canEditTicket) {
       return;
@@ -1577,6 +1676,234 @@ export class TicketDetails implements OnInit {
       });
   }
 
+  canModifyComment(
+    comment: TicketComment,
+  ): boolean {
+    const currentUser =
+      this.authService.currentUser();
+
+    if (!currentUser) {
+      return false;
+    }
+
+    const isCommentCreator =
+      Number(currentUser.id) ===
+      Number(comment.createdBy);
+
+    if (!isCommentCreator) {
+      return false;
+    }
+
+    const createdTime =
+      new Date(
+        comment.createdAt,
+      ).getTime() -
+      5.5 * 60 * 60 * 1000;
+
+    if (
+      Number.isNaN(createdTime)
+    ) {
+      return false;
+    }
+
+    const fiveMinutes =
+      5 * 60 * 1000;
+
+    return (
+      Date.now() <=
+      createdTime + fiveMinutes
+    );
+  }
+
+  startEditingComment(
+    comment: TicketComment,
+  ): void {
+    if (
+      !this.canModifyComment(comment) ||
+      this.updatingCommentId !== null ||
+      this.deletingCommentId !== null
+    ) {
+      return;
+    }
+
+    this.editingCommentId =
+      comment.id;
+
+    this.editingCommentText =
+      comment.message;
+
+    this.commentError = '';
+    this.commentSuccess = '';
+  }
+
+  cancelEditingComment(): void {
+    if (
+      this.updatingCommentId !== null
+    ) {
+      return;
+    }
+
+    this.editingCommentId = null;
+    this.editingCommentText = '';
+  }
+
+  saveCommentUpdate(
+    comment: TicketComment,
+  ): void {
+    const updatedComment =
+      this.editingCommentText.trim();
+
+    if (
+      !this.canModifyComment(comment) ||
+      !updatedComment ||
+      this.updatingCommentId !== null
+    ) {
+      return;
+    }
+
+    this.updatingCommentId =
+      comment.id;
+
+    this.commentError = '';
+    this.commentSuccess = '';
+
+    this.ticketApiService
+      .updateTicketComment({
+        id:
+          comment.id,
+
+        comment:
+          updatedComment,
+      })
+      .subscribe({
+        next: response => {
+          this.updatingCommentId =
+            null;
+
+          if (!response.success) {
+            this.commentError =
+              response.message ||
+              'Unable to update comment.';
+
+            return;
+          }
+
+          this.editingCommentId =
+            null;
+
+          this.editingCommentText =
+            '';
+
+          this.commentSuccess =
+            response.message ||
+            'Comment updated successfully.';
+
+          this.loadTicketDetails(
+            this.ticket.id!,
+          );
+        },
+
+        error: (
+          error: HttpErrorResponse,
+        ) => {
+          this.updatingCommentId =
+            null;
+
+          this.commentError =
+            error.error?.message ||
+            'Unable to update comment.';
+        },
+      });
+  }
+
+  requestCommentDelete(
+    comment: TicketComment,
+  ): void {
+    if (
+      !this.canModifyComment(comment) ||
+      this.deletingCommentId !== null ||
+      this.updatingCommentId !== null
+    ) {
+      return;
+    }
+
+    this.commentPendingDelete =
+      comment;
+
+    this.commentError = '';
+  }
+
+  cancelCommentDelete(): void {
+    if (
+      this.deletingCommentId !== null
+    ) {
+      return;
+    }
+
+    this.commentPendingDelete =
+      null;
+  }
+
+  confirmCommentDelete(): void {
+    const comment =
+      this.commentPendingDelete;
+
+    if (
+      !comment ||
+      !this.canModifyComment(comment) ||
+      this.deletingCommentId !== null
+    ) {
+      return;
+    }
+
+    this.deletingCommentId =
+      comment.id;
+
+    this.commentError = '';
+    this.commentSuccess = '';
+
+    this.ticketApiService
+      .deleteTicketComment(
+        comment.id,
+      )
+      .subscribe({
+        next: response => {
+          this.deletingCommentId =
+            null;
+
+          if (!response.success) {
+            this.commentError =
+              response.message ||
+              'Unable to delete comment.';
+
+            return;
+          }
+
+          this.commentPendingDelete =
+            null;
+
+          this.commentSuccess =
+            response.message ||
+            'Comment deleted successfully.';
+
+          this.loadTicketDetails(
+            this.ticket.id!,
+          );
+        },
+
+        error: (
+          error: HttpErrorResponse,
+        ) => {
+          this.deletingCommentId =
+            null;
+
+          this.commentError =
+            error.error?.message ||
+            'Unable to delete comment.';
+        },
+      });
+  }
+
   getPriorityClass(priority: TicketPriority): string {
     return `priority-${priority.toLowerCase()}`;
   }
@@ -1637,14 +1964,82 @@ export class TicketDetails implements OnInit {
     return new Intl.DateTimeFormat(
       'en-IN',
       {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
+        timeZone:
+          'Asia/Kolkata',
+
+        day:
+          '2-digit',
+
+        month:
+          'short',
+
+        year:
+          'numeric',
+
+        hour:
+          '2-digit',
+
+        minute:
+          '2-digit',
+
+        hour12:
+          true,
       },
     ).format(date);
+  }
+
+  formatCommentDate(
+    dateValue:
+      string | null | undefined,
+  ): string {
+    if (!dateValue) {
+      return 'Not available';
+    }
+
+    const apiDate =
+      new Date(dateValue);
+
+    if (
+      Number.isNaN(
+        apiDate.getTime(),
+      )
+    ) {
+      return 'Not available';
+    }
+
+    // Temporary fix:
+    // Backend sends IST clock time marked with Z.
+    const correctedDate =
+      new Date(
+        apiDate.getTime() -
+        5.5 * 60 * 60 * 1000,
+      );
+
+    return new Intl.DateTimeFormat(
+      'en-IN',
+      {
+        timeZone:
+          'Asia/Kolkata',
+
+        day:
+          '2-digit',
+
+        month:
+          'short',
+
+        year:
+          'numeric',
+
+        hour:
+          '2-digit',
+
+        minute:
+          '2-digit',
+
+        hour12:
+          true,
+      },
+    ).format(correctedDate);
   }
 
   get canEditTicket(): boolean {

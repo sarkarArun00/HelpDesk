@@ -40,7 +40,9 @@ interface TicketReportRecord {
   assignee: string;
   createdBy: string;
   createdAt: string;
+  assignedAt: string | null;
   resolvedAt: string | null;
+  slaResolutionTime: string;
 }
 
 interface ReportSummaryItem {
@@ -322,6 +324,16 @@ export class TicketReports implements OnInit {
               this.mapTicketStatus(
                 ticket.status,
               );
+            
+            const assignedAt =
+              ticket.assigned_at ??
+              latestAssignment
+                ?.assigned_at ??
+              null;
+
+            const resolvedAt =
+              ticket.resolved_at ??
+              null;
 
             return {
               id: ticket.id,
@@ -374,11 +386,15 @@ export class TicketReports implements OnInit {
               createdAt:
                 ticket.created_at,
 
-              resolvedAt:
-                status === 'Resolved' ||
-                  status === 'Closed'
-                  ? ticket.updated_at
-                  : null,
+              assignedAt,
+
+              resolvedAt,
+
+              slaResolutionTime:
+                this.calculateResolutionTime(
+                  assignedAt,
+                  resolvedAt,
+                ),
             };
           })
           .sort(
@@ -426,6 +442,94 @@ export class TicketReports implements OnInit {
           'Unable to load ticket report.';
       },
     });
+  }
+
+  private calculateResolutionTime(
+    assignedAt:
+      string | null | undefined,
+    resolvedAt:
+      string | null | undefined,
+  ): string {
+    if (
+      !assignedAt ||
+      !resolvedAt
+    ) {
+      return 'Not resolved';
+    }
+
+    const assignedTime =
+      new Date(
+        assignedAt,
+      ).getTime();
+
+    const resolvedTime =
+      new Date(
+        resolvedAt,
+      ).getTime();
+
+    if (
+      Number.isNaN(assignedTime) ||
+      Number.isNaN(resolvedTime) ||
+      resolvedTime < assignedTime
+    ) {
+      return 'Not available';
+    }
+
+    const totalMinutes =
+      Math.floor(
+        (
+          resolvedTime -
+          assignedTime
+        ) /
+        (1000 * 60),
+      );
+
+    if (totalMinutes < 1) {
+      return 'Less than 1 minute';
+    }
+
+    const days =
+      Math.floor(
+        totalMinutes /
+        (24 * 60),
+      );
+
+    const hours =
+      Math.floor(
+        (
+          totalMinutes %
+          (24 * 60)
+        ) /
+        60,
+      );
+
+    const minutes =
+      totalMinutes % 60;
+
+    const parts: string[] = [];
+
+    if (days) {
+      parts.push(
+        `${days}d`,
+      );
+    }
+
+    if (hours) {
+      parts.push(
+        `${hours}h`,
+      );
+    }
+
+    if (
+      minutes ||
+      !parts.length
+    ) {
+      parts.push(
+        `${minutes}m`,
+      );
+    }
+
+    return parts.join(' ');
   }
 
   private mapTicketPriority(
@@ -518,6 +622,7 @@ export class TicketReports implements OnInit {
       'Created By',
       'Created At',
       'Resolved At',
+      'SLA Resolution Time',
     ];
 
     const rows = this.filteredTickets.map(ticket => [
@@ -534,6 +639,7 @@ export class TicketReports implements OnInit {
       ticket.resolvedAt
         ? this.formatDate(ticket.resolvedAt)
         : '',
+      ticket.slaResolutionTime,
     ]);
 
     const csvContent = [headers, ...rows]
@@ -547,6 +653,8 @@ export class TicketReports implements OnInit {
     const csvBlob = new Blob([csvContent], {
       type: 'text/csv;charset=utf-8;',
     });
+
+    
 
     const downloadUrl = URL.createObjectURL(csvBlob);
     const downloadLink = document.createElement('a');

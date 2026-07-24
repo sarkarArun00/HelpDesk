@@ -11,21 +11,26 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { OnInit } from '@angular/core';
 import { forkJoin } from 'rxjs';
 
+
 import { TicketCategoryApiService } from '../../../masters/services/ticket-category-api.service';
-import { TicketApiService, TicketListItem } from '../../../tickets/services/ticket-api.service';
+import {
+  TicketApiService, TicketListItem, TicketSummaryData,
+  TicketSummaryDateFilter,
+} from '../../../tickets/services/ticket-api.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 
 
-interface DashboardStat {
-  label: string;
-  value: number;
-  description: string;
-  icon: string;
-  type: 'total' | 'assigned' | 'progress' | 'resolved' | 'closed';
-}
+// interface DashboardStat {
+//   label: string;
+//   value: number;
+//   description: string;
+//   icon: string;
+//   type: 'total' | 'assigned' | 'progress' | 'resolved' | 'closed';
+// }
 
 interface QueueSummary {
   label: string;
@@ -54,9 +59,27 @@ interface RecentTicket {
   updatedAt: string;
 }
 
+interface DashboardStat {
+  label: string;
+  value: number;
+  description: string;
+  icon: string;
+  type:
+  | 'total'
+  | 'open'
+  | 'assigned'
+  | 'progress'
+  | 'resolved'
+  | 'closed';
+}
+
 @Component({
   selector: 'app-dashboard',
-  imports: [MatButtonModule, RouterLink],
+  imports: [
+    MatButtonModule,
+    RouterLink,
+    FormsModule,
+  ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -70,62 +93,202 @@ export class Dashboard
 
   isLoadingTickets = false;
 
+  selectedSummaryDateFilter:
+    TicketSummaryDateFilter =
+    '7-DAYS';
   ticketLoadError = '';
-  readonly statistics: DashboardStat[] = [
-    {
-      label: 'Total Tickets',
-      value: 128,
-      description: 'All tickets visible to you',
-      icon: '▦',
-      type: 'total',
-    },
-    {
-      label: 'Assigned',
-      value: 24,
-      description: 'Waiting to be processed',
-      icon: '✓',
-      type: 'assigned',
-    },
-    {
-      label: 'In Progress',
-      value: 18,
-      description: 'Currently being handled',
-      icon: '↻',
-      type: 'progress',
-    },
-    {
-      label: 'Resolved',
-      value: 63,
-      description: 'Resolution has been submitted',
-      icon: '✓',
-      type: 'resolved',
-    },
-    {
-      label: 'Closed',
-      value: 63,
-      description: 'Resolution has been submitted',
-      icon: '✓',
-      type: 'closed',
-    },
-  ];
 
-  readonly queueSummaries: QueueSummary[] = [
-    {
-      label: 'Assigned to Me',
-      value: 12,
-      description: 'Tickets currently assigned to you',
-    },
-    {
-      label: 'Raised by Me',
-      value: 8,
-      description: 'Tickets currently Raised by you',
-    },
-    {
-      label: 'Awaiting Confirmation',
-      value: 5,
-      description: 'Resolved tickets awaiting creator confirmation',
-    },
-  ];
+  get statistics(): DashboardStat[] {
+    return [
+      {
+        label:
+          'Total Tickets',
+
+        value:
+          this.ticketSummary
+            .totalTickets,
+
+        description:
+          'All tickets available to you',
+
+        icon:
+          '▦',
+
+        type:
+          'total',
+      },
+      {
+        label:
+          'Open',
+
+        value:
+          this.ticketSummary
+            .openTickets,
+
+        description:
+          'Tickets waiting for assignment',
+
+        icon:
+          '○',
+
+        type:
+          'open',
+      },
+      {
+        label:
+          'Assigned',
+
+        value:
+          this.ticketSummary
+            .assignedTickets,
+
+        description:
+          'Tickets assigned for processing',
+
+        icon:
+          '✓',
+
+        type:
+          'assigned',
+      },
+      {
+        label:
+          'In Progress',
+
+        value:
+          this.ticketSummary
+            .inProgressTickets,
+
+        description:
+          'Tickets currently being handled',
+
+        icon:
+          '↻',
+
+        type:
+          'progress',
+      },
+      {
+        label:
+          'Resolved',
+
+        value:
+          this.ticketSummary
+            .resolvedTickets,
+
+        description:
+          'Resolution submitted',
+
+        icon:
+          '✓',
+
+        type:
+          'resolved',
+      },
+      {
+        label:
+          'Closed',
+
+        value:
+          this.ticketSummary
+            .closedTickets,
+
+        description:
+          'Tickets successfully closed',
+
+        icon:
+          '⊘',
+
+        type:
+          'closed',
+      },
+    ];
+  }
+
+  get queueSummaries():
+    QueueSummary[] {
+    return [
+      {
+        label:
+          'Assigned to Me',
+
+        value:
+          this.ticketSummary
+            .assignedToMeTickets,
+
+        description:
+          'Tickets currently assigned to you',
+      },
+      {
+        label:
+          'Raised by Me',
+
+        value:
+          this.ticketSummary
+            .raisedByMeTickets,
+
+        description:
+          'Tickets raised by you',
+      },
+      {
+        label:
+          'Awaiting Confirmation',
+
+        value:
+          this.ticketSummary
+            .awaitingConfirmationTickets,
+
+        description:
+          'Resolved tickets awaiting creator confirmation',
+      },
+    ];
+  }
+
+  readonly summaryDateFilters: {
+    label: string;
+    value: TicketSummaryDateFilter;
+  }[] = [
+      {
+        label: 'Last 7 Days',
+        value: '7-DAYS',
+      },
+      {
+        label: 'Last 15 Days',
+        value: '15-DAYS',
+      },
+      {
+        label: 'Last 1 Month',
+        value: '1-MONTH',
+      },
+      {
+        label: 'Last 3 Months',
+        value: '3-MONTH',
+      },
+      {
+        label: 'Last 6 Months',
+        value: '6-MONTH',
+      },
+      {
+        label: 'All Time',
+        value: 'ALL',
+      },
+    ];
+  
+  ticketSummary:
+    TicketSummaryData = {
+      totalTickets: 0,
+      openTickets: 0,
+      assignedTickets: 0,
+      inProgressTickets: 0,
+      resolvedTickets: 0,
+      closedTickets: 0,
+      awaitingConfirmationTickets: 0,
+      raisedByMeTickets: 0,
+      assignedToMeTickets: 0,
+    };
+  
+  isLoadingSummary = false;
+  summaryLoadError = '';
 
   recentTickets: RecentTicket[] = [];
 
@@ -152,6 +315,7 @@ constructor() {
 
   
   ngOnInit(): void {
+    this.loadTicketSummary();
     this.loadDashboardTickets();
   }
 
@@ -297,6 +461,59 @@ constructor() {
           'Unable to load dashboard tickets.';
       },
     });
+  }
+
+  loadTicketSummary(): void {
+    this.isLoadingSummary = true;
+    this.summaryLoadError = '';
+
+    this.ticketApiService
+      .getTicketSummaryData({
+        dateFilter:
+          this.selectedSummaryDateFilter,
+
+        department_id:
+          null,
+
+        category_id:
+          null,
+
+        centre_id:
+          null,
+
+        priority_id:
+          null,
+      })
+      .subscribe({
+        next: response => {
+          this.isLoadingSummary = false;
+
+          if (!response.success) {
+            this.summaryLoadError =
+              response.message ||
+              'Unable to load ticket summary.';
+
+            return;
+          }
+
+          this.ticketSummary =
+            response.data;
+        },
+
+        error: (
+          error: HttpErrorResponse,
+        ) => {
+          this.isLoadingSummary = false;
+
+          this.summaryLoadError =
+            error.error?.message ||
+            'Unable to load ticket summary.';
+        },
+      });
+  }
+
+  onSummaryDateFilterChange(): void {
+    this.loadTicketSummary();
   }
 
   private mapPriority(

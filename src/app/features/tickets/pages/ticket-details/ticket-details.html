@@ -250,12 +250,12 @@
                 <strong>{{ ticket.centre }}</strong>
               </article>
 
-              <article class="information-item">
+              <!-- <article class="information-item">
                 <span>Originating Department</span>
                 <strong>
                   {{ ticket.originatingDepartment }}
                 </strong>
-              </article>
+              </article> -->
 
               <article class="information-item">
                 <span>Target Department</span>
@@ -358,10 +358,36 @@
 
           <div class="card-body-custom">
             @if (ticket.status !== 'Closed') {
+              @if (commentError) {
+                <div class="alert alert-danger comment-alert">
+                  <i class="bi bi-exclamation-circle-fill"></i>
+                  {{ commentError }}
+                </div>
+              }
+
+              @if (commentSuccess) {
+                <div class="alert alert-success comment-alert">
+                  <i class="bi bi-check-circle-fill"></i>
+                  {{ commentSuccess }}
+                </div>
+              }
               <div class="comment-form">
-                <span class="comment-avatar">
+                <!-- <img class="comment-avatar" [src]="this.currentUserProfile" alt=""> -->
+                <!-- <span class="comment-avatar">
                   {{ getInitials(currentUserName) }}
-                </span>
+                </span> -->
+
+                @if (this.currentUserProfile) {
+                  <img
+                    class="comment-avatar comment-avatar-image"
+                    [src]="this.currentUserProfile"
+                    [alt]="this.currentUserProfile"
+                  />
+                } @else {
+                  <span class="comment-avatar">
+                    {{ getInitials(currentUserName) }}
+                  </span>
+                }
 
                 <div class="comment-input-area">
                   <textarea
@@ -378,44 +404,187 @@
                     </span>
 
                     <button
-                      type="button"
-                      class="btn add-comment-button"
-                      [disabled]="!newComment.trim()"
-                      (click)="addComment()"
-                    >
+                    type="button"
+                    class="btn add-comment-button"
+                    [disabled]="
+                      !newComment.trim() ||
+                      isAddingComment
+                    "
+                    (click)="addComment()"
+                  >
+                    @if (isAddingComment) {
+                      <span
+                        class="spinner-border spinner-border-sm"
+                        aria-hidden="true"
+                      ></span>
+                      Sending...
+                    } @else {
                       <i class="bi bi-send"></i>
                       Add Comment
-                    </button>
+                    }
+                  </button>
                   </div>
                 </div>
               </div>
             }
 
             <div class="comments-list">
-              @for (
-                comment of ticket.comments;
-                track comment.id
-              ) {
-                <article class="comment-item">
-                  <span class="comment-avatar">
-                    {{ getInitials(comment.author) }}
-                  </span>
+              @if (ticket.comments.length) {
+                @for (
+                  comment of ticket.comments;
+                  track comment.id
+                ) {
+                  <article class="comment-item">
+                    @if (comment.authorPhoto) {
+                    <img
+                      class="comment-avatar comment-avatar-image"
+                      [src]="comment.authorPhoto"
+                      [alt]="comment.author"
+                    />
+                  } @else {
+                    <span class="comment-avatar">
+                      {{ getInitials(comment.author) }}
+                    </span>
+                  }
 
-                  <div class="comment-content">
-                    <header>
-                      <div>
-                        <strong>{{ comment.author }}</strong>
-                        <span>{{ comment.authorCode }}</span>
-                      </div>
+                    <div class="comment-content">
+                      <header>
+                        <div>
+                          <strong>
+                            {{ comment.author }}
+                          </strong>
 
-                      <time>
-                        {{ formatDate(comment.createdAt) }}
-                      </time>
-                    </header>
+                          <span>
+                            {{ comment.authorCode }}
+                          </span>
+                        </div>
 
-                    <p>{{ comment.message }}</p>
-                  </div>
-                </article>
+                        <div class="comment-meta">
+                          <time>
+                            {{ formatCommentDate(comment.createdAt) }}
+                          </time>
+
+                          @if (
+                            canModifyComment(comment)
+                          ) {
+                            <div class="comment-actions">
+                              <button
+                                type="button"
+                                class="comment-action-button edit"
+                                aria-label="Edit comment"
+                                title="Edit comment"
+                                [disabled]="
+                                  updatingCommentId !== null ||
+                                  deletingCommentId !== null
+                                "
+                                (click)="
+                                  startEditingComment(comment)
+                                "
+                              >
+                                <i class="bi bi-pencil"></i>
+                              </button>
+
+                              <button
+                                type="button"
+                                class="comment-action-button delete"
+                                aria-label="Delete comment"
+                                title="Delete comment"
+                                [disabled]="
+                                  updatingCommentId !== null ||
+                                  deletingCommentId !== null
+                                "
+                                (click)="
+                                  requestCommentDelete(comment)
+                                "
+                              >
+                                <i class="bi bi-trash"></i>
+                              </button>
+                            </div>
+                          }
+                        </div>
+                      </header>
+
+                      @if (
+                        editingCommentId === comment.id
+                      ) {
+                        <div class="comment-edit-form">
+                          <textarea
+                            class="form-control"
+                            rows="3"
+                            maxlength="1000"
+                            [(ngModel)]="
+                              editingCommentText
+                            "
+                          ></textarea>
+
+                          <div class="comment-edit-footer">
+                            <span>
+                              {{
+                                editingCommentText.length
+                              }}/1000
+                            </span>
+
+                            <div>
+                              <button
+                                type="button"
+                                class="btn cancel-comment-edit"
+                                [disabled]="
+                                  updatingCommentId ===
+                                  comment.id
+                                "
+                                (click)="
+                                  cancelEditingComment()
+                                "
+                              >
+                                Cancel
+                              </button>
+
+                              <button
+                                type="button"
+                                class="btn save-comment-edit"
+                                [disabled]="
+                                  !editingCommentText.trim() ||
+                                  updatingCommentId ===
+                                    comment.id
+                                "
+                                (click)="
+                                  saveCommentUpdate(comment)
+                                "
+                              >
+                                @if (
+                                  updatingCommentId ===
+                                  comment.id
+                                ) {
+                                  <span
+                                    class="
+                                      spinner-border
+                                      spinner-border-sm
+                                    "
+                                    aria-hidden="true"
+                                  ></span>
+                                  Updating...
+                                } @else {
+                                  <i class="bi bi-check-lg"></i>
+                                  Save
+                                }
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      } @else {
+                        <p>{{ comment.message }}</p>
+                      }
+                    </div>
+                  </article>
+                }
+              } @else {
+                <div class="comments-empty-state">
+                  <i class="bi bi-chat-left-text"></i>
+
+                  <p>
+                    No comments have been added yet.
+                  </p>
+                </div>
               }
             </div>
           </div>
@@ -433,9 +602,21 @@
 
           <div class="card-body-custom people-list">
             <article class="person-item">
+              @if (ticket.createdByPhoto) {
+              <img
+                class="
+                  person-avatar
+                  person-avatar-image
+                  creator-avatar
+                "
+                [src]="ticket.createdByPhoto"
+                [alt]="ticket.createdBy"
+              />
+            } @else {
               <span class="person-avatar creator-avatar">
                 {{ getInitials(ticket.createdBy) }}
               </span>
+            }
 
               <div>
                 <span>Created By</span>
@@ -447,9 +628,21 @@
             </article>
 
             <article class="person-item">
-              <span class="person-avatar assignee-avatar">
-                {{ getInitials(ticket.assignee) }}
-              </span>
+              @if (ticket.assigneePhoto) {
+                <img
+                  class="
+                    person-avatar
+                    person-avatar-image
+                    assignee-avatar
+                  "
+                  [src]="ticket.assigneePhoto"
+                  [alt]="ticket.assignee"
+                />
+              } @else {
+                <span class="person-avatar assignee-avatar">
+                  {{ getInitials(ticket.assignee) }}
+                </span>
+              }
 
               <div>
                 <span>Assigned To</span>
@@ -762,209 +955,279 @@
   </section>
 }
 
-@if (isReassignModalVisible) {
-  <div
-    class="reassign-modal-backdrop"
-    (click)="closeReassignModal()"
-  >
-    <section
-      class="reassign-modal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="reassignTicketTitle"
+    @if (isReassignModalVisible) {
+      <div
+        class="reassign-modal-backdrop"
+        (click)="closeReassignModal()"
+      >
+        <section
+          class="reassign-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="reassignTicketTitle"
+          (click)="$event.stopPropagation()"
+        >
+          <header class="reassign-modal-header">
+            <div>
+              <span class="modal-eyebrow">
+                TICKET ASSIGNMENT
+              </span>
+
+              <h2 id="reassignTicketTitle">
+                Reassign Ticket
+              </h2>
+
+              <p>
+                {{ ticket.ticketId }} —
+                {{ ticket.subject }}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              class="modal-close-button"
+              aria-label="Close"
+              [disabled]="isReassigningTicket"
+              (click)="closeReassignModal()"
+            >
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </header>
+
+          <div class="reassign-modal-body">
+            @if (reassignError) {
+              <div class="alert alert-danger">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                {{ reassignError }}
+              </div>
+            }
+
+            @if (isLoadingReassignEmployees) {
+              <div class="employee-loading-state">
+                <span
+                  class="spinner-border spinner-border-sm"
+                  aria-hidden="true"
+                ></span>
+
+                Loading employees...
+              </div>
+            } @else {
+              <div class="form-group">
+                <label
+                  for="reassignEmployee"
+                  class="form-label"
+                >
+                  Assign to employee
+                  <span class="required">*</span>
+                </label>
+
+              <div
+      class="searchable-employee-dropdown"
       (click)="$event.stopPropagation()"
     >
-      <header class="reassign-modal-header">
-        <div>
-          <span class="modal-eyebrow">
-            TICKET ASSIGNMENT
-          </span>
+      <div class="employee-search-wrapper">
+        <i class="bi bi-search"></i>
 
-          <h2 id="reassignTicketTitle">
-            Reassign Ticket
-          </h2>
-
-          <p>
-            {{ ticket.ticketId }} —
-            {{ ticket.subject }}
-          </p>
-        </div>
-
-        <button
-          type="button"
-          class="modal-close-button"
-          aria-label="Close"
+        <input
+          type="search"
+          class="form-control employee-search-input"
+          placeholder="Search employee by name, code or department"
+          [(ngModel)]="reassignEmployeeSearch"
           [disabled]="isReassigningTicket"
-          (click)="closeReassignModal()"
-        >
-          <i class="bi bi-x-lg"></i>
-        </button>
-      </header>
+          autocomplete="off"
+          (focus)="openReassignEmployeeDropdown()"
+          (input)="
+            selectedReassignEmployeeId = 0;
+            isReassignEmployeeDropdownOpen = true
+          "
+        />
 
-      <div class="reassign-modal-body">
-        @if (reassignError) {
-          <div class="alert alert-danger">
-            <i class="bi bi-exclamation-circle-fill"></i>
-            {{ reassignError }}
-          </div>
-        }
-
-        @if (isLoadingReassignEmployees) {
-          <div class="employee-loading-state">
-            <span
-              class="spinner-border spinner-border-sm"
-              aria-hidden="true"
-            ></span>
-
-            Loading employees...
-          </div>
-        } @else {
-          <div class="form-group">
-            <label
-              for="reassignEmployee"
-              class="form-label"
-            >
-              Assign to employee
-              <span class="required">*</span>
-            </label>
-
-          <div
-  class="searchable-employee-dropdown"
-  (click)="$event.stopPropagation()"
->
-  <div class="employee-search-wrapper">
-    <i class="bi bi-search"></i>
-
-    <input
-      type="search"
-      class="form-control employee-search-input"
-      placeholder="Search employee by name, code or department"
-      [(ngModel)]="reassignEmployeeSearch"
-      [disabled]="isReassigningTicket"
-      autocomplete="off"
-      (focus)="openReassignEmployeeDropdown()"
-      (input)="
-        selectedReassignEmployeeId = 0;
-        isReassignEmployeeDropdownOpen = true
-      "
-    />
-
-    @if (reassignEmployeeSearch) {
-      <button
-        type="button"
-        class="clear-employee-search"
-        aria-label="Clear employee"
-        (click)="clearReassignEmployee()"
-      >
-        <i class="bi bi-x-lg"></i>
-      </button>
-    }
-  </div>
-
-  @if (isReassignEmployeeDropdownOpen) {
-    <div class="employee-dropdown-menu">
-      @if (filteredReassignEmployees.length) {
-        @for (
-          employee of filteredReassignEmployees;
-          track employee.id
-        ) {
+        @if (reassignEmployeeSearch) {
           <button
             type="button"
-            class="employee-dropdown-option"
-            [class.selected]="
-              selectedReassignEmployeeId === employee.id
-            "
-            (click)="selectReassignEmployee(employee)"
+            class="clear-employee-search"
+            aria-label="Clear employee"
+            (click)="clearReassignEmployee()"
           >
-            <span class="employee-option-avatar">
-              {{
-                employee.employee_name
-                  .charAt(0)
-                  .toUpperCase()
-              }}
-            </span>
-
-            <span class="employee-option-details">
-              <strong>
-                {{ employee.employee_name }}
-              </strong>
-
-              <small>
-                {{ employee.employee_code }}
-
-                @if (employee.departments.length) {
-                  · {{ employee.departments.join(', ') }}
-                }
-              </small>
-            </span>
-
-            @if (
-              selectedReassignEmployeeId === employee.id
-            ) {
-              <i class="bi bi-check-lg"></i>
-            }
+            <i class="bi bi-x-lg"></i>
           </button>
-        }
-      } @else {
-        <div class="employee-dropdown-empty">
-          No matching employee found.
-        </div>
-      }
-    </div>
-  }
-</div>
-
-          @if (
-            reassignEmployeeSearch &&
-            !filteredReassignEmployees.length
-          ) {
-            <!-- <p class="empty-employee-message">
-              No employee matches
-              “{{ reassignEmployeeSearch }}”.
-            </p> -->
-          } @else if (!reassignEmployees.length) {
-            <p class="empty-employee-message">
-              No active employees are available for reassignment.
-            </p>
-          }
-          </div>
         }
       </div>
 
-      <footer class="reassign-modal-footer">
-        <button
-          type="button"
-          class="btn cancel-button"
-          [disabled]="isReassigningTicket"
-          (click)="closeReassignModal()"
-        >
-          Cancel
-        </button>
+      @if (isReassignEmployeeDropdownOpen) {
+        <div class="employee-dropdown-menu">
+          @if (filteredReassignEmployees.length) {
+            @for (
+              employee of filteredReassignEmployees;
+              track employee.id
+            ) {
+              <button
+                type="button"
+                class="employee-dropdown-option"
+                [class.selected]="
+                  selectedReassignEmployeeId === employee.id
+                "
+                (click)="selectReassignEmployee(employee)"
+              >
+                <span class="employee-option-avatar">
+                  {{
+                    employee.employee_name
+                      .charAt(0)
+                      .toUpperCase()
+                  }}
+                </span>
 
-        <button
-          type="button"
-          class="btn confirm-reassign-button"
-          [disabled]="
-            isLoadingReassignEmployees ||
-            isReassigningTicket ||
-            !selectedReassignEmployeeId
-          "
-          (click)="reassignTicket()"
-        >
-          @if (isReassigningTicket) {
-            <span
-              class="spinner-border spinner-border-sm"
-              aria-hidden="true"
-            ></span>
-            Reassigning...
+                <span class="employee-option-details">
+                  <strong>
+                    {{ employee.employee_name }}
+                  </strong>
+
+                  <small>
+                    {{ employee.employee_code }}
+
+                    @if (employee.departments.length) {
+                      · {{ employee.departments.join(', ') }}
+                    }
+                  </small>
+                </span>
+
+                @if (
+                  selectedReassignEmployeeId === employee.id
+                ) {
+                  <i class="bi bi-check-lg"></i>
+                }
+              </button>
+            }
           } @else {
-            <i class="bi bi-person-check"></i>
-            Confirm Reassignment
+            <div class="employee-dropdown-empty">
+              No matching employee found.
+            </div>
           }
-        </button>
-      </footer>
-    </section>
-  </div>
+        </div>
+      }
+    </div>
+
+              @if (
+                reassignEmployeeSearch &&
+                !filteredReassignEmployees.length
+              ) {
+                <!-- <p class="empty-employee-message">
+                  No employee matches
+                  “{{ reassignEmployeeSearch }}”.
+                </p> -->
+              } @else if (!reassignEmployees.length) {
+                <p class="empty-employee-message">
+                  No active employees are available for reassignment.
+                </p>
+              }
+              </div>
+            }
+          </div>
+
+          <footer class="reassign-modal-footer">
+            <button
+              type="button"
+              class="btn cancel-button"
+              [disabled]="isReassigningTicket"
+              (click)="closeReassignModal()"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              class="btn confirm-reassign-button"
+              [disabled]="
+                isLoadingReassignEmployees ||
+                isReassigningTicket ||
+                !selectedReassignEmployeeId
+              "
+              (click)="reassignTicket()"
+            >
+              @if (isReassigningTicket) {
+                <span
+                  class="spinner-border spinner-border-sm"
+                  aria-hidden="true"
+                ></span>
+                Reassigning...
+              } @else {
+                <i class="bi bi-person-check"></i>
+                Confirm Reassignment
+              }
+            </button>
+          </footer>
+        </section>
+      </div>
+    }
+
+    @if (commentPendingDelete) {
+    <div
+      class="comment-delete-backdrop"
+      (click)="cancelCommentDelete()"
+    >
+      <section
+        class="comment-delete-modal"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="deleteCommentTitle"
+        (click)="$event.stopPropagation()"
+      >
+        <span class="delete-modal-icon">
+          <i class="bi bi-trash"></i>
+        </span>
+
+        <h2 id="deleteCommentTitle">
+          Delete comment?
+        </h2>
+
+        <p>
+          This comment will be permanently deleted.
+          This action cannot be undone.
+        </p>
+
+        <blockquote>
+          {{ commentPendingDelete.message }}
+        </blockquote>
+
+        <div class="delete-modal-actions">
+          <button
+            type="button"
+            class="btn cancel-delete-button"
+            [disabled]="
+              deletingCommentId !== null
+            "
+            (click)="cancelCommentDelete()"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="button"
+            class="btn confirm-delete-button"
+            [disabled]="
+              deletingCommentId !== null
+            "
+            (click)="confirmCommentDelete()"
+          >
+            @if (
+              deletingCommentId !== null
+            ) {
+              <span
+                class="
+                  spinner-border
+                  spinner-border-sm
+                "
+                aria-hidden="true"
+              ></span>
+              Deleting...
+            } @else {
+              <i class="bi bi-trash"></i>
+              Delete Comment
+            }
+          </button>
+        </div>
+      </section>
+    </div>
 }
   </section>
 }

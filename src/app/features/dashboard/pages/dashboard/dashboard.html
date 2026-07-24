@@ -6,10 +6,46 @@
             <p>Monitor ticket activity and department workload.</p>
         </div>
 
-        <a mat-flat-button routerLink="/tickets/raise" class="raise-ticket-button">
+        <!-- <a mat-flat-button routerLink="/tickets/raise" class="raise-ticket-button">
+            <span class="button-plus">+</span>
+            Raise Ticket
+        </a> -->
+        <div class="dashboard-header-actions">
+        <div class="summary-date-filter">
+            <label for="summaryDateFilter">
+            Summary period
+            </label>
+
+            <select
+            id="summaryDateFilter"
+            [(ngModel)]="
+                selectedSummaryDateFilter
+            "
+            [disabled]="isLoadingSummary"
+            (ngModelChange)="
+                onSummaryDateFilterChange()
+            "
+            >
+            @for (
+                filter of summaryDateFilters;
+                track filter.value
+            ) {
+                <option [value]="filter.value">
+                {{ filter.label }}
+                </option>
+            }
+            </select>
+        </div>
+
+        <a
+            mat-flat-button
+            routerLink="/tickets/raise"
+            class="raise-ticket-button"
+        >
             <span class="button-plus">+</span>
             Raise Ticket
         </a>
+        </div>
     </header>
 
     @if (accessDenied) {
@@ -41,6 +77,20 @@
   </div>
 }
 
+@if (summaryLoadError) {
+  <div class="summary-error-alert">
+    <i class="bi bi-exclamation-circle"></i>
+
+    <span>{{ summaryLoadError }}</span>
+
+    <button
+      type="button"
+      (click)="loadTicketSummary()"
+    >
+      Retry
+    </button>
+  </div>
+}
     <section class="statistics-grid" aria-label="Ticket statistics">
         @for (statistic of statistics; track statistic.label) {
         <article class="statistic-card" [class]="'statistic-card statistic-' + statistic.type">
@@ -55,7 +105,17 @@
             </div>
 
             <strong class="statistic-value">
+            @if (isLoadingSummary) {
+                <span
+                class="
+                    spinner-border
+                    spinner-border-sm
+                "
+                aria-hidden="true"
+                ></span>
+            } @else {
                 {{ statistic.value }}
+            }
             </strong>
 
             <p>{{ statistic.description }}</p>

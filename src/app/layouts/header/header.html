@@ -86,6 +86,39 @@
       </header>
 
       <div class="notification-list">
+        @if (isLoadingNotifications()) {
+  <div class="notification-state">
+    <span
+      class="
+        spinner-border
+        spinner-border-sm
+      "
+      aria-hidden="true"
+    ></span>
+
+    <span>
+      Loading notifications...
+    </span>
+  </div>
+} @else if (notificationLoadError()) {
+  <div class="notification-state error">
+    <i class="bi bi-exclamation-circle"></i>
+
+    <span>
+      {{ notificationLoadError() }}
+    </span>
+
+    <button
+      type="button"
+      (click)="
+        notificationService
+          .loadNotifications()
+      "
+    >
+      Retry
+    </button>
+  </div>
+} @else {
         @if (notifications().length) {
           @for (
             notification of notifications();
@@ -160,13 +193,13 @@
                 </span>
 
                 <span class="notification-meta">
-                  @if (notification.ticketId) {
+                  <!-- @if (notification.ticketId) {
                     <b>
                       {{ notification.ticketId }}
                     </b>
 
                     <span>•</span>
-                  }
+                  } -->
 
                   <time>
                     {{
@@ -192,6 +225,46 @@
               </button>
             </a>
           }
+
+          @if (hasMoreNotifications()) {
+  <div class="notification-load-more">
+    <button
+      type="button"
+      [disabled]="
+        isLoadingMoreNotifications()
+      "
+      (click)="
+        notificationService
+          .loadMoreNotifications()
+      "
+    >
+      @if (
+        isLoadingMoreNotifications()
+      ) {
+        <span
+          class="
+            spinner-border
+            spinner-border-sm
+          "
+          aria-hidden="true"
+        ></span>
+
+        Loading...
+      } @else {
+        Load more notifications
+      }
+    </button>
+
+    <span>
+      Showing
+      {{ notifications().length }}
+      of
+      {{
+        notificationPagination().total
+      }}
+    </span>
+  </div>
+}
         } @else {
           <div class="empty-notification-state">
             <span>
@@ -204,6 +277,7 @@
               New ticket activity will appear here.
             </p>
           </div>
+        }
         }
       </div>
     </section>
