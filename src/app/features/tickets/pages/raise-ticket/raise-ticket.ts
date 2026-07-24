@@ -10,7 +10,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TicketCategoryApiService } from '../../../masters/services/ticket-category-api.service';
 import { TicketApiService } from '../../services/ticket-api.service';
 
@@ -55,6 +55,8 @@ export class RaiseTicket
     inject(TicketCategoryApiService);
   private readonly formBuilder = inject(FormBuilder);
 
+  private readonly router =
+    inject(Router);
 
 
   isLoadingMasters = false;
@@ -527,8 +529,11 @@ private readonly ticketStore =
           this.submissionMessage =
             response.message ||
             'Ticket created successfully.';
-
+          
           this.resetForm(false);
+          void this.router.navigate([
+            '/tickets/my-raised',
+          ]);
         },
 
         error: (

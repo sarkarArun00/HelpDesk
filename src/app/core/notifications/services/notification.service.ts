@@ -7,11 +7,85 @@ import {
   signal,
 } from '@angular/core';
 
+import {
+  HttpClient,
+} from '@angular/common/http';
+
+import {
+  Observable,
+} from 'rxjs';
+
+import {
+  environment,
+} from '../../../../environments/environment';
+
 import { AuthService } from '../../auth/services/auth.service';
 import {
   CreateNotificationPayload,
   ServiceDeskNotification,
 } from '../models/notification.model';
+
+
+
+
+
+export interface NotificationApiItem {
+  id: number;
+  userId: number;
+  senderId: number | null;
+  ticketId: number | null;
+  title: string;
+  message: string;
+  type: string;
+  isRead: boolean;
+  readAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface NotificationPagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface NotificationListResponse {
+  success: boolean;
+  message: string;
+  unreadCount: number;
+  total: number;
+  data: NotificationApiItem[];
+  pagination: NotificationPagination;
+}
+
+export interface NotificationUnreadCountResponse {
+  success: boolean;
+  message: string;
+  unreadCount: number;
+}
+
+export interface NotificationActionResponse {
+  success: boolean;
+  message: string;
+}
+
+export type NotificationApiType =
+  | 'STATUS_CHANGE'
+  | 'TICKET_CREATED'
+  | 'TICKET_ASSIGNED'
+  | 'COMMENT'
+  | 'SYSTEM';
+
+export interface NotificationListPayload {
+  isRead?: boolean;
+  type?: NotificationApiType;
+  page: number;
+  limit: number;
+}
+
+
+
 
 @Injectable({
   providedIn: 'root',
@@ -19,6 +93,62 @@ import {
 export class NotificationService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly authService = inject(AuthService);
+
+  private readonly http =
+    inject(HttpClient);
+
+  private readonly apiBaseUrl =
+    environment.apiBaseUrl;
+  
+  private readonly unreadCountSignal =
+    signal(0);
+
+  private readonly loadingSignal =
+    signal(false);
+
+  private readonly loadErrorSignal =
+    signal('');
+
+  readonly isLoading =
+    this.loadingSignal.asReadonly();
+
+  readonly loadError =
+    this.loadErrorSignal.asReadonly();
+  
+  private readonly paginationSignal =
+    signal<NotificationPagination>({
+      total: 0,
+      page: 1,
+      limit: 10,
+      totalPages: 1,
+    });
+
+  private readonly loadingMoreSignal =
+    signal(false);
+
+  private activeIsRead:
+    boolean | undefined;
+
+  private activeType:
+    NotificationApiType | undefined;
+
+  readonly pagination =
+    this.paginationSignal.asReadonly();
+
+  readonly isLoadingMore =
+    this.loadingMoreSignal.asReadonly();
+
+  readonly hasMoreNotifications =
+    computed(() => {
+      const pagination =
+        this.paginationSignal();
+
+      return (
+        pagination.page <
+        pagination.totalPages
+      );
+    });
+  
 
   private readonly storageKey =
     'isd-service-desk-notifications';
@@ -32,6 +162,11 @@ export class NotificationService {
   readonly currentUserNotifications = computed(() => {
     const currentUser =
       this.authService.currentUser();
+    
+    
+    
+    
+    
 
     if (!currentUser) {
       return [];
@@ -54,17 +189,199 @@ export class NotificationService {
       );
   });
 
-  readonly unreadCount = computed(
-    () =>
-      this.currentUserNotifications().filter(
-        notification => !notification.isRead,
-      ).length,
-  );
+  readonly unreadCount =
+    this.unreadCountSignal.asReadonly();
 
   constructor() {
-    this.notificationsSignal.set(
-      this.restoreNotifications(),
+    this.notificationsSignal.set([]);
+  }
+
+  
+  loadNotifications(
+    page = 1,
+    limit = 10,
+    isRead?: boolean,
+    type?: NotificationApiType,
+    append = false,
+  ): void {
+    if (append) {
+      this.loadingMoreSignal.set(true);
+    } else {
+      this.loadingSignal.set(true);
+      this.loadErrorSignal.set('');
+
+      this.activeIsRead =
+        isRead;
+
+      this.activeType =
+        type;
+    }
+
+    this.getNotificationList({
+      page,
+      limit,
+      ...(isRead !== undefined
+        ? {
+          isRead,
+        }
+        : {}),
+      ...(type
+        ? {
+          type,
+        }
+        : {}),
+    }).subscribe({
+      next: response => {
+        this.loadingSignal.set(false);
+        this.loadingMoreSignal.set(false);
+
+        if (!response.success) {
+          this.loadErrorSignal.set(
+            response.message ||
+            'Unable to load notifications.',
+          );
+
+          return;
+        }
+
+        const notifications =
+          response.data.map(item => ({
+            id:
+              String(item.id),
+
+            recipientUserId:
+              item.userId,
+
+            type:
+              this.mapNotificationType(
+                item.type,
+              ),
+
+            title:
+              item.title,
+
+            message:
+              item.message,
+
+            ticketId:
+              item.ticketId !== null
+                ? String(item.ticketId)
+                : null,
+
+            actorName:
+              item.senderId !== null
+                ? `User ${item.senderId}`
+                : null,
+
+            isRead:
+              item.isRead,
+
+            createdAt:
+              item.createdAt,
+          }));
+
+        if (append) {
+          this.notificationsSignal.update(
+            currentNotifications => {
+              const notificationMap =
+                new Map<
+                  string,
+                  ServiceDeskNotification
+                >();
+
+              [
+                ...currentNotifications,
+                ...notifications,
+              ].forEach(notification => {
+                notificationMap.set(
+                  notification.id,
+                  notification,
+                );
+              });
+
+              return [
+                ...notificationMap.values(),
+              ];
+            },
+          );
+        } else {
+          this.notificationsSignal.set(
+            notifications,
+          );
+        }
+
+        this.paginationSignal.set(
+          response.pagination,
+        );
+
+        this.unreadCountSignal.set(
+          response.unreadCount,
+        );
+      },
+
+      error: error => {
+        this.loadingSignal.set(false);
+        this.loadingMoreSignal.set(false);
+
+        this.loadErrorSignal.set(
+          error.error?.message ||
+          'Unable to load notifications.',
+        );
+      },
+    });
+  }
+
+  loadMoreNotifications(): void {
+    const pagination =
+      this.paginationSignal();
+
+    if (
+      this.loadingSignal() ||
+      this.loadingMoreSignal() ||
+      pagination.page >=
+      pagination.totalPages
+    ) {
+      return;
+    }
+
+    this.loadNotifications(
+      pagination.page + 1,
+      pagination.limit,
+      this.activeIsRead,
+      this.activeType,
+      true,
     );
+  }
+
+  private mapNotificationType(
+    type: string,
+  ): ServiceDeskNotification['type'] {
+    switch (
+    type
+      ?.trim()
+      .toUpperCase()
+    ) {
+      case 'TICKET_CREATED':
+      case 'CREATE':
+        return 'ticket-created';
+
+      case 'TICKET_ASSIGNED':
+      case 'ASSIGNED':
+      case 'ASSIGNMENT':
+        return 'ticket-assigned';
+
+      case 'STATUS_CHANGE':
+      case 'STATUS_CHANGED':
+        return 'status-changed';
+
+      case 'COMMENT':
+      case 'COMMENT_ADDED':
+        return 'comment';
+
+      case 'SYSTEM':
+      default:
+        return 'system';
+    }
   }
 
   createNotification(
@@ -96,67 +413,192 @@ export class NotificationService {
     return notification;
   }
 
-  markAsRead(notificationId: string): void {
-    const updatedNotifications =
-      this.notificationsSignal().map(
-        notification => {
-          if (
-            notification.id !==
-              notificationId ||
-            notification.isRead
-          ) {
-            return notification;
-          }
+  markAsRead(
+    notificationId: string,
+  ): void {
+    const numericId =
+      Number(notificationId);
 
-          return {
-            ...notification,
-            isRead: true,
-          };
-        },
-      );
-
-    this.commit(updatedNotifications);
-  }
-
-  markAllAsRead(): void {
-    const currentUser =
-      this.authService.currentUser();
-
-    if (!currentUser) {
+    if (
+      !numericId ||
+      Number.isNaN(numericId)
+    ) {
       return;
     }
 
-    const updatedNotifications =
-      this.notificationsSignal().map(
-        notification => {
-          if (
-            notification.recipientUserId !==
-              currentUser.id ||
-            notification.isRead
-          ) {
-            return notification;
+    const selectedNotification =
+      this.notificationsSignal()
+        .find(notification =>
+          notification.id ===
+          notificationId,
+        );
+
+    if (
+      !selectedNotification ||
+      selectedNotification.isRead
+    ) {
+      return;
+    }
+
+    this.markNotificationRead(
+      numericId,
+    ).subscribe({
+      next: response => {
+        if (!response.success) {
+          return;
+        }
+
+        this.notificationsSignal.update(
+          notifications =>
+            notifications.map(
+              notification =>
+                notification.id ===
+                  notificationId
+                  ? {
+                    ...notification,
+                    isRead: true,
+                  }
+                  : notification,
+            ),
+        );
+
+        this.unreadCountSignal.update(
+          count =>
+            Math.max(
+              0,
+              count - 1,
+            ),
+        );
+      },
+
+      error: error => {
+        console.error(
+          'Unable to mark notification as read:',
+          error,
+        );
+      },
+    });
+  }
+
+  markAllAsRead(): void {
+    if (
+      this.unreadCountSignal() === 0
+    ) {
+      return;
+    }
+
+    this.markAllNotificationsRead()
+      .subscribe({
+        next: response => {
+          if (!response.success) {
+            return;
           }
 
-          return {
-            ...notification,
-            isRead: true,
-          };
-        },
-      );
+          this.notificationsSignal.update(
+            notifications =>
+              notifications.map(
+                notification => ({
+                  ...notification,
+                  isRead: true,
+                }),
+              ),
+          );
 
-    this.commit(updatedNotifications);
+          this.unreadCountSignal.set(0);
+        },
+
+        error: error => {
+          console.error(
+            'Unable to mark all notifications as read:',
+            error,
+          );
+        },
+      });
   }
 
   deleteNotification(
     notificationId: string,
   ): void {
-    const updatedNotifications =
-      this.notificationsSignal().filter(
-        notification =>
-          notification.id !== notificationId,
-      );
+    const numericId =
+      Number(notificationId);
 
-    this.commit(updatedNotifications);
+    if (
+      !numericId ||
+      Number.isNaN(numericId)
+    ) {
+      return;
+    }
+
+    const selectedNotification =
+      this.notificationsSignal()
+        .find(notification =>
+          notification.id ===
+          notificationId,
+        );
+
+    if (!selectedNotification) {
+      return;
+    }
+
+    this.deleteNotificationFromApi(
+      numericId,
+    ).subscribe({
+      next: response => {
+        if (!response.success) {
+          return;
+        }
+
+        this.notificationsSignal.update(
+          notifications =>
+            notifications.filter(
+              notification =>
+                notification.id !==
+                notificationId,
+            ),
+        );
+
+        if (
+          !selectedNotification.isRead
+        ) {
+          this.unreadCountSignal.update(
+            count =>
+              Math.max(
+                0,
+                count - 1,
+              ),
+          );
+        }
+      },
+
+      error: error => {
+        console.error(
+          'Unable to delete notification:',
+          error,
+        );
+      },
+    });
+  }
+
+  refreshUnreadCount(): void {
+    this.getUnreadNotificationCount()
+      .subscribe({
+        next: response => {
+          if (!response.success) {
+            return;
+          }
+
+          this.unreadCountSignal.set(
+            response.unreadCount,
+          );
+        },
+
+        error: error => {
+          console.error(
+            'Unable to refresh unread notification count:',
+            error,
+          );
+        },
+      });
   }
 
   clearReadNotifications(): void {
@@ -346,5 +788,52 @@ export class NotificationService {
           '2026-07-17T09:00:00',
       },
     ];
+  }
+
+
+  getNotificationList(
+    payload: NotificationListPayload,
+  ): Observable<NotificationListResponse> {
+    return this.http.post<NotificationListResponse>(
+      `${this.apiBaseUrl}/notification/list`,
+      payload,
+    );
+  }
+
+  getUnreadNotificationCount():
+    Observable<NotificationUnreadCountResponse> {
+    return this.http.get<NotificationUnreadCountResponse>(
+      `${this.apiBaseUrl}/notification/unread-count`,
+    );
+  }
+
+  markNotificationRead(
+    notificationId: number,
+  ): Observable<NotificationActionResponse> {
+    return this.http.post<NotificationActionResponse>(
+      `${this.apiBaseUrl}/notification/mark-read`,
+      {
+        id: notificationId,
+      },
+    );
+  }
+
+  markAllNotificationsRead():
+    Observable<NotificationActionResponse> {
+    return this.http.post<NotificationActionResponse>(
+      `${this.apiBaseUrl}/notification/mark-all-read`,
+      {},
+    );
+  }
+
+  deleteNotificationFromApi(
+    notificationId: number,
+  ): Observable<NotificationActionResponse> {
+    return this.http.post<NotificationActionResponse>(
+      `${this.apiBaseUrl}/notification/delete`,
+      {
+        id: notificationId,
+      },
+    );
   }
 }
