@@ -35,7 +35,8 @@ export interface TicketListItem {
     subject: string;
     description: string;
     requester_id: number;
-
+    assigned_at: string | null;
+    resolved_at: string | null;
     requester: {
         id: number;
         employee_code: string;
@@ -157,6 +158,21 @@ export interface TicketAssignmentApi {
     id: number;
     ticket_id: number;
     assigned_to: number;
+
+    assignedEmployee: {
+        id: number;
+        employee_code: string;
+        employee_name: string;
+        email_id: string | null;
+        user_name: string;
+        status: string;
+        employeePhoto: string | null;
+        delete_status:
+        string | boolean | null;
+        createdAt: string;
+        updatedAt: string;
+    } | null;
+
     assigned_by: number;
     department_id: number;
     assignment_type: string;
@@ -268,6 +284,61 @@ export interface TicketCommentActionResponse {
     data?: TicketCommentApi;
 }
 
+export interface UpdateTicketCommentPayload {
+    id: number;
+    comment: string;
+}
+
+export type TicketSummaryDateFilter =
+    | '7-DAYS'
+    | '15-DAYS'
+    | '1-MONTH'
+    | '3-MONTH'
+    | '6-MONTH'
+    | 'ALL';
+
+export interface TicketSummaryPayload {
+    dateFilter:
+    TicketSummaryDateFilter;
+
+    department_id:
+    number | null;
+
+    category_id:
+    number | null;
+
+    centre_id:
+    number | null;
+
+    priority_id:
+    number | null;
+}
+
+
+export interface TicketSummaryData {
+    totalTickets: number;
+    openTickets: number;
+    assignedTickets: number;
+    inProgressTickets: number;
+    resolvedTickets: number;
+    closedTickets: number;
+    awaitingConfirmationTickets: number;
+    raisedByMeTickets: number;
+    assignedToMeTickets: number;
+}
+
+export interface TicketSummaryResponse {
+    success: boolean;
+    message: string;
+    data: TicketSummaryData;
+}
+
+export interface GetTicketDetailsResponse {
+    success: boolean;
+    message: string;
+    data: TicketListItem;
+    base_url: string;
+}
 
 @Injectable({
     providedIn: 'root',
@@ -408,6 +479,24 @@ export class TicketApiService {
             {
                 id: commentId,
             },
+        );
+    }
+
+    updateTicketComment(
+        payload: UpdateTicketCommentPayload,
+    ): Observable<TicketCommentActionResponse> {
+        return this.http.post<TicketCommentActionResponse>(
+            `${this.apiBaseUrl}/ticket/comment/update`,
+            payload,
+        );
+    }
+
+    getTicketSummaryData(
+        payload: TicketSummaryPayload,
+    ): Observable<TicketSummaryResponse> {
+        return this.http.post<TicketSummaryResponse>(
+            `${this.apiBaseUrl}/ticket/get-summary-data`,
+            payload,
         );
     }
     

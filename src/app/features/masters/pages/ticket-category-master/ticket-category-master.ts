@@ -552,11 +552,11 @@ export class TicketCategoryMaster
       return;
     }
 
-    if (!description) {
-      this.formError =
-        'Description is required.';
-      return;
-    }
+    // if (!description) {
+    //   this.formError =
+    //     'Description is required.';
+    //   return;
+    // }
 
     if (this.editingCategoryId) {
       const categoryId =
