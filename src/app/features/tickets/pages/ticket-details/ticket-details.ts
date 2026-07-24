@@ -896,9 +896,13 @@ export class TicketDetails implements OnInit {
   }
 
   get canReassignTicket(): boolean {
-    return (
+    const hasReassignRole =
       this.authService.isSystemAdmin() ||
-      this.authService.isDepartmentManager()
+      this.authService.isDepartmentManager();
+
+    return (
+      hasReassignRole &&
+      this.ticket.status === 'Assigned'
     );
   }
 
@@ -1049,6 +1053,7 @@ export class TicketDetails implements OnInit {
     this.isReassignEmployeeDropdownOpen =
       true;
   }
+  
   reassignTicket(): void {
     if (
       !this.canReassignTicket ||
@@ -1101,9 +1106,10 @@ export class TicketDetails implements OnInit {
             response.message ||
             'Ticket reassigned successfully.';
 
-          void this.router.navigate([
-            '/tickets/action-items',
-          ]);
+          // void this.router.navigate([
+          //   '/tickets/action-items',
+          // ]);
+          this.location.back();
         },
 
         error: (
@@ -1642,8 +1648,16 @@ export class TicketDetails implements OnInit {
   }
 
   get canEditTicket(): boolean {
-    return (
-      this.ticket.status === 'Assigned'
+    const currentUser =
+      this.authService.currentUser();
+
+    return Boolean(
+      currentUser &&
+      this.ticket.requesterId &&
+      currentUser.id ===
+      this.ticket.requesterId &&
+      this.ticket.status ===
+      'Assigned',
     );
   }
 
