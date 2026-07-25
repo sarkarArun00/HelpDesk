@@ -21,6 +21,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import {
+  Achievements,
+} from '../../components/achievements/achievements';
 
 
 
@@ -73,12 +76,22 @@ interface DashboardStat {
   | 'closed';
 }
 
+interface QueueSummary {
+  label: string;
+  value: number;
+  description: string;
+  route: string;
+}
+
+
+
 @Component({
   selector: 'app-dashboard',
   imports: [
     MatButtonModule,
     RouterLink,
     FormsModule,
+    Achievements
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
@@ -205,44 +218,55 @@ export class Dashboard
     ];
   }
 
+  
+
   get queueSummaries():
-    QueueSummary[] {
-    return [
-      {
-        label:
-          'Assigned to Me',
+  QueueSummary[] {
+  return [
+    {
+      label:
+        'Assigned to Me',
 
-        value:
-          this.ticketSummary
-            .assignedToMeTickets,
+      value:
+        this.ticketSummary
+          .assignedToMeTickets,
 
-        description:
-          'Tickets currently assigned to you',
-      },
-      {
-        label:
-          'Raised by Me',
+      description:
+        'Tickets currently assigned to you',
 
-        value:
-          this.ticketSummary
-            .raisedByMeTickets,
+      route:
+        '/tickets/action-items',
+    },
+    {
+      label:
+        'Raised by Me',
 
-        description:
-          'Tickets raised by you',
-      },
-      {
-        label:
-          'Awaiting Confirmation',
+      value:
+        this.ticketSummary
+          .raisedByMeTickets,
 
-        value:
-          this.ticketSummary
-            .awaitingConfirmationTickets,
+      description:
+        'Tickets raised by you',
 
-        description:
-          'Resolved tickets awaiting creator confirmation',
-      },
-    ];
-  }
+      route:
+        '/tickets/my-raised',
+    },
+    {
+      label:
+        'Awaiting Confirmation',
+
+      value:
+        this.ticketSummary
+          .awaitingConfirmationTickets,
+
+      description:
+        'Resolved tickets awaiting creator confirmation',
+
+      route:
+        '/tickets/action-items',
+    },
+  ];
+}
 
   readonly summaryDateFilters: {
     label: string;

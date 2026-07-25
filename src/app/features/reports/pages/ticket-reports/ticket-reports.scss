@@ -32,6 +32,29 @@
   }
 }
 
+.report-view-button {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  color: #175cd3;
+  text-decoration: none;
+  background: #ffffff;
+  border: 1px solid #b2ddff;
+  border-radius: 8px;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+
+  &:hover {
+    color: #ffffff;
+    background: #175cd3;
+    border-color: #175cd3;
+  }
+}
+
 .page-eyebrow {
   display: block;
   margin-bottom: 6px;
