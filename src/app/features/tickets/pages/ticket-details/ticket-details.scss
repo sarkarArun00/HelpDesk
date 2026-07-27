@@ -909,8 +909,8 @@
   color: #fff;
   font-size: 0.875rem;
   font-weight: 600;
-  background: #5b4df5;
-  border: 1px solid #5b4df5;
+  background: #00a651;
+  border: 1px solid #00a651;
   border-radius: 8px;
   transition:
     background-color 0.2s ease,
@@ -918,8 +918,8 @@
     transform 0.2s ease;
 
   &:hover {
-    background: #4939dc;
-    border-color: #4939dc;
+    background: #087b40;
+    border-color: #087b40;
   }
 
   &:active {
@@ -942,7 +942,7 @@
 .reassign-modal {
   width: min(100%, 560px);
   max-height: calc(100vh - 2rem);
-  overflow-y: auto;
+  // overflow-y: auto;
   background: #fff;
   border: 1px solid #dfe4ec;
   border-radius: 14px;
@@ -972,7 +972,7 @@
 }
 
 .modal-eyebrow {
-  color: #5b4df5;
+  color: #00a651;
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -1053,12 +1053,12 @@
 
 .confirm-reassign-button {
   color: #fff;
-  background: #5b4df5;
-  border: 1px solid #5b4df5;
+  background: #00a651;
+  border: 1px solid #00a651;
 
   &:hover:not(:disabled) {
-    background: #4939dc;
-    border-color: #4939dc;
+    background: #087b40;
+    border-color: #087b40;
   }
 
   &:disabled {
@@ -1085,6 +1085,7 @@
 .employee-search-input {
   padding-right: 2.75rem;
   padding-left: 2.5rem;
+  box-shadow:none;
 }
 
 .clear-employee-search {
@@ -1108,11 +1109,11 @@
 }
 
 .employee-dropdown-menu {
-  position: absolute;
-  z-index: 20;
-  top: calc(100% + 6px);
-  right: 0;
-  left: 0;
+  // position: absolute;
+  // z-index: 20;
+  // top: calc(100% + 6px);
+  // right: 0;
+  // left: 0;
   max-height: 240px;
   overflow-y: auto;
   background: #fff;
