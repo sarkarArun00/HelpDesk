@@ -350,7 +350,7 @@ constructor() {
     forkJoin({
       tickets:
         this.ticketApiService
-          .getAllTickets(),
+          .getAllTickets({ order: "DESC"}),
 
       departments:
         this.ticketCategoryApiService

@@ -150,8 +150,13 @@ export type TicketListType =
     | 'created'
     | 'assigned';
 
+export type TicketOrder =
+    | 'ASC'
+    | 'DESC';
+
 export interface GetTicketsPayload {
     type?: TicketListType;
+    order?: TicketOrder;
 }
 
 export interface TicketAssignmentApi {
