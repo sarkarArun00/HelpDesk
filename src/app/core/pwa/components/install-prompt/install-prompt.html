@@ -1,0 +1,49 @@
+@if (
+  pwaInstallService.canInstall() &&
+  !pwaInstallService.isInstalled() &&
+  !isDismissed()
+) {
+  <aside
+    class="pwa-install-prompt"
+    aria-label="Install NHCPL Helpdesk"
+  >
+    <button
+      type="button"
+      class="dismiss-button"
+      aria-label="Close install prompt"
+      (click)="dismissPrompt()"
+    >
+      ×
+    </button>
+
+    <img
+      src="icons/icon-192x192.png"
+      alt="NHCPL Helpdesk"
+      class="app-icon"
+    >
+
+    <div class="prompt-content">
+      <strong>
+        Install NHCPL Helpdesk
+      </strong>
+
+      <p>
+        Install the application for faster
+        access and a better experience.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="install-button"
+      [disabled]="isInstalling()"
+      (click)="installApp()"
+    >
+      @if (isInstalling()) {
+        Installing...
+      } @else {
+        Install App
+      }
+    </button>
+  </aside>
+}
