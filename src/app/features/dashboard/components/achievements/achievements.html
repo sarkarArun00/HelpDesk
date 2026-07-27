@@ -14,8 +14,27 @@
     </div>
 
     <div class="level-pill">
-      <span>Level</span>
-      <strong>{{ currentLevel }}</strong>
+    <div class="achievement-filter">
+      <label for="achievementMonth">
+        Period
+      </label>
+
+      <select
+        id="achievementMonth"
+        name="achievementMonth"
+        [(ngModel)]="selectedMonth"
+        (ngModelChange)="onMonthChange()"
+      >
+        @for (
+          option of monthOptions;
+          track option.value
+        ) {
+          <option [value]="option.value">
+            {{ option.label }}
+          </option>
+        }
+      </select>
+    </div>
     </div>
   </header>
 

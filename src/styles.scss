@@ -136,3 +136,7 @@ select {
 .sidebar-brand img{ max-width:40px; }
 
 .sidebar-brand h4{ font-family: "Arima", system-ui; font-weight: 600; color:#33a651; margin:0; }
+
+@media screen and (max-width:767px){
+  .page-header h1{ font-size:22px !important; }
+}

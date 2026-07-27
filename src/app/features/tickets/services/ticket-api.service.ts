@@ -159,6 +159,47 @@ export interface GetTicketsPayload {
     order?: TicketOrder;
 }
 
+export interface AchievementPayload {
+    employee_id: number;
+    month: number;
+    year: number;
+}
+
+export type AchievementStatus =
+    | 'EARNED'
+    | 'IN_PROGRESS';
+
+export interface AchievementBadge {
+    id: number;
+    code: string;
+    name: string;
+    icon: string;
+    description: string;
+    progress: number;
+    target: number;
+    status: AchievementStatus;
+    earnedAt: string | null;
+    assignedTickets: number;
+    percentage: number;
+
+    quickResponses?: number;
+    firstTimeFixes?: number;
+    resolvedTickets?: number;
+    currentStreak?: number;
+    maxStreak?: number;
+    communicatedTickets?: number;
+}
+
+export interface AchievementResponse {
+    success: boolean;
+    message: string;
+    employeeId: number;
+    month: number;
+    year: number;
+    assignedTickets: number;
+    badges: AchievementBadge[];
+}
+
 export interface TicketAssignmentApi {
     id: number;
     ticket_id: number;
@@ -501,6 +542,15 @@ export class TicketApiService {
     ): Observable<TicketSummaryResponse> {
         return this.http.post<TicketSummaryResponse>(
             `${this.apiBaseUrl}/ticket/get-summary-data`,
+            payload,
+        );
+    }
+
+    getEmployeeAchievements(
+        payload: AchievementPayload,
+    ): Observable<AchievementResponse> {
+        return this.http.post<AchievementResponse>(
+            `${this.apiBaseUrl}/ticket/achievment`,
             payload,
         );
     }
