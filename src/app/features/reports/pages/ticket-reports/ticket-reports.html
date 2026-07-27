@@ -556,6 +556,7 @@
               <th>Status</th>
               <th>Assignee</th>
               <th>Created At</th>
+              <th aria-label="Ticket action">Action</th>
             </tr>
           </thead>
 
@@ -623,6 +624,20 @@
                     {{ formatDate(ticket.createdAt) }}
                   </span>
                 </td>
+
+                <td>
+                <a
+                  class="report-view-button"
+                  [routerLink]="[
+                    '/tickets',
+                    ticket.id
+                  ]"
+                  title="View ticket details"
+                  aria-label="View ticket details"
+                >
+                  <i class="bi bi-eye"></i>
+                </a>
+              </td>
               </tr>
             }
           </tbody>

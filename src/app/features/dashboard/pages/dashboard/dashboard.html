@@ -140,14 +140,22 @@
                     <p>{{ queue.description }}</p>
                 </div>
 
-                <button type="button" class="queue-action" [attr.aria-label]="'View ' + queue.label">
-                    →
-                </button>
+               <a
+                class="queue-action"
+                [routerLink]="queue.route"
+                [attr.aria-label]="
+                    'View ' + queue.label
+                "
+                [title]="'View ' + queue.label"
+                >
+                →
+                </a>
             </article>
             }
         </div>
     </section>
 
+    <app-achievements />
     <section class="dashboard-section recent-tickets-section">
         <div class="section-header">
             <div>

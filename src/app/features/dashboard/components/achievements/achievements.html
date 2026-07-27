@@ -1,0 +1,199 @@
+<section class="achievements-card">
+  <header class="achievements-header">
+    <div>
+      <span class="section-eyebrow">
+        MOTIVATION & REWARDS
+      </span>
+
+      <h2>My Achievements</h2>
+
+      <p>
+        Keep resolving tickets and helping your team
+        to unlock new badges.
+      </p>
+    </div>
+
+    <div class="level-pill">
+      <span>Level</span>
+      <strong>{{ currentLevel }}</strong>
+    </div>
+  </header>
+
+  <div class="achievement-overview">
+    <article class="achievement-profile">
+      <div class="achievement-avatar">
+        <span>🏆</span>
+      </div>
+
+      <div>
+        <span class="profile-label">
+          Ticket Champion
+        </span>
+
+        <h3>{{ employeeName }}</h3>
+
+        <p>
+          You resolved
+          <strong>
+            {{ resolvedThisMonth }}
+          </strong>
+          tickets this month.
+        </p>
+      </div>
+    </article>
+
+    <div class="achievement-stat-grid">
+      <article>
+        <span>Total Points</span>
+        <strong>
+          {{ totalPoints }}
+        </strong>
+        <small>XP earned</small>
+      </article>
+
+      <article>
+        <span>Monthly Rank</span>
+        <strong>
+          #{{ currentRank }}
+        </strong>
+        <small>Across your team</small>
+      </article>
+
+      <article>
+        <span>Badges Earned</span>
+        <strong>
+          {{ earnedBadgesCount }}
+          /
+          {{ badges.length }}
+        </strong>
+        <small>Keep going</small>
+      </article>
+    </div>
+  </div>
+
+  <section class="level-progress-section">
+    <div class="level-progress-header">
+      <div>
+        <strong>
+          Level {{ currentLevel }}
+        </strong>
+
+        <span>
+          {{ totalPoints }}
+          /
+          {{ nextLevelPoints }} XP
+        </span>
+      </div>
+
+      <span>
+        {{ pointsRemaining }}
+        XP to Level
+        {{ currentLevel + 1 }}
+      </span>
+    </div>
+
+    <div
+      class="level-progress-track"
+      role="progressbar"
+      [attr.aria-valuenow]="levelProgress"
+      aria-valuemin="0"
+      aria-valuemax="100"
+    >
+      <span
+        [style.width.%]="levelProgress"
+      ></span>
+    </div>
+  </section>
+
+  <div class="badge-section-header">
+    <div>
+      <h3>Achievement Badges</h3>
+      <p>
+        Your recently earned badges and upcoming goals.
+      </p>
+    </div>
+
+    <span class="badge-count">
+      {{ earnedBadgesCount }}
+      unlocked
+    </span>
+  </div>
+
+  <div class="badge-grid">
+    @for (
+      badge of badges;
+      track badge.id
+    ) {
+      <article
+        class="badge-card"
+        [class.earned]="
+          badge.status === 'earned'
+        "
+        [class.locked]="
+          badge.status === 'locked'
+        "
+      >
+        @if (
+          badge.status === 'earned'
+        ) {
+          <span class="unlocked-label">
+            <i class="bi bi-check-circle-fill"></i>
+            Unlocked
+          </span>
+        } @else {
+          <span class="locked-label">
+            <i class="bi bi-lock-fill"></i>
+            In progress
+          </span>
+        }
+
+        <div class="badge-icon">
+          {{ badge.icon }}
+        </div>
+
+        <h4>{{ badge.name }}</h4>
+
+        <p>{{ badge.description }}</p>
+
+        <div class="badge-progress-details">
+          <span>
+            {{ badge.progress }}
+            /
+            {{ badge.target }}
+          </span>
+
+          <strong>
+            {{ getBadgeProgress(badge) }}%
+          </strong>
+        </div>
+
+        <div class="badge-progress-track">
+          <span
+            [style.width.%]="
+              getBadgeProgress(badge)
+            "
+          ></span>
+        </div>
+
+        @if (
+          badge.status === 'earned' &&
+          badge.earnedAt
+        ) {
+          <small>
+            <i class="bi bi-stars"></i>
+            Badge earned
+          </small>
+        } @else {
+          <small>
+            Only
+            {{
+              badge.target -
+              badge.progress
+            }}
+            more to unlock
+          </small>
+        }
+      </article>
+    }
+  </div>
+</section>
