@@ -183,18 +183,26 @@ export class Header
     this.isRequestingPushPermission = true;
 
     try {
-      const registration =
-        await navigator.serviceWorker
-          .register(
-            '/firebase-messaging-sw.js',
-          );
+      // const registration =
+        // await navigator.serviceWorker
+        //   .register(
+        //     '/firebase-messaging-sw.js',
+        //   );
+        const serviceWorkerRegistration =
+        await navigator.serviceWorker.register(
+          '/firebase-messaging-sw.js',
+          {
+            scope:
+              '/firebase-cloud-messaging-push-scope/',
+          },
+        );
 
       await navigator.serviceWorker.ready;
 
       const token =
         await this.firebaseMessagingService
           .requestPermissionAndGetToken(
-            registration,
+            serviceWorkerRegistration,
           );
 
       if (!token) {
