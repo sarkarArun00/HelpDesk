@@ -37,33 +37,7 @@ export class AuthService {
     'isd-session-access-token';
   
   readonly demoAccounts: readonly DemoAccount[] = [
-    {
-      id: 1,
-      employeeCode: 'EMP-0101',
-      fullName: 'Arun Sarkar',
-      email: 'admin@nirnayanhealthcare.com',
-      password: 'Admin@123',
-      department: 'Information Technology',
-      role: 'Admin',
-    },
-    {
-      id: 2,
-      employeeCode: 'EMP-0102',
-      fullName: 'Rahul Sharma',
-      email: 'manager@nirnayanhealthcare.com',
-      password: 'Manager@123',
-      department: 'Logistics',
-      role: 'Department Manager',
-    },
-    {
-      id: 3,
-      employeeCode: 'EMP-0106',
-      fullName: 'Sourav Dey',
-      email: 'employee@nirnayanhealthcare.com',
-      password: 'Employee@123',
-      department: 'Customer Relationship Management',
-      role: 'Employee',
-    },
+
   ];
 
   private readonly currentUserSignal =

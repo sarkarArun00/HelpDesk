@@ -435,6 +435,56 @@
   height: 5px;
 }
 
+.achievement-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  label {
+    color: #667085;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  select {
+    min-width: 155px;
+    height: 38px;
+    padding: 0 34px 0 12px;
+    color: #344054;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    background-color: #ffffff;
+    border: 1px solid #d0d5dd;
+    border-radius: 9px;
+    outline: none;
+    cursor: pointer;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+
+    &:hover {
+      border-color: #8b5cf6;
+    }
+
+    &:focus {
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .achievement-filter {
+    width: 100%;
+    justify-content: space-between;
+
+    select {
+      min-width: 145px;
+    }
+  }
+}
+
 @keyframes trophy-float {
   0%,
   100% {
