@@ -129,7 +129,21 @@
   font-size: 14px;
 }
 .filter-header .clear-filter-button{ margin-top:5px; }
-
+.back-button{
+	display: inline-flex;
+	min-height: 43px;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 0 17px;
+	color: #344054;
+	background: #ffffff;
+	border: 1px solid #d0d5dd;
+	border-radius: 9px;
+	font-size: 13px;
+	font-weight: 600;
+}
 
 .summary-grid {
   display: grid;

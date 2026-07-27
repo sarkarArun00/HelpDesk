@@ -615,7 +615,7 @@
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
   .page-header {
     flex-direction: column;
   }
@@ -641,4 +641,8 @@
   .statistics-grid {
     grid-template-columns: 1fr;
   }
+  .dashboard-section.recent-tickets-section .section-header{
+    flex-wrap:wrap; gap:15px;
+  }
+  .dashboard-section.recent-tickets-section .section-header > div{ width:100%; }
 }
