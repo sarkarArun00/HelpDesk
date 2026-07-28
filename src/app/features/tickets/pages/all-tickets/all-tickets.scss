@@ -4,7 +4,7 @@
 
 .all-tickets-page {
     min-height: 100%;
-    padding: 1.5rem;
+    padding: 0;
     color: #172033;
     background: #f4f6fa;
 }
@@ -311,7 +311,7 @@ table {
 .ticket-number {
     display: block;
     margin-bottom: 0.3rem;
-    color: #5145dd;
+    color: #00a651;
     font-weight: 700;
     text-decoration: none;
 
@@ -499,7 +499,7 @@ table {
 
 @media (max-width: 767.98px) {
     .all-tickets-page {
-        padding: 1rem;
+        padding: 0;
     }
 
     .page-header {
