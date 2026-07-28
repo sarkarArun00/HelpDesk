@@ -116,8 +116,6 @@ export class Achievements implements OnInit {
     this.employeeName =
       user.fullName ?? 'Employee';
 
-    console.log('jkhjdhkhdkasd', this.employeeName)
-
     this.isLoading = true;
     this.loadError = '';
 
