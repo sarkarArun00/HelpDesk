@@ -81,6 +81,14 @@ export class AllTickets implements OnInit {
 
   currentPage = 1;
   pageSize = 10;
+  totalRecords = 0;
+
+  readonly pageSizeOptions = [
+    10,
+    25,
+    50,
+    100,
+  ];
 
   tickets: AllTicketRecord[] = [];
 
@@ -177,15 +185,6 @@ export class AllTickets implements OnInit {
     );
   }
 
-  get totalPages(): number {
-    return Math.max(
-      1,
-      Math.ceil(
-        this.filteredTickets.length /
-        this.pageSize,
-      ),
-    );
-  }
 
   get pageNumbers(): number[] {
     return Array.from(
@@ -222,8 +221,11 @@ export class AllTickets implements OnInit {
 
     forkJoin({
       tickets:
-        this.ticketApiService
-          .getAllTickets(),
+        this.ticketApiService.getAllTickets({
+          order: 'DESC',
+          page: this.currentPage,
+          limit: this.pageSize,
+        }),
 
       departments:
         this.ticketCategoryApiService
@@ -251,6 +253,9 @@ export class AllTickets implements OnInit {
 
           return;
         }
+
+        this.totalRecords =
+          response.tickets.data.length
 
         const departmentNameById =
           new Map<number, string>();
@@ -392,16 +397,74 @@ export class AllTickets implements OnInit {
         this.currentPage = 1;
       },
 
-      error: (
-        error: HttpErrorResponse,
-      ) => {
+      error: error => {
         this.isLoading = false;
+        this.tickets = [];
+        this.totalRecords = 0;
 
-        this.loadError =
-          error.error?.message ||
-          'Unable to load tickets.';
+        console.error(
+          'Unable to load all tickets:',
+          error,
+        );
       },
     });
+  }
+
+
+  get totalPages(): number {
+    return Math.max(
+      1,
+      Math.ceil(
+        this.totalRecords / this.pageSize,
+      ),
+    );
+  }
+
+  get paginationStart(): number {
+    if (this.totalRecords === 0) {
+      return 0;
+    }
+
+    return (
+      (this.currentPage - 1) *
+      this.pageSize +
+      1
+    );
+  }
+
+  get paginationEnd(): number {
+    return Math.min(
+      this.currentPage * this.pageSize,
+      this.totalRecords,
+    );
+  }
+
+  get visiblePages(): number[] {
+    const startPage = Math.max(
+      1,
+      this.currentPage - 2,
+    );
+
+    const endPage = Math.min(
+      this.totalPages,
+      startPage + 4,
+    );
+
+    const adjustedStartPage = Math.max(
+      1,
+      endPage - 4,
+    );
+
+    return Array.from(
+      {
+        length:
+          endPage -
+          adjustedStartPage +
+          1,
+      },
+      (_, index) =>
+        adjustedStartPage + index,
+    );
   }
 
   get totalTicketCount(): number {
@@ -446,12 +509,19 @@ export class AllTickets implements OnInit {
   changePage(page: number): void {
     if (
       page < 1 ||
-      page > this.totalPages
+      page > this.totalPages ||
+      page === this.currentPage
     ) {
       return;
     }
 
     this.currentPage = page;
+    this.loadTickets();
+  }
+
+  onPageSizeChange(): void {
+    this.currentPage = 1;
+    this.loadTickets();
   }
 
   getPriorityClass(
