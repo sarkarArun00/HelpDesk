@@ -160,6 +160,54 @@ export class Header
 
             this.notificationService
               .refreshUnreadCount();
+
+            if (
+              !('Notification' in window) ||
+              Notification.permission !==
+              'granted'
+            ) {
+              return;
+            }
+
+            const title =
+              payload.notification?.title ??
+              payload.data?.['title'] ??
+              'NHCPL Helpdesk';
+
+            const body =
+              payload.notification?.body ??
+              payload.data?.['message'] ??
+              payload.data?.['body'] ??
+              'You have a new notification.';
+
+            const ticketId =
+              payload.data?.['ticketId'] ??
+              payload.data?.['ticket_id'];
+
+            const notification =
+              new Notification(title, {
+                body,
+                icon:
+                  '/pwa-icons/icon-192x192.png',
+                badge:
+                  '/pwa-icons/icon-96x96.png',
+                data: {
+                  ticketId,
+                },
+              });
+
+            notification.onclick = () => {
+              window.focus();
+
+              if (ticketId) {
+                void this.router.navigate([
+                  '/tickets',
+                  ticketId,
+                ]);
+              }
+
+              notification.close();
+            };
           },
         );
   }
