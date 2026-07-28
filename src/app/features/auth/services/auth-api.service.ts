@@ -98,6 +98,7 @@ export class AuthApiService {
     getProfile(): Observable<{
         success: boolean;
         message: string;
+        status: number;
         data: {
             id: number;
             employee_code: string;
@@ -112,6 +113,7 @@ export class AuthApiService {
         return this.http.get<{
             success: boolean;
             message: string;
+            status: number;
             data: {
                 id: number;
                 employee_code: string;

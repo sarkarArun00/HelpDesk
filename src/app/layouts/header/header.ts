@@ -8,7 +8,7 @@ import {
   Output,
   inject,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthApiService } from '../../features/auth/services/auth-api.service';
 import { AuthService } from '../../core/auth/services/auth.service';
 import {
@@ -24,6 +24,7 @@ import {
 import {
   firstValueFrom,
 } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-header',
@@ -79,6 +80,9 @@ export class Header
   private readonly firebaseMessagingService =
     inject(FirebaseMessagingService);
   
+  private readonly router =
+    inject(Router);
+  
   isProfileMenuVisible = false;
   isNotificationMenuVisible = false;
 
@@ -103,24 +107,41 @@ export class Header
       .getProfile()
       .subscribe({
         next: response => {
-          if (response.success && response.data) {
+          if (
+            response.success &&
+            response.data
+          ) {
             this.authService
               .updateUserProfile(
                 response.data,
               );
+
+            console.log(
+              'Current user:',
+              this.authService.currentUser(),
+            );
           }
         },
 
-        error: error => {
+        error: (
+          error: HttpErrorResponse,
+        ) => {
+          if (error.status === 401) {
+            this.authService.logout();
+
+            void this.router.navigate(
+              ['/auth/login'],
+            );
+
+            return;
+          }
+
           console.error(
             'Unable to load profile:',
             error,
           );
         },
       });
-    
-    
-    console.log('authService.currentUser()', this.authService.currentUser())
   }
 
   private async listenForFirebaseMessages():
