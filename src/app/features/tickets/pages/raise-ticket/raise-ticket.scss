@@ -499,6 +499,84 @@
   }
 }
 
+
+.category-autocomplete {
+  position: relative;
+}
+
+.autocomplete-input-wrapper {
+  position: relative;
+
+  .form-control {
+    padding-right: 42px;
+  }
+}
+
+.autocomplete-clear {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #6b7280;
+  transform: translateY(-50%);
+  cursor: pointer;
+
+  &:hover {
+    color: #dc3545;
+  }
+}
+
+.autocomplete-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  left: 0;
+  z-index: 1050;
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+}
+
+.autocomplete-option {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-bottom: 1px solid #f1f5f9;
+  background: #ffffff;
+  color: #374151;
+  text-align: left;
+  cursor: pointer;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  &:hover,
+  &.selected {
+    background: #f0fff4;
+    color: #00a651;
+  }
+
+  &.selected {
+    font-weight: 600;
+  }
+}
+
+.autocomplete-empty {
+  padding: 12px;
+  color: #6b7280;
+  font-size: 14px;
+  text-align: center;
+}
 @media (max-width: 767px) {
   .page-header {
     flex-direction: column;

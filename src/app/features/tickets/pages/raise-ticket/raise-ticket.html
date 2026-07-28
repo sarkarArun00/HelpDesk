@@ -165,7 +165,7 @@
           </div>
 
           <!-- Category -->
-          <div class="col-12 col-lg-6">
+          <!-- <div class="col-12 col-lg-6">
             <label for="issueCategory" class="form-label">
               Issue Category
               <span class="required-star">*</span>
@@ -204,7 +204,69 @@
                 Issue category is required.
               </div>
             }
-          </div>
+          </div> -->
+          <div class="category-autocomplete">
+  <div class="autocomplete-input-wrapper">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Search and select category"
+      [(ngModel)]="categorySearch"
+      [ngModelOptions]="{ standalone: true }"
+      (focus)="openCategoryDropdown()"
+      (input)="openCategoryDropdown()"
+      (blur)="closeCategoryDropdown()"
+      autocomplete="off"
+    />
+
+    @if (categorySearch) {
+      <button
+        type="button"
+        class="autocomplete-clear"
+        (mousedown)="$event.preventDefault()"
+        (click)="clearCategory()"
+        aria-label="Clear category"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+    }
+  </div>
+
+  @if (isCategoryDropdownOpen) {
+    <div class="autocomplete-dropdown">
+      @for (
+        category of filteredCategories;
+        track category.id
+      ) {
+        <button
+          type="button"
+          class="autocomplete-option"
+          [class.selected]="
+            ticketForm.controls.categoryId.value ===
+            category.id
+          "
+          (mousedown)="$event.preventDefault()"
+          (click)="selectCategory(category)"
+        >
+          {{ category.name }}
+        </button>
+      } @empty {
+        <div class="autocomplete-empty">
+          No category found
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (
+  ticketForm.controls.categoryId.touched &&
+  ticketForm.controls.categoryId.invalid
+) {
+  <div class="invalid-feedback d-block">
+    Please select a category.
+  </div>
+}
 
           <!-- Target department -->
           <div class="col-12 col-lg-6">

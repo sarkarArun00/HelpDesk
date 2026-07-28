@@ -7,6 +7,7 @@ import {
 import { forkJoin } from 'rxjs';
 import {
   FormBuilder,
+  FormsModule,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
@@ -39,7 +40,7 @@ interface Centre {
 
 @Component({
   selector: 'app-raise-ticket',
-  imports: [RouterLink, ReactiveFormsModule],
+  imports: [RouterLink, ReactiveFormsModule, FormsModule],
   templateUrl: './raise-ticket.html',
   styleUrl: './raise-ticket.scss',
 })
@@ -163,6 +164,9 @@ private readonly ticketStore =
 
   submissionMessage = '';
 
+  categorySearch = '';
+  isCategoryDropdownOpen = false;
+
   readonly maximumFileSize = 5 * 1024 * 1024;
 
   readonly allowedMimeTypes = [
@@ -180,6 +184,23 @@ private readonly ticketStore =
     this.isLoadingMasters = true;
     this.masterLoadError = '';
 
+    const userId =
+      Number(
+        this.authService.currentUser()?.id,
+      );
+    
+    console.log('resssss,', userId)
+
+    if (!userId) {
+      this.isLoadingMasters = false;
+      this.centres = [];
+
+      this.masterLoadError =
+        'Logged-in user information is unavailable.';
+
+      return;
+    }
+
     forkJoin({
       categories:
         this.ticketCategoryApiService
@@ -190,8 +211,8 @@ private readonly ticketStore =
           .getAllPriorities(),
 
       centres:
-        this.centreApiService
-          .getAllCentres(),
+        this.ticketApiService
+          .getEmployeeCentres(userId),
     }).subscribe({
       next: response => {
         this.isLoadingMasters = false;
@@ -378,6 +399,64 @@ private readonly ticketStore =
 
     this.fileError = '';
   }
+
+  get filteredCategories(): TicketCategory[] {
+    const searchValue =
+      this.categorySearch
+        .trim()
+        .toLowerCase();
+
+    if (!searchValue) {
+      return this.categories;
+    }
+
+    return this.categories.filter(category =>
+      category.name
+        .toLowerCase()
+        .includes(searchValue),
+    );
+  }
+
+
+  openCategoryDropdown(): void {
+    this.isCategoryDropdownOpen = true;
+  }
+
+  selectCategory(
+    category: TicketCategory,
+  ): void {
+    this.ticketForm.controls.categoryId.setValue(
+      category.id,
+    );
+
+    this.categorySearch = category.name;
+    this.isCategoryDropdownOpen = false;
+
+    this.ticketForm.controls.categoryId.markAsTouched();
+  }
+
+  clearCategory(): void {
+    this.categorySearch = '';
+
+    this.ticketForm.controls.categoryId.setValue(0);
+    this.ticketForm.controls.categoryId.markAsTouched();
+
+    this.isCategoryDropdownOpen = true;
+  }
+
+  closeCategoryDropdown(): void {
+    setTimeout(() => {
+      this.isCategoryDropdownOpen = false;
+
+      const categoryId =
+        this.ticketForm.controls.categoryId.value;
+
+      if (!categoryId) {
+        this.categorySearch = '';
+      }
+    }, 150);
+  }
+  
 
   getFileSize(sizeInBytes: number): string {
     if (sizeInBytes < 1024 * 1024) {

@@ -556,5 +556,19 @@ export class TicketApiService {
             payload,
         );
     }
+
+    getEmployeeCentres(userId: number) {
+        return this.http.get<{
+            success: boolean;
+            message: string;
+            data: Array<{
+                id: number;
+                centreCode: string;
+                centreName: string;
+            }>;
+        }>(
+            `${this.apiBaseUrl}/employee/get-centres/${userId}`,
+        );
+    }
     
 }
