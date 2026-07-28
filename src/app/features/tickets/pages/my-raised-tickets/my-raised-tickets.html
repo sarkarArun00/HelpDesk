@@ -328,6 +328,80 @@
           </tbody>
         </table>
       </div>
+
+      @if (
+  !isLoading &&
+  !loadError &&
+  totalRecords > 0
+) {
+  <div class="report-pagination">
+    <div class="pagination-summary">
+      Showing
+      <strong>{{ paginationStart }}</strong>
+      to
+      <strong>{{ paginationEnd }}</strong>
+      of
+      <strong>{{ totalRecords }}</strong>
+      records
+    </div>
+
+    <div class="pagination-controls">
+      <label for="raisedTicketsPageSize">
+        Rows per page
+      </label>
+
+      <select
+        id="raisedTicketsPageSize"
+        class="form-select form-select-sm"
+        [(ngModel)]="pageSize"
+        (ngModelChange)="onPageSizeChange()"
+      >
+        @for (
+          size of pageSizeOptions;
+          track size
+        ) {
+          <option [ngValue]="size">
+            {{ size }}
+          </option>
+        }
+      </select>
+
+      <button
+        type="button"
+        class="pagination-button"
+        [disabled]="currentPage === 1"
+        (click)="changePage(currentPage - 1)"
+        aria-label="Previous page"
+      >
+        <i class="bi bi-chevron-left"></i>
+      </button>
+
+      @for (
+        page of visiblePages;
+        track page
+      ) {
+        <button
+          type="button"
+          class="pagination-button"
+          [class.active]="currentPage === page"
+          (click)="changePage(page)"
+        >
+          {{ page }}
+        </button>
+      }
+
+      <button
+        type="button"
+        class="pagination-button"
+        [disabled]="currentPage === totalPages"
+        (click)="changePage(currentPage + 1)"
+        aria-label="Next page"
+      >
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+}
     } @else {
       <div class="empty-state">
         <span class="empty-icon">

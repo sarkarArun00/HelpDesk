@@ -157,6 +157,8 @@ export type TicketOrder =
 export interface GetTicketsPayload {
     type?: TicketListType;
     order?: TicketOrder;
+    page?: number;
+    limit?: number;
 }
 
 export interface AchievementPayload {

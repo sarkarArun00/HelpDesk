@@ -103,6 +103,19 @@ export class TicketReports implements OnInit {
   ];
 
 
+  currentPage = 1;
+  pageSize = 10;
+  totalRecords = 0;
+
+  readonly pageSizeOptions = [
+    10,
+    25,
+    50,
+    100,
+  ];
+
+  order: 'ASC' | 'DESC' = 'DESC';
+
 
   get filteredTickets(): TicketReportRecord[] {
     if (this.isDateRangeInvalid) {
@@ -256,7 +269,11 @@ export class TicketReports implements OnInit {
     forkJoin({
       tickets:
         this.ticketApiService
-          .getAllTickets(),
+          .getAllTickets({
+            order: 'DESC',
+            page: this.currentPage,
+            limit: this.pageSize,
+          }),
 
       departments:
         this.ticketCategoryApiService
@@ -324,6 +341,9 @@ export class TicketReports implements OnInit {
               this.mapTicketStatus(
                 ticket.status,
               );
+            
+            this.totalRecords =
+              response.tickets.total ?? 0;
             
             const assignedAt =
               ticket.assigned_at ??
@@ -436,12 +456,89 @@ export class TicketReports implements OnInit {
         error: HttpErrorResponse,
       ) => {
         this.isLoading = false;
+        this.tickets = [];
+        this.totalRecords = 0;
 
         this.loadError =
           error.error?.message ||
           'Unable to load ticket report.';
       },
     });
+  }
+
+  get totalPages(): number {
+    return Math.max(
+      1,
+      Math.ceil(
+        this.totalRecords /
+        this.pageSize,
+      ),
+    );
+  }
+
+  get paginationStart(): number {
+    if (this.totalRecords === 0) {
+      return 0;
+    }
+
+    return (
+      (this.currentPage - 1) *
+      this.pageSize +
+      1
+    );
+  }
+
+  get paginationEnd(): number {
+    return Math.min(
+      this.currentPage * this.pageSize,
+      this.totalRecords,
+    );
+  }
+
+  get visiblePages(): number[] {
+    const startPage = Math.max(
+      1,
+      this.currentPage - 2,
+    );
+
+    const endPage = Math.min(
+      this.totalPages,
+      startPage + 4,
+    );
+
+    const adjustedStartPage = Math.max(
+      1,
+      endPage - 4,
+    );
+
+    return Array.from(
+      {
+        length:
+          endPage -
+          adjustedStartPage +
+          1,
+      },
+      (_, index) =>
+        adjustedStartPage + index,
+    );
+  }
+
+  changePage(page: number): void {
+    if (
+      page < 1 ||
+      page > this.totalPages ||
+      page === this.currentPage
+    ) {
+      return;
+    }
+
+    this.currentPage = page;
+    this.loadReportTickets();
+  }
+
+  onPageSizeChange(): void {
+    this.currentPage = 1;
+    this.loadReportTickets();
   }
 
   private calculateResolutionTime(
