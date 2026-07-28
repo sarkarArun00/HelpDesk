@@ -164,10 +164,23 @@
           <div>
             <strong>Ticket Action</strong>
 
-            <span>
+            <!-- <span>
               Current status:
               <b>{{ ticket.status }}</b>
-            </span>
+            </span> -->
+            <div class="d-flex gap-2 align-items-center">
+              <h5 class="m-0 current_status_text">Current status:</h5>
+              <span
+                class="status-badge"
+                [class]="
+                  'status-badge ' +
+                  getStatusClass(ticket.status)
+                "
+              >
+                <span class="status-dot"></span>
+                {{ ticket.status }}
+              </span>
+            </div>
           </div>
         </div>
 
