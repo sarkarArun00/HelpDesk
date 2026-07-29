@@ -169,8 +169,8 @@ export class MyActionItems
         this.ticketApiService.getAllTickets({
           type: 'assigned',
           order: 'DESC',
-          page: this.currentPage,
-          limit: this.pageSize,
+          // page: this.currentPage,
+          // limit: this.pageSize,
         }),
 
       departments:
@@ -190,7 +190,7 @@ export class MyActionItems
           return;
         }
 
-        // this.totalRecords = response.tickets.data.length
+
 
         const departmentNameById =
           new Map<number, string>();
