@@ -251,20 +251,20 @@ export class Dashboard
       route:
         '/tickets/my-raised',
     },
-    {
-      label:
-        'Awaiting Confirmation',
+    // {
+    //   label:
+    //     'Awaiting Confirmation',
 
-      value:
-        this.ticketSummary
-          .awaitingConfirmationTickets,
+    //   value:
+    //     this.ticketSummary
+    //       .awaitingConfirmationTickets,
 
-      description:
-        'Resolved tickets awaiting creator confirmation',
+    //   description:
+    //     'Resolved tickets awaiting creator confirmation',
 
-      route:
-        '/tickets/action-items',
-    },
+    //   route:
+    //     '/tickets/action-items',
+    // },
   ];
 }
 
