@@ -248,6 +248,8 @@ export class TicketDetails implements OnInit {
 
   commentPendingDelete:
     TicketComment | null = null;
+  
+  createrCode: any
 
   editTicketForm = {
     subject: '',
@@ -505,6 +507,8 @@ export class TicketDetails implements OnInit {
 
         const apiTicket =
           response.ticket.data;
+        
+        this.createrCode = response.ticket.data.requester?.employee_code
         const employeeById =
           new Map<
             number,
@@ -988,6 +992,7 @@ export class TicketDetails implements OnInit {
 
       return;
     }
+    console.log('depppppppp', this.ticket)
 
     const employeeApiRole:
       'Admin' | 'Manager' =
@@ -995,12 +1000,26 @@ export class TicketDetails implements OnInit {
         'Department Manager'
         ? 'Manager'
         : 'Admin';
+    
+    const departmentId = Number(
+      this.ticket?.departmentId ?? null
+    );
+
+    if (!Number.isInteger(departmentId) || departmentId <= 0) {
+      this.isLoadingReassignEmployees = false;
+      this.reassignError =
+        'Ticket department information is unavailable.';
+
+      return;
+    }
+
 
     this.ticketApiService
-      .getFilteredEmployeeList({
+      .getFilteredEmployeeList2({
         status: true,
         // page: this.reassignEmployeePage,
         // limit: this.reassignEmployeeLimit,
+        department_id: Number(departmentId),
         role: employeeApiRole,
       })
       .subscribe({
@@ -1369,6 +1388,20 @@ export class TicketDetails implements OnInit {
     this.isLoadingEditMasters = true;
     this.editError = '';
 
+    const userId = Number(
+      this.authService.currentUser()?.id,
+    );
+
+    if (!userId) {
+      this.isLoadingEditMasters = false;
+      this.editCentres = [];
+
+      this.editError =
+        'Logged-in user information is unavailable.';
+
+      return;
+    }
+
     forkJoin({
       categories:
         this.ticketCategoryApiService
@@ -1383,8 +1416,8 @@ export class TicketDetails implements OnInit {
           .getAllPriorities(),
 
       centres:
-        this.ticketCategoryApiService
-          .getAllCentres(),
+        this.ticketApiService
+          .getEmployeeCentres(userId),
     }).subscribe({
       next: response => {
         this.isLoadingEditMasters = false;
@@ -1401,6 +1434,16 @@ export class TicketDetails implements OnInit {
           return;
         }
 
+        this.editCentres = Array.isArray(
+          response.centres.data,
+        )
+          ? response.centres.data.map(centre => ({
+            id: Number(centre.id),
+            code: centre.centreCode ?? '',
+            name: centre.centreName ?? '',
+          }))
+          : [];
+        
         const departmentNameById =
           new Map<number, string>();
 

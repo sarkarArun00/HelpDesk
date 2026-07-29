@@ -147,7 +147,7 @@ export class MasterDashboard
             
             users:
               response.data
-                .centreCount,
+                .employeeCount,
           };
 
           this.masterModules =

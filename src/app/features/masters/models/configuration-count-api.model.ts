@@ -7,6 +7,7 @@ export interface RecordCount {
 export interface ConfigurationCountData {
     centreCount: RecordCount;
     ticketCategoryCount: RecordCount;
+    employeeCount: RecordCount
 }
 
 export interface ConfigurationCountResponse {

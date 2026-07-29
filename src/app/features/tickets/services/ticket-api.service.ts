@@ -280,6 +280,13 @@ export interface EmployeeListParams {
     // limit: number;
     role: EmployeeListRole;
 }
+export interface EmployeeListParams2 {
+    status: boolean;
+    // page: number;
+    // limit: number;
+    role: EmployeeListRole;
+    department_id: number;
+}
 
 export interface CreateTicketCommentPayload {
     ticket_id: number;
@@ -491,6 +498,24 @@ export class TicketApiService {
             {
                 params: {
                     status: params.status,
+                    
+                    // page: params.page,
+                    // limit: params.limit,
+                    role: params.role,
+                },
+            },
+        );
+    }
+
+    getFilteredEmployeeList2(
+        params: EmployeeListParams2,
+    ): Observable<GetEmployeeListResponse> {
+        return this.http.get<GetEmployeeListResponse>(
+            `${this.apiBaseUrl}/employee/get-employee-list`,
+            {
+                params: {
+                    status: params.status,
+                    department_id: params.department_id,
                     // page: params.page,
                     // limit: params.limit,
                     role: params.role,
