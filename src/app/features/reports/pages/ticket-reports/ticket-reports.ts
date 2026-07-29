@@ -105,7 +105,8 @@ export class TicketReports implements OnInit {
 
   currentPage = 1;
   pageSize = 10;
-  totalRecords = 0;
+
+
 
   readonly pageSizeOptions = [
     10,
@@ -271,8 +272,8 @@ export class TicketReports implements OnInit {
         this.ticketApiService
           .getAllTickets({
             order: 'DESC',
-            page: this.currentPage,
-            limit: this.pageSize,
+            // page: this.currentPage,
+            // limit: this.pageSize,
           }),
 
       departments:
@@ -342,8 +343,6 @@ export class TicketReports implements OnInit {
                 ticket.status,
               );
             
-            this.totalRecords =
-              response.tickets.total ?? 0;
             
             const assignedAt =
               ticket.assigned_at ??
@@ -457,13 +456,28 @@ export class TicketReports implements OnInit {
       ) => {
         this.isLoading = false;
         this.tickets = [];
-        this.totalRecords = 0;
 
         this.loadError =
           error.error?.message ||
           'Unable to load ticket report.';
       },
     });
+  }
+
+  get totalRecords(): number {
+    return this.filteredTickets.length;
+  }
+
+
+  get paginatedTickets(): any[] {
+    const startIndex =
+      (this.currentPage - 1) *
+      this.pageSize;
+
+    return this.filteredTickets.slice(
+      startIndex,
+      startIndex + this.pageSize,
+    );
   }
 
   get totalPages(): number {
