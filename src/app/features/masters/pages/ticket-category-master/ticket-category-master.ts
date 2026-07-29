@@ -127,7 +127,7 @@ export class TicketCategoryMaster
 
   currentPage = 1;
 
-  pageSize = 10;
+  pageSize = 100;
 
   totalRecords = 0;
 
@@ -255,17 +255,17 @@ export class TicketCategoryMaster
               };
             });
 
-          this.totalRecords =
-            response.pagination.total;
+          // this.totalRecords =
+          //   response.pagination.total;
 
-          this.currentPage =
-            response.pagination.page;
+          // this.currentPage =
+          //   response.pagination.page;
 
-          this.pageSize =
-            response.pagination.limit;
+          // this.pageSize =
+          //   response.pagination.limit;
 
-          this.totalPages =
-            response.pagination.totalPages;
+          // this.totalPages =
+          //   response.pagination.totalPages;
         },
 
         error: (

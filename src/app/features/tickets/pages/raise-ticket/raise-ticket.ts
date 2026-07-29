@@ -327,6 +327,8 @@ private readonly ticketStore =
       category => category.id === categoryId,
     );
 
+    // this.closeCategoryDropdown();
+    console.log('ahsgdghsadsahgdhgasdghasdfhgasd', categoryId,  selectedCategory)
     if (!selectedCategory) {
       this.ticketForm.patchValue({
         targetDepartment: '',
@@ -340,6 +342,8 @@ private readonly ticketStore =
       targetDepartment: selectedCategory.targetDepartment,
       priority: selectedCategory.defaultPriority,
     });
+
+
   }
 
   onFileSelected(event: Event): void {

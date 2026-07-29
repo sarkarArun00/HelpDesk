@@ -130,23 +130,23 @@ export class Dashboard
         type:
           'total',
       },
-      {
-        label:
-          'Open',
+      // {
+      //   label:
+      //     'Open',
 
-        value:
-          this.ticketSummary
-            .openTickets,
+      //   value:
+      //     this.ticketSummary
+      //       .openTickets,
 
-        description:
-          'Tickets waiting for assignment',
+      //   description:
+      //     'Tickets waiting for assignment',
 
-        icon:
-          '○',
+      //   icon:
+      //     '○',
 
-        type:
-          'open',
-      },
+      //   type:
+      //     'open',
+      // },
       {
         label:
           'Assigned',
@@ -251,20 +251,20 @@ export class Dashboard
       route:
         '/tickets/my-raised',
     },
-    {
-      label:
-        'Awaiting Confirmation',
+    // {
+    //   label:
+    //     'Awaiting Confirmation',
 
-      value:
-        this.ticketSummary
-          .awaitingConfirmationTickets,
+    //   value:
+    //     this.ticketSummary
+    //       .awaitingConfirmationTickets,
 
-      description:
-        'Resolved tickets awaiting creator confirmation',
+    //   description:
+    //     'Resolved tickets awaiting creator confirmation',
 
-      route:
-        '/tickets/action-items',
-    },
+    //   route:
+    //     '/tickets/action-items',
+    // },
   ];
 }
 
