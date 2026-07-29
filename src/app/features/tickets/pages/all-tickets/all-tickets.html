@@ -92,123 +92,131 @@
       }
     </header>
 
-    <div class="filter-grid">
-      <div class="search-field">
-        <label for="ticketSearch">
-          Search
-        </label>
+    <div class="filter-card-body">
+      <div class="row g-3">
+        <div class="col-12 col-xl-4">
+          <div class="search-field">
+            <label for="ticketSearch">
+              Search
+            </label>
 
-        <div class="search-input">
-          <i class="bi bi-search"></i>
+            <div class="input-group is-new">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
 
-          <input
-            id="ticketSearch"
-            type="search"
-            placeholder="Search tickets..."
-            [(ngModel)]="searchTerm"
-            (ngModelChange)="onFiltersChanged()"
-          />
+              <input class="form-control"
+                id="ticketSearch"
+                type="search"
+                placeholder="Search tickets..."
+                [(ngModel)]="searchTerm"
+                (ngModelChange)="onFiltersChanged()"
+              />
+            </div>
+          </div>
         </div>
-      </div>
+        <div class="col-12 col-md-4 col-xl-2">
+          <div class="filter-field">
+            <label for="departmentFilter">
+              Department
+            </label>
 
-      <div class="filter-field">
-        <label for="departmentFilter">
-          Department
-        </label>
+            <select class="form-select"
+              id="departmentFilter"
+              [(ngModel)]="selectedDepartment"
+              (ngModelChange)="onFiltersChanged()"
+            >
+              <option value="">
+                All Departments
+              </option>
 
-        <select
-          id="departmentFilter"
-          [(ngModel)]="selectedDepartment"
-          (ngModelChange)="onFiltersChanged()"
-        >
-          <option value="">
-            All Departments
-          </option>
+              @for (
+                department of departments;
+                track department
+              ) {
+                <option [value]="department">
+                  {{ department }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="col-12 col-md-4 col-xl-2">
+          <div class="filter-field">
+            <label for="centreFilter">
+              Centre
+            </label>
 
-          @for (
-            department of departments;
-            track department
-          ) {
-            <option [value]="department">
-              {{ department }}
-            </option>
-          }
-        </select>
-      </div>
+            <select class="form-select"
+              id="centreFilter"
+              [(ngModel)]="selectedCentre"
+              (ngModelChange)="onFiltersChanged()"
+            >
+              <option value="">
+                All Centres
+              </option>
 
-      <div class="filter-field">
-        <label for="centreFilter">
-          Centre
-        </label>
+              @for (
+                centre of centres;
+                track centre
+              ) {
+                <option [value]="centre">
+                  {{ centre }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="col-12 col-md-4 col-xl-2">
+          <div class="filter-field">
+            <label for="priorityFilter">
+              Priority
+            </label>
 
-        <select
-          id="centreFilter"
-          [(ngModel)]="selectedCentre"
-          (ngModelChange)="onFiltersChanged()"
-        >
-          <option value="">
-            All Centres
-          </option>
+            <select class="form-select"
+              id="priorityFilter"
+              [(ngModel)]="selectedPriority"
+              (ngModelChange)="onFiltersChanged()"
+            >
+              <option value="">
+                All Priorities
+              </option>
 
-          @for (
-            centre of centres;
-            track centre
-          ) {
-            <option [value]="centre">
-              {{ centre }}
-            </option>
-          }
-        </select>
-      </div>
+              @for (
+                priority of priorities;
+                track priority
+              ) {
+                <option [value]="priority">
+                  {{ priority }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="col-12 col-md-4 col-xl-2">
+          <div class="filter-field">
+            <label for="statusFilter">
+              Status
+            </label>
 
-      <div class="filter-field">
-        <label for="priorityFilter">
-          Priority
-        </label>
+            <select class="form-select"
+              id="statusFilter"
+              [(ngModel)]="selectedStatus"
+              (ngModelChange)="onFiltersChanged()"
+            >
+              <option value="">
+                All Statuses
+              </option>
 
-        <select
-          id="priorityFilter"
-          [(ngModel)]="selectedPriority"
-          (ngModelChange)="onFiltersChanged()"
-        >
-          <option value="">
-            All Priorities
-          </option>
-
-          @for (
-            priority of priorities;
-            track priority
-          ) {
-            <option [value]="priority">
-              {{ priority }}
-            </option>
-          }
-        </select>
-      </div>
-
-      <div class="filter-field">
-        <label for="statusFilter">
-          Status
-        </label>
-
-        <select
-          id="statusFilter"
-          [(ngModel)]="selectedStatus"
-          (ngModelChange)="onFiltersChanged()"
-        >
-          <option value="">
-            All Statuses
-          </option>
-
-          @for (
-            status of statuses;
-            track status
-          ) {
-            <option [value]="status">
-              {{ status }}
-            </option>
-          }
-        </select>
+              @for (
+                status of statuses;
+                track status
+              ) {
+                <option [value]="status">
+                  {{ status }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
       </div>
     </div>
   </section>

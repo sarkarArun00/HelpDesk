@@ -7,8 +7,12 @@
     padding: 0;
     color: #172033;
     background: #f4f6fa;
+    max-width: 1550px;
+    margin: 0 auto;
 }
-
+.filter-card-body {
+  padding: 20px 21px 22px;
+}
 .page-header {
     display: flex;
     align-items: flex-start;
@@ -187,11 +191,12 @@
 
     input,
     select {
+        font-size:13px;
         width: 100%;
         min-height: 42px;
         padding: 0.6rem 0.75rem;
         color: #263247;
-        background: #fff;
+        background-color: #fff;
         border: 1px solid #ced6e2;
         border-radius: 8px;
         outline: none;
@@ -235,7 +240,14 @@
     border: 1px solid #d7d2ff;
     border-radius: 7px;
 }
-
+.input-group-text {
+  color: #667085;
+  background: #f8fafc;
+}
+.input-group.is-new {
+    display: flex;
+    flex-wrap: nowrap;
+}
 .state-card {
     display: flex;
     min-height: 250px;
