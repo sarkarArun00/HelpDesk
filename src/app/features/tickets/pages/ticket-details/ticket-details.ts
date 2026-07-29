@@ -802,24 +802,25 @@ export class TicketDetails implements OnInit {
     });
   }
 
+  isSameDptHod: boolean = false
   requestedDepart(dept: any) {
     const storedUserData =
       localStorage.getItem('isd-authenticated-user');
     
-    // console.log('dept dept dept', dept)
-    // console.log('dept dept storedUserData', storedUserData)
-    // if (storedUserData) {
-    //   const currentUser =
-    //     JSON.parse(storedUserData);
+    console.log('dept dept dept', dept)
+    console.log('dept dept storedUserData', storedUserData)
 
-    //   // console.log('Current user:', currentUser);
-    //   console.log('User ID:', currentUser.id);
-    //   console.log(
-    //     'Department ID:',
-    //     currentUser.department_id,
-    //   );
-    // }
-    return 
+    if (storedUserData) {
+      const currentUser =
+        JSON.parse(storedUserData);
+
+      // console.log('Current user:', currentUser);
+      console.log('User ID:', currentUser.id);
+    
+      this.isSameDptHod = Number(dept.hod_user) == currentUser.id
+
+      console.log('rksjhdkjasdhkjshdkja', this.isSameDptHod)
+    }
   }
 
   private mapAttachment(
@@ -985,7 +986,8 @@ export class TicketDetails implements OnInit {
 
     return (
       hasReassignRole &&
-      this.ticket.status === 'Assigned'
+      this.ticket.status === 'Assigned' && 
+      !this.isSameDptHod
     );
   }
 
