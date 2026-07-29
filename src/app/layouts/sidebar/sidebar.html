@@ -80,6 +80,20 @@
         My Action Items
       </span>
     </a>
+    <a
+      routerLink="/tickets/all"
+      routerLinkActive="active"
+      class="sidebar-menu-link"
+      (click)="closeAfterNavigation()"
+    >
+      <span class="sidebar-menu-icon">
+        <i class="bi bi-card-checklist"></i>
+      </span>
+
+      <span class="sidebar-menu-label">
+        All Tickets
+      </span>
+    </a>
 
     <!-- @if (canViewTeamPool) {
       <a

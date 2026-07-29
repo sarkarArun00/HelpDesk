@@ -86,7 +86,7 @@ export class MyActionItems
 
   currentPage = 1;
   pageSize = 10;
-  totalRecords = 0;
+  // totalRecords = 0;
 
   readonly pageSizeOptions = [
     10,
@@ -190,7 +190,7 @@ export class MyActionItems
           return;
         }
 
-        this.totalRecords = response.tickets.data.length
+        // this.totalRecords = response.tickets.data.length
 
         const departmentNameById =
           new Map<number, string>();
@@ -292,7 +292,7 @@ export class MyActionItems
       error: error => {
         this.isLoading = false;
         this.tickets = [];
-        this.totalRecords = 0;
+        // this.totalRecords = 0;
 
         console.error(
           'Unable to load action items:',
@@ -300,6 +300,22 @@ export class MyActionItems
         );
       },
     });
+  }
+
+  get totalRecords(): number {
+    return this.filteredTickets.length;
+  }
+
+
+  get paginatedTickets(): any[] {
+    const startIndex =
+      (this.currentPage - 1) *
+      this.pageSize;
+
+    return this.filteredTickets.slice(
+      startIndex,
+      startIndex + this.pageSize,
+    );
   }
 
   get totalPages(): number {

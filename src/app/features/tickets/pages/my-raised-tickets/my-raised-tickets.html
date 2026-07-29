@@ -237,7 +237,7 @@
           </thead>
 
           <tbody>
-            @for (ticket of filteredTickets; track ticket.id) {
+            @for (ticket of paginatedTickets; track ticket.id) {
               <tr>
                 <td>
                   <div class="ticket-primary">

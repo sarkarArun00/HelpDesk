@@ -81,7 +81,7 @@ export class AllTickets implements OnInit {
 
   currentPage = 1;
   pageSize = 10;
-  totalRecords = 0;
+  // totalRecords = 0;
 
   readonly pageSizeOptions = [
     10,
@@ -173,17 +173,17 @@ export class AllTickets implements OnInit {
     });
   }
 
-  get paginatedTickets():
-    AllTicketRecord[] {
-    const startIndex =
-      (this.currentPage - 1) *
-      this.pageSize;
+  // get paginatedTickets():
+  //   AllTicketRecord[] {
+  //   const startIndex =
+  //     (this.currentPage - 1) *
+  //     this.pageSize;
 
-    return this.filteredTickets.slice(
-      startIndex,
-      startIndex + this.pageSize,
-    );
-  }
+  //   return this.filteredTickets.slice(
+  //     startIndex,
+  //     startIndex + this.pageSize,
+  //   );
+  // }
 
 
   get pageNumbers(): number[] {
@@ -223,8 +223,8 @@ export class AllTickets implements OnInit {
       tickets:
         this.ticketApiService.getAllTickets({
           order: 'DESC',
-          page: this.currentPage,
-          limit: this.pageSize,
+          // page: this.currentPage,
+          // limit: this.pageSize,
         }),
 
       departments:
@@ -254,8 +254,8 @@ export class AllTickets implements OnInit {
           return;
         }
 
-        this.totalRecords =
-          response.tickets.data.length
+        // this.totalRecords =
+        //   response.tickets.data.length
 
         const departmentNameById =
           new Map<number, string>();
@@ -400,7 +400,7 @@ export class AllTickets implements OnInit {
       error: error => {
         this.isLoading = false;
         this.tickets = [];
-        this.totalRecords = 0;
+        // this.totalRecords = 0;
 
         console.error(
           'Unable to load all tickets:',
@@ -410,6 +410,21 @@ export class AllTickets implements OnInit {
     });
   }
 
+  get totalRecords(): number {
+    return this.filteredTickets.length;
+  }
+
+
+  get paginatedTickets(): any[] {
+    const startIndex =
+      (this.currentPage - 1) *
+      this.pageSize;
+
+    return this.filteredTickets.slice(
+      startIndex,
+      startIndex + this.pageSize,
+    );
+  }
 
   get totalPages(): number {
     return Math.max(
