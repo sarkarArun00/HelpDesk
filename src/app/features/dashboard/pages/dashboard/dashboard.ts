@@ -130,23 +130,23 @@ export class Dashboard
         type:
           'total',
       },
-      {
-        label:
-          'Open',
+      // {
+      //   label:
+      //     'Open',
 
-        value:
-          this.ticketSummary
-            .openTickets,
+      //   value:
+      //     this.ticketSummary
+      //       .openTickets,
 
-        description:
-          'Tickets waiting for assignment',
+      //   description:
+      //     'Tickets waiting for assignment',
 
-        icon:
-          '○',
+      //   icon:
+      //     '○',
 
-        type:
-          'open',
-      },
+      //   type:
+      //     'open',
+      // },
       {
         label:
           'Assigned',
