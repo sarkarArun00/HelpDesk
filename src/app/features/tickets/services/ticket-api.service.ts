@@ -157,6 +157,8 @@ export type TicketOrder =
 export interface GetTicketsPayload {
     type?: TicketListType;
     order?: TicketOrder;
+    page?: number;
+    limit?: number;
 }
 
 export interface AchievementPayload {
@@ -277,6 +279,13 @@ export interface EmployeeListParams {
     // page: number;
     // limit: number;
     role: EmployeeListRole;
+}
+export interface EmployeeListParams2 {
+    status: boolean;
+    // page: number;
+    // limit: number;
+    role: EmployeeListRole;
+    department_id: number;
 }
 
 export interface CreateTicketCommentPayload {
@@ -489,6 +498,24 @@ export class TicketApiService {
             {
                 params: {
                     status: params.status,
+                    
+                    // page: params.page,
+                    // limit: params.limit,
+                    role: params.role,
+                },
+            },
+        );
+    }
+
+    getFilteredEmployeeList2(
+        params: EmployeeListParams2,
+    ): Observable<GetEmployeeListResponse> {
+        return this.http.get<GetEmployeeListResponse>(
+            `${this.apiBaseUrl}/employee/get-employee-list`,
+            {
+                params: {
+                    status: params.status,
+                    department_id: params.department_id,
                     // page: params.page,
                     // limit: params.limit,
                     role: params.role,
@@ -552,6 +579,20 @@ export class TicketApiService {
         return this.http.post<AchievementResponse>(
             `${this.apiBaseUrl}/ticket/achievment`,
             payload,
+        );
+    }
+
+    getEmployeeCentres(userId: number) {
+        return this.http.get<{
+            success: boolean;
+            message: string;
+            data: Array<{
+                id: number;
+                centreCode: string;
+                centreName: string;
+            }>;
+        }>(
+            `${this.apiBaseUrl}/employee/get-centres/${userId}`,
         );
     }
     

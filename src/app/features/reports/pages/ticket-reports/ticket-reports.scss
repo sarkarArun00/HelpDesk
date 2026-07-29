@@ -592,6 +592,79 @@
   }
 }
 
+.report-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px;
+  flex-wrap: wrap;
+}
+
+.pagination-summary {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  label {
+    margin-right: 4px;
+    color: #6b7280;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  select {
+    width: 75px;
+    margin-right: 8px;
+  }
+}
+
+.pagination-button {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #374151;
+  cursor: pointer;
+  transition: 0.2s ease;
+
+  &:hover:not(:disabled) {
+    border-color: #00a651;
+    color: #00a651;
+    background: #f0fff4;
+  }
+
+  &.active {
+    border-color: #00a651;
+    background: #00a651;
+    color: #ffffff;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+}
+
+@media (max-width: 767px) {
+  .report-pagination {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pagination-controls {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}
+
 @media (max-width: 1300px) {
   .summary-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));

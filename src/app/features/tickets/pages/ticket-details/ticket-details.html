@@ -23,7 +23,7 @@
             @if (canEditTicket) {
               <button
                 type="button"
-                class="edit-ticket-button"
+                class="edit-ticket-button is-edit"
                 (click)="openEditModal()"
               >
                 <i class="bi bi-pencil"></i>
@@ -635,7 +635,7 @@
                 <span>Created By</span>
                 <strong>{{ ticket.createdBy }}</strong>
                 <small>
-                  {{ ticket.originatingDepartment }}
+                  {{ createrCode }}
                 </small>
               </div>
             </article>
@@ -1043,7 +1043,7 @@
 
         <input
           type="search"
-          class="form-control employee-search-input"
+          class="form-control employee-search-input employee-search-input-v2"
           placeholder="Search employee by name, code or department"
           [(ngModel)]="reassignEmployeeSearch"
           [disabled]="isReassigningTicket"

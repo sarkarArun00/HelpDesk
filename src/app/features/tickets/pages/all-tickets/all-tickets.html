@@ -92,123 +92,131 @@
       }
     </header>
 
-    <div class="filter-grid">
-      <div class="search-field">
-        <label for="ticketSearch">
-          Search
-        </label>
+    <div class="filter-card-body">
+      <div class="row g-3">
+        <div class="col-12 col-xl-4">
+          <div class="search-field">
+            <label for="ticketSearch">
+              Search
+            </label>
 
-        <div class="search-input">
-          <i class="bi bi-search"></i>
+            <div class="input-group is-new">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
 
-          <input
-            id="ticketSearch"
-            type="search"
-            placeholder="Search tickets..."
-            [(ngModel)]="searchTerm"
-            (ngModelChange)="onFiltersChanged()"
-          />
+              <input class="form-control"
+                id="ticketSearch"
+                type="search"
+                placeholder="Search tickets..."
+                [(ngModel)]="searchTerm"
+                (ngModelChange)="onFiltersChanged()"
+              />
+            </div>
+          </div>
         </div>
-      </div>
+        <div class="col-12 col-md-4 col-xl-2">
+          <div class="filter-field">
+            <label for="departmentFilter">
+              Department
+            </label>
 
-      <div class="filter-field">
-        <label for="departmentFilter">
-          Department
-        </label>
+            <select class="form-select"
+              id="departmentFilter"
+              [(ngModel)]="selectedDepartment"
+              (ngModelChange)="onFiltersChanged()"
+            >
+              <option value="">
+                All Departments
+              </option>
 
-        <select
-          id="departmentFilter"
-          [(ngModel)]="selectedDepartment"
-          (ngModelChange)="onFiltersChanged()"
-        >
-          <option value="">
-            All Departments
-          </option>
+              @for (
+                department of departments;
+                track department
+              ) {
+                <option [value]="department">
+                  {{ department }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="col-12 col-md-4 col-xl-2">
+          <div class="filter-field">
+            <label for="centreFilter">
+              Centre
+            </label>
 
-          @for (
-            department of departments;
-            track department
-          ) {
-            <option [value]="department">
-              {{ department }}
-            </option>
-          }
-        </select>
-      </div>
+            <select class="form-select"
+              id="centreFilter"
+              [(ngModel)]="selectedCentre"
+              (ngModelChange)="onFiltersChanged()"
+            >
+              <option value="">
+                All Centres
+              </option>
 
-      <div class="filter-field">
-        <label for="centreFilter">
-          Centre
-        </label>
+              @for (
+                centre of centres;
+                track centre
+              ) {
+                <option [value]="centre">
+                  {{ centre }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="col-12 col-md-4 col-xl-2">
+          <div class="filter-field">
+            <label for="priorityFilter">
+              Priority
+            </label>
 
-        <select
-          id="centreFilter"
-          [(ngModel)]="selectedCentre"
-          (ngModelChange)="onFiltersChanged()"
-        >
-          <option value="">
-            All Centres
-          </option>
+            <select class="form-select"
+              id="priorityFilter"
+              [(ngModel)]="selectedPriority"
+              (ngModelChange)="onFiltersChanged()"
+            >
+              <option value="">
+                All Priorities
+              </option>
 
-          @for (
-            centre of centres;
-            track centre
-          ) {
-            <option [value]="centre">
-              {{ centre }}
-            </option>
-          }
-        </select>
-      </div>
+              @for (
+                priority of priorities;
+                track priority
+              ) {
+                <option [value]="priority">
+                  {{ priority }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="col-12 col-md-4 col-xl-2">
+          <div class="filter-field">
+            <label for="statusFilter">
+              Status
+            </label>
 
-      <div class="filter-field">
-        <label for="priorityFilter">
-          Priority
-        </label>
+            <select class="form-select"
+              id="statusFilter"
+              [(ngModel)]="selectedStatus"
+              (ngModelChange)="onFiltersChanged()"
+            >
+              <option value="">
+                All Statuses
+              </option>
 
-        <select
-          id="priorityFilter"
-          [(ngModel)]="selectedPriority"
-          (ngModelChange)="onFiltersChanged()"
-        >
-          <option value="">
-            All Priorities
-          </option>
-
-          @for (
-            priority of priorities;
-            track priority
-          ) {
-            <option [value]="priority">
-              {{ priority }}
-            </option>
-          }
-        </select>
-      </div>
-
-      <div class="filter-field">
-        <label for="statusFilter">
-          Status
-        </label>
-
-        <select
-          id="statusFilter"
-          [(ngModel)]="selectedStatus"
-          (ngModelChange)="onFiltersChanged()"
-        >
-          <option value="">
-            All Statuses
-          </option>
-
-          @for (
-            status of statuses;
-            track status
-          ) {
-            <option [value]="status">
-              {{ status }}
-            </option>
-          }
-        </select>
+              @for (
+                status of statuses;
+                track status
+              ) {
+                <option [value]="status">
+                  {{ status }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -273,9 +281,9 @@
 
             <tbody>
               @for (
-                ticket of paginatedTickets;
-                track ticket.id
-              ) {
+              ticket of filteredTickets;
+              track ticket.id
+            ) {
                 <tr>
                   <td>
                     <a
@@ -360,46 +368,79 @@
           </table>
         </div>
 
-        @if (totalPages > 1) {
-          <footer class="pagination">
-            <button
-              type="button"
-              [disabled]="currentPage === 1"
-              (click)="changePage(currentPage - 1)"
-            >
-              <i class="bi bi-chevron-left"></i>
-              Previous
-            </button>
+        @if (
+  !isLoading &&
+  !loadError &&
+  totalRecords > 0
+) {
+  <div class="report-pagination">
+    <div class="pagination-summary">
+      Showing
+      <strong>{{ paginationStart }}</strong>
+      to
+      <strong>{{ paginationEnd }}</strong>
+      of
+      <strong>{{ totalRecords }}</strong>
+      records
+    </div>
 
-            <div class="page-numbers">
-              @for (
-                page of pageNumbers;
-                track page
-              ) {
-                <button
-                  type="button"
-                  [class.active]="
-                    currentPage === page
-                  "
-                  (click)="changePage(page)"
-                >
-                  {{ page }}
-                </button>
-              }
-            </div>
+    <div class="pagination-controls">
+      <label for="allTicketsPageSize">
+        Rows per page
+      </label>
 
-            <button
-              type="button"
-              [disabled]="
-                currentPage === totalPages
-              "
-              (click)="changePage(currentPage + 1)"
-            >
-              Next
-              <i class="bi bi-chevron-right"></i>
-            </button>
-          </footer>
+      <select
+        id="allTicketsPageSize"
+        class="form-select form-select-sm"
+        [(ngModel)]="pageSize"
+        (ngModelChange)="onPageSizeChange()"
+      >
+        @for (
+          size of pageSizeOptions;
+          track size
+        ) {
+          <option [ngValue]="size">
+            {{ size }}
+          </option>
         }
+      </select>
+
+      <button
+        type="button"
+        class="pagination-button"
+        [disabled]="currentPage === 1"
+        (click)="changePage(currentPage - 1)"
+        aria-label="Previous page"
+      >
+        <i class="bi bi-chevron-left"></i>
+      </button>
+
+      @for (
+        page of visiblePages;
+        track page
+      ) {
+        <button
+          type="button"
+          class="pagination-button"
+          [class.active]="currentPage === page"
+          (click)="changePage(page)"
+        >
+          {{ page }}
+        </button>
+      }
+
+      <button
+        type="button"
+        class="pagination-button"
+        [disabled]="currentPage === totalPages"
+        (click)="changePage(currentPage + 1)"
+        aria-label="Next page"
+      >
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+}
       } @else {
         <div class="empty-state">
           <i class="bi bi-inbox"></i>

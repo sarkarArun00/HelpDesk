@@ -17,12 +17,7 @@
     </a>
   </header>
 
-  <form
-    [formGroup]="ticketForm"
-    (ngSubmit)="onSubmit()"
-    novalidate
-    class="ticket-form"
-  >
+  <form [formGroup]="ticketForm" (ngSubmit)="onSubmit()" novalidate class="ticket-form">
     <!-- Requester information -->
     <section class="form-card">
       <div class="form-card-header">
@@ -72,7 +67,7 @@
 
                 <strong>
                   {{
-                    ticketForm.controls.originatingDepartment.value
+                  ticketForm.controls.originatingDepartment.value
                   }}
                 </strong>
               </div>
@@ -124,37 +119,30 @@
               <span class="required-star">*</span>
             </label>
 
-            <input
-              id="ticketSubject"
-              type="text"
-              class="form-control"
-              formControlName="subject"
-              maxlength="120"
-              placeholder="Enter a short summary of the issue"
-              [class.is-invalid]="
+            <input id="ticketSubject" type="text" class="form-control" formControlName="subject" maxlength="120"
+              placeholder="Enter a short summary of the issue" [class.is-invalid]="
                 ticketForm.controls.subject.touched &&
                 ticketForm.controls.subject.invalid
-              "
-            />
+              " />
 
             <div class="field-footer">
               <div>
                 @if (
-                  ticketForm.controls.subject.touched &&
-                  ticketForm.controls.subject.hasError('required')
+                ticketForm.controls.subject.touched &&
+                ticketForm.controls.subject.hasError('required')
                 ) {
-                  <span class="invalid-message">
-                    Ticket subject is required.
-                  </span>
+                <span class="invalid-message">
+                  Ticket subject is required.
+                </span>
                 }
 
                 @if (
-                  ticketForm.controls.subject.touched &&
-                  ticketForm.controls.subject.hasError('minlength')
+                ticketForm.controls.subject.touched &&
+                ticketForm.controls.subject.hasError('minlength')
                 ) {
-                  <span class="invalid-message">
-                    Subject must contain at least 5 characters.
-                  </span>
+                <span class="invalid-message">
+                  Subject must contain at least 5 characters.
+                </span>
                 }
               </div>
 
@@ -165,7 +153,7 @@
           </div>
 
           <!-- Category -->
-          <div class="col-12 col-lg-6">
+          <!-- <div class="col-12 col-lg-6">
             <label for="issueCategory" class="form-label">
               Issue Category
               <span class="required-star">*</span>
@@ -204,6 +192,51 @@
                 Issue category is required.
               </div>
             }
+          </div> -->
+          <div class="col-12 col-lg-6">
+            <label class="form-label">Issue Category</label>
+            <div class="category-autocomplete">
+              <div class="autocomplete-input-wrapper">
+                <input type="text" class="form-control" placeholder="Search and select category"
+                  [(ngModel)]="categorySearch" [ngModelOptions]="{ standalone: true }" (focus)="openCategoryDropdown()"
+                  (input)="openCategoryDropdown()" (blur)="closeCategoryDropdown()" autocomplete="off" />
+
+                @if (categorySearch) {
+                <button type="button" class="autocomplete-clear" (mousedown)="$event.preventDefault()"
+                  (click)="clearCategory()" aria-label="Clear category">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+                }
+              </div>
+
+              @if (isCategoryDropdownOpen) {
+              <div class="autocomplete-dropdown">
+                @for (
+                category of filteredCategories;
+                track category.id
+                ) {
+                <button type="button" class="autocomplete-option" [class.selected]="
+              ticketForm.controls.categoryId.value ===
+              category.id
+            " (mousedown)="$event.preventDefault()" (click)="selectCategory(category)">
+                  {{ category.name }}
+                </button>
+                } @empty {
+                <div class="autocomplete-empty">
+                  No category found
+                </div>
+                }
+              </div>
+              }
+            </div>
+            @if (
+            ticketForm.controls.categoryId.touched &&
+            ticketForm.controls.categoryId.invalid
+            ) {
+            <div class="invalid-feedback d-block">
+              Please select a category.
+            </div>
+            }
           </div>
 
           <!-- Target department -->
@@ -217,13 +250,8 @@
                 <i class="bi bi-building"></i>
               </span>
 
-              <input
-                id="targetDepartment"
-                type="text"
-                class="form-control readonly-control"
-                formControlName="targetDepartment"
-                placeholder="Selected automatically"
-              />
+              <input id="targetDepartment" type="text" class="form-control readonly-control"
+                formControlName="targetDepartment" placeholder="Selected automatically" />
             </div>
 
             <div class="form-text">
@@ -238,33 +266,28 @@
               <span class="required-star">*</span>
             </label>
 
-            <select
-              id="centreId"
-              class="form-select"
-              formControlName="centreId"
-              [class.is-invalid]="
+            <select id="centreId" class="form-select" formControlName="centreId" [class.is-invalid]="
                 ticketForm.controls.centreId.touched &&
                 ticketForm.controls.centreId.invalid
-              "
-            >
+              ">
               <option [ngValue]="0" disabled>
                 Select centre or facility
               </option>
 
               @for (centre of centres; track centre.id) {
-                <option [ngValue]="centre.id">
-                  {{ centre.name }} ({{ centre.code }})
-                </option>
+              <option [ngValue]="centre.id">
+                {{ centre.name }} ({{ centre.code }})
+              </option>
               }
             </select>
 
             @if (
-              ticketForm.controls.centreId.touched &&
-              ticketForm.controls.centreId.invalid
+            ticketForm.controls.centreId.touched &&
+            ticketForm.controls.centreId.invalid
             ) {
-              <div class="invalid-message mt-2">
-                Centre or facility is required.
-              </div>
+            <div class="invalid-message mt-2">
+              Centre or facility is required.
+            </div>
             }
           </div>
 
@@ -275,23 +298,18 @@
               <span class="required-star">*</span>
             </label>
 
-            <select
-              id="priority"
-              class="form-select"
-              formControlName="priority"
-              [class.is-invalid]="
+            <select id="priority" class="form-select" formControlName="priority" [class.is-invalid]="
                 ticketForm.controls.priority.touched &&
                 ticketForm.controls.priority.invalid
-              "
-            >
+              ">
               <option value="" disabled>
                 Select ticket priority
               </option>
 
               @for (priority of priorities; track priority) {
-                <option [value]="priority">
-                  {{ priority }}
-                </option>
+              <option [value]="priority">
+                {{ priority }}
+              </option>
               }
             </select>
 
@@ -300,12 +318,12 @@
             </div>
 
             @if (
-              ticketForm.controls.priority.touched &&
-              ticketForm.controls.priority.invalid
+            ticketForm.controls.priority.touched &&
+            ticketForm.controls.priority.invalid
             ) {
-              <div class="invalid-message mt-2">
-                Priority is required.
-              </div>
+            <div class="invalid-message mt-2">
+              Priority is required.
+            </div>
             }
           </div>
 
@@ -316,60 +334,54 @@
               <span class="required-star">*</span>
             </label>
 
-            <textarea
-              id="description"
-              class="form-control description-control"
-              formControlName="description"
-              rows="7"
-              maxlength="2000"
-              placeholder="Describe the issue, its impact and any action already taken"
+            <textarea id="description" class="form-control description-control" formControlName="description" rows="7"
+              maxlength="2000" placeholder="Describe the issue, its impact and any action already taken"
               [class.is-invalid]="
                 ticketForm.controls.description.touched &&
                 ticketForm.controls.description.invalid
-              "
-            ></textarea>
+              "></textarea>
 
             <div class="field-footer">
               <div>
                 @if (
-                  ticketForm.controls.description.touched &&
-                  ticketForm.controls.description.hasError('required')
+                ticketForm.controls.description.touched &&
+                ticketForm.controls.description.hasError('required')
                 ) {
-                  <span class="invalid-message">
-                    Detailed description is required.
-                  </span>
+                <span class="invalid-message">
+                  Detailed description is required.
+                </span>
                 }
 
                 @if (
-                  ticketForm.controls.description.touched &&
-                  ticketForm.controls.description.hasError(
-                    'minlength'
-                  )
+                ticketForm.controls.description.touched &&
+                ticketForm.controls.description.hasError(
+                'minlength'
+                )
                 ) {
-                  <span class="invalid-message">
-                    Description must contain at least 20 characters.
-                  </span>
+                <span class="invalid-message">
+                  Description must contain at least 20 characters.
+                </span>
                 }
 
                 @if (
-                  !ticketForm.controls.description.invalid ||
-                  !ticketForm.controls.description.touched
+                !ticketForm.controls.description.invalid ||
+                !ticketForm.controls.description.touched
                 ) {
-                  <span class="form-help">
-                    Do not include patient-identifiable or confidential
-                    medical information.
-                  </span>
+                <span class="form-help">
+                  Do not include patient-identifiable or confidential
+                  medical information.
+                </span>
                 }
               </div>
 
               <span class="character-count">
                 {{
-                  ticketForm.controls.description.value.length
+                ticketForm.controls.description.value.length
                 }}/2000
               </span>
             </div>
 
-            <div class="privacy-warning">
+            <!-- <div class="privacy-warning">
               <i class="bi bi-shield-exclamation"></i>
 
               <div>
@@ -380,7 +392,7 @@
                   numbers or other personally identifiable information.
                 </span>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
@@ -401,20 +413,10 @@
       </div>
 
       <div class="form-card-body">
-        <input
-          #fileInput
-          id="ticketAttachments"
-          type="file"
-          hidden
-          multiple
-          accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg"
-          (change)="onFileSelected($event)"
-        />
+        <input #fileInput id="ticketAttachments" type="file" hidden multiple
+          accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" (change)="onFileSelected($event)" />
 
-        <label
-          for="ticketAttachments"
-          class="upload-area"
-        >
+        <label for="ticketAttachments" class="upload-area">
           <span class="upload-icon">
             <i class="bi bi-cloud-arrow-up"></i>
           </span>
@@ -429,89 +431,71 @@
         </label>
 
         @if (fileError) {
-          <div class="alert alert-danger file-alert" role="alert">
-            <i class="bi bi-exclamation-circle"></i>
-            {{ fileError }}
-          </div>
+        <div class="alert alert-danger file-alert" role="alert">
+          <i class="bi bi-exclamation-circle"></i>
+          {{ fileError }}
+        </div>
         }
 
         @if (selectedFiles.length > 0) {
-          <div class="selected-files">
-            <h3>Selected attachments</h3>
+        <div class="selected-files">
+          <h3>Selected attachments</h3>
 
-            @for (
-              file of selectedFiles;
-              track $index;
-              let fileIndex = $index
-            ) {
-              <article class="file-item">
-                <div class="file-details">
-                  <span class="file-icon">
-                    <i class="bi bi-file-earmark"></i>
-                  </span>
+          @for (
+          file of selectedFiles;
+          track $index;
+          let fileIndex = $index
+          ) {
+          <article class="file-item">
+            <div class="file-details">
+              <span class="file-icon">
+                <i class="bi bi-file-earmark"></i>
+              </span>
 
-                  <div>
-                    <strong>{{ file.name }}</strong>
-                    <small>{{ getFileSize(file.size) }}</small>
-                  </div>
-                </div>
+              <div>
+                <strong>{{ file.name }}</strong>
+                <small>{{ getFileSize(file.size) }}</small>
+              </div>
+            </div>
 
-                <button
-                  type="button"
-                  class="remove-file-button"
-                  [attr.aria-label]="'Remove ' + file.name"
-                  (click)="removeFile(fileIndex)"
-                >
-                  <i class="bi bi-trash3"></i>
-                </button>
-              </article>
-            }
-          </div>
+            <button type="button" class="remove-file-button" [attr.aria-label]="'Remove ' + file.name"
+              (click)="removeFile(fileIndex)">
+              <i class="bi bi-trash3"></i>
+            </button>
+          </article>
+          }
+        </div>
         }
       </div>
     </section>
 
     @if (submissionMessage) {
-      <div
-        class="alert alert-success submission-message"
-        role="status"
-      >
-        <i class="bi bi-check-circle-fill"></i>
-        {{ submissionMessage }}
-      </div>
+    <div class="alert alert-success submission-message" role="status">
+      <i class="bi bi-check-circle-fill"></i>
+      {{ submissionMessage }}
+    </div>
     }
 
-<footer class="form-actions">
-  <button
-    type="button"
-    class="btn btn-outline-secondary action-button"
-    [disabled]="isSubmitting"
-    (click)="resetForm()"
-  >
-    <i class="bi bi-arrow-counterclockwise"></i>
-    Reset Form
-  </button>
+    <footer class="form-actions">
+      <button type="button" class="btn btn-outline-secondary action-button" [disabled]="isSubmitting"
+        (click)="resetForm()">
+        <i class="bi bi-arrow-counterclockwise"></i>
+        Reset Form
+      </button>
 
-  <button
-    type="submit"
-    class="btn btn-primary action-button submit-button"
-    [disabled]="
+      <button type="submit" class="btn btn-primary action-button submit-button" [disabled]="
       isSubmitting ||
       isLoadingMasters
-    "
-  >
-    @if (isSubmitting) {
-      <span
-        class="spinner-border spinner-border-sm"
-        aria-hidden="true"
-      ></span>
+    ">
+        @if (isSubmitting) {
+        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
 
-      Creating Ticket...
-    } @else {
-      <i class="bi bi-send"></i>
-      Submit Ticket
-    }
-  </button>
-</footer>
+        Creating Ticket...
+        } @else {
+        <i class="bi bi-send"></i>
+        Submit Ticket
+        }
+      </button>
+    </footer>
   </form>
 </section>
