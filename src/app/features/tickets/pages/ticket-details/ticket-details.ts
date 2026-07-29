@@ -250,6 +250,7 @@ export class TicketDetails implements OnInit {
     TicketComment | null = null;
   
   createrCode: any
+  departDetails:any
 
   editTicketForm = {
     subject: '',
@@ -507,7 +508,9 @@ export class TicketDetails implements OnInit {
 
         const apiTicket =
           response.ticket.data;
-        
+        this.departDetails = apiTicket
+        // console.log('ressssss sss', this.departDetails)
+        this.requestedDepart(this.departDetails.department)
         this.createrCode = response.ticket.data.requester?.employee_code
         const employeeById =
           new Map<
@@ -797,6 +800,26 @@ export class TicketDetails implements OnInit {
           'Unable to load ticket details.';
       },
     });
+  }
+
+  requestedDepart(dept: any) {
+    const storedUserData =
+      localStorage.getItem('isd-authenticated-user');
+    
+    // console.log('dept dept dept', dept)
+    // console.log('dept dept storedUserData', storedUserData)
+    // if (storedUserData) {
+    //   const currentUser =
+    //     JSON.parse(storedUserData);
+
+    //   // console.log('Current user:', currentUser);
+    //   console.log('User ID:', currentUser.id);
+    //   console.log(
+    //     'Department ID:',
+    //     currentUser.department_id,
+    //   );
+    // }
+    return 
   }
 
   private mapAttachment(
