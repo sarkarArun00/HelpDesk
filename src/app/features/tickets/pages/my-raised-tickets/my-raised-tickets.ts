@@ -165,8 +165,8 @@ export class MyRaisedTickets
         this.ticketApiService.getAllTickets({
           type: 'created',
           order: 'DESC',
-          page: this.currentPage,
-          limit: this.pageSize,
+          // page: this.currentPage,
+          // limit: this.pageSize,
         }),
 
       departments:
