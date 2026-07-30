@@ -52,6 +52,7 @@ export class Achievements implements OnInit {
 
   resolvedThisMonth = 0;
 
+
   badges: AchievementBadge[] = [];
 
   isLoading = false;
@@ -143,6 +144,7 @@ export class Achievements implements OnInit {
             );
 
           this.resolvedThisMonth = response.resolvedTickets ?? [],
+            this.currentRank = response.rank ?? []
             
           // this.resolvedThisMonth =
           //   this.getResolvedTicketCount(
