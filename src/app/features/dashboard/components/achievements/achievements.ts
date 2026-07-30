@@ -104,10 +104,6 @@ export class Achievements implements OnInit {
       return;
     }
 
-
-    
-
-
     const user =
       currentUser as unknown as {
         fullName?: string;
@@ -146,10 +142,12 @@ export class Achievements implements OnInit {
                 this.mapBadge(badge),
             );
 
-          this.resolvedThisMonth =
-            this.getResolvedTicketCount(
-              response.badges ?? [],
-            );
+          this.resolvedThisMonth = response.resolvedTickets ?? [],
+            
+          // this.resolvedThisMonth =
+          //   this.getResolvedTicketCount(
+          //     response.badges ?? [],
+          //   );
 
           /*
            * Temporary points calculation.
