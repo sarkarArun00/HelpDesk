@@ -200,6 +200,7 @@ export interface AchievementResponse {
     year: number;
     assignedTickets: number;
     resolvedTickets: number;
+    rank: number;
     badges: AchievementBadge[];
 }
 
