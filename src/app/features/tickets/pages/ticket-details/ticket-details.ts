@@ -987,7 +987,7 @@ export class TicketDetails implements OnInit {
     return (
       hasReassignRole &&
       this.ticket.status === 'Assigned' && 
-      !this.isSameDptHod
+      this.isSameDptHod
     );
   }
 
