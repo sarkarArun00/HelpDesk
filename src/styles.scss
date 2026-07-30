@@ -137,6 +137,14 @@ select {
 
 .sidebar-brand h4{ font-family: "Arima", system-ui; font-weight: 600; color:#33a651; margin:0; }
 
+/* Firefox */
+.sidebar-navigation{ scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.4) transparent;}
+.sidebar-navigation::-webkit-scrollbar{ width:8px; }
+.sidebar-navigation::-webkit-scrollbar-track{ background:transparent; margin:8px 0; }
+.sidebar-navigation::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.4); border-radius:20px; border:2px solid transparent; background-clip:content-box; transition:background .3s; }
+.sidebar-navigation::-webkit-scrollbar-thumb:hover{ background: rgba(255,255,255,.65); background-clip:content-box; }
+.sidebar-navigation::-webkit-scrollbar-corner{ background:transparent; }
+
 @media screen and (max-width:767px){
   .page-header h1{ font-size:22px !important; }
 }
