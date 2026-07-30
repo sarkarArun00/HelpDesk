@@ -107,7 +107,7 @@ export interface UpdateTicketPayload {
     department_id: number;
     centre_id: number;
     priority_id: number;
-    status: 'Assign';
+    status?: 'Assign';
 }
 
 export interface UpdateTicketResponse {
@@ -199,6 +199,7 @@ export interface AchievementResponse {
     month: number;
     year: number;
     assignedTickets: number;
+    resolvedTickets: number;
     badges: AchievementBadge[];
 }
 

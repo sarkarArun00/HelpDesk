@@ -1623,7 +1623,7 @@ export class TicketDetails implements OnInit {
           this.editTicketForm.centreId,
         priority_id:
           this.editTicketForm.priorityId,
-        status: 'Assign',
+        // status: 'Assign',
       })
       .subscribe({
         next: response => {
