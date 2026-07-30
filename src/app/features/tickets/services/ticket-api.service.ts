@@ -199,6 +199,7 @@ export interface AchievementResponse {
     month: number;
     year: number;
     assignedTickets: number;
+    resolvedTickets: number;
     badges: AchievementBadge[];
 }
 
