@@ -71,7 +71,7 @@ export const routes: Routes = [
       {
         path: 'tickets/all',
         title: 'All Tickets | ISD Ticketing System',
-        canActivate: [roleGuard],
+        // canActivate: [roleGuard],
         data: {
           roles: [
             'Admin',
