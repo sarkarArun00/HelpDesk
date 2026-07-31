@@ -153,7 +153,7 @@
           </div>
 
           <!-- Category -->
-          <div class="col-12 col-lg-6">
+          <!-- <div class="col-12 col-lg-6">
             <label for="issueCategory" class="form-label">
               Issue Category
               <span class="required-star">*</span>
@@ -184,6 +184,13 @@
               }
             </select>
 
+            @if(catDescription) {
+              <div class="form-text">
+              {{catDescription}}
+            </div>
+            }
+            
+
             @if (
               ticketForm.controls.categoryId.touched &&
               ticketForm.controls.categoryId.invalid
@@ -192,8 +199,8 @@
                 Issue category is required.
               </div>
             }
-          </div>
-          <!-- <div class="col-12 col-lg-6">
+          </div> -->
+          <div class="col-12 col-lg-6">
             <label class="form-label">Issue Category</label>
             <div class="category-autocomplete">
               <div class="autocomplete-input-wrapper">
@@ -237,7 +244,7 @@
               Please select a category.
             </div>
             }
-          </div> -->
+          </div>
 
           <!-- Target department -->
           <div class="col-12 col-lg-6">

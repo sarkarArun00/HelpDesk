@@ -30,6 +30,7 @@ interface TicketCategory {
   departmentId: number;
   targetDepartment: string;
   defaultPriority: TicketPriority;
+  description: string;
 }
 
 interface Centre {
@@ -204,7 +205,7 @@ private readonly ticketStore =
     forkJoin({
       categories:
         this.ticketCategoryApiService
-          .getAllCategories(1, 100),
+          .getAllCategories(1, 150),
 
       priorities:
         this.ticketCategoryApiService
@@ -282,6 +283,7 @@ private readonly ticketStore =
                   category.department
                     ?.departmentName ??
                   'Not assigned',
+                description: category.description,
                 defaultPriority:
                   (defaultPriority
                     ?.priority_name ??
@@ -322,26 +324,30 @@ private readonly ticketStore =
     });
   }
 
+  catDescription: any = ''
   onCategoryChange(categoryId: number): void {
     const selectedCategory = this.categories.find(
       category => category.id === categoryId,
     );
 
     // this.closeCategoryDropdown();
-    console.log('ahsgdghsadsahgdhgasdghasdfhgasd', categoryId,  selectedCategory)
     if (!selectedCategory) {
       this.ticketForm.patchValue({
         targetDepartment: '',
         priority: '',
       });
-
+      
       return;
     }
-
+    
     this.ticketForm.patchValue({
       targetDepartment: selectedCategory.targetDepartment,
       priority: selectedCategory.defaultPriority,
     });
+
+    this.catDescription = this.categories.find(item => item.id == categoryId)?.description
+    
+    console.log('ahsgdghsadsahgdhgasdghasdfhgasd', this.catDescription)
 
 
   }
@@ -426,17 +432,33 @@ private readonly ticketStore =
     this.isCategoryDropdownOpen = true;
   }
 
-  selectCategory(
-    category: TicketCategory,
-  ): void {
+  // selectCategory(
+  //   category: TicketCategory,
+  // ): void {
+  //   this.ticketForm.controls.categoryId.setValue(
+  //     category.id,
+  //   );
+
+  //   this.categorySearch = category.name;
+  //   this.isCategoryDropdownOpen = false;
+
+  //   this.ticketForm.controls.categoryId.markAsTouched();
+  // }
+
+  selectCategory(category: TicketCategory): void {
+    const categoryId = Number(category.id);
+
     this.ticketForm.controls.categoryId.setValue(
-      category.id,
+      categoryId,
     );
+
+    this.ticketForm.controls.categoryId.markAsTouched();
+    this.ticketForm.controls.categoryId.markAsDirty();
 
     this.categorySearch = category.name;
     this.isCategoryDropdownOpen = false;
 
-    this.ticketForm.controls.categoryId.markAsTouched();
+    this.onCategoryChange(categoryId);
   }
 
   clearCategory(): void {
@@ -591,6 +613,19 @@ private readonly ticketStore =
 
     this.isSubmitting = true;
 
+    // formData.forEach((value, key) => {
+    //   if (value instanceof File) {
+    //     console.log(key, {
+    //       name: value.name,
+    //       type: value.type,
+    //       size: value.size,
+    //     });
+    //   } else {
+    //     console.log(key, value);
+    //   }
+    // });
+
+    // return
     this.ticketApiService
       .createTicket(formData)
       .subscribe({
