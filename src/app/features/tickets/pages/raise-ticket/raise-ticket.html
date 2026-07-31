@@ -236,6 +236,12 @@
               </div>
               }
             </div>
+
+            @if (catDescription) {
+              <div class="form-text">
+                {{ catDescription }}
+              </div>
+            }
             @if (
             ticketForm.controls.categoryId.touched &&
             ticketForm.controls.categoryId.invalid
