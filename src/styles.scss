@@ -145,7 +145,7 @@ select {
 .sidebar-navigation::-webkit-scrollbar-thumb:hover{ background: rgba(255,255,255,.65); background-clip:content-box; }
 .sidebar-navigation::-webkit-scrollbar-corner{ background:transparent; }
 
-.back-link{ color:#000; font-size:13px; }
+.back-link{ color:#000 !important; font-size:13px !important; }
 
 @media screen and (max-width:767px){
   .page-header h1{ font-size:22px !important; }
