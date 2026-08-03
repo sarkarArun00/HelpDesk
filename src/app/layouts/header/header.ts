@@ -89,17 +89,36 @@ export class Header
   isRequestingPushPermission = false;
   fcmToken: string | null = null;
 
+
   ngOnInit(): void {
     this.loadProfile();
 
-    this.notificationService
-      .loadNotifications();
+    this.notificationService.loadNotifications();
+    this.notificationService.refreshUnreadCount();
 
-    this.notificationService
-      .refreshUnreadCount();
+    void this.initializePushNotifications();
+    void this.listenForFirebaseMessages();
+  }
 
-    void this
-      .listenForFirebaseMessages();
+  private async initializePushNotifications(): Promise<void> {
+    if (
+      !('Notification' in window) ||
+      !('serviceWorker' in navigator)
+    ) {
+      console.warn(
+        'Push notifications are not supported by this browser.',
+      );
+      return;
+    }
+
+    if (Notification.permission === 'denied') {
+      console.warn(
+        'Notification permission was previously denied.',
+      );
+      return;
+    }
+
+    await this.enablePushNotifications();
   }
 
   loadProfile(): void {
@@ -354,17 +373,7 @@ export class Header
   }
 
   
-  async toggleNotificationMenu():
-    Promise<void> {
-    if (
-      'Notification' in window &&
-      Notification.permission !==
-      'denied' &&
-      !this.fcmToken
-    ) {
-      await this.enablePushNotifications();
-    }
-
+  toggleNotificationMenu(): void {
     const willOpen =
       !this.isNotificationMenuVisible;
 
