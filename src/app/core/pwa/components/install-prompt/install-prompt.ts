@@ -3,6 +3,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+
 import {
   PwaInstallService,
 } from '../../services/pwa-install';
@@ -23,7 +24,30 @@ export class InstallPrompt {
   protected readonly isInstalling =
     signal(false);
 
-  protected async installApp():
+  protected readonly showIosInstructions =
+    signal(false);
+
+  protected async openInstallOption():
+    Promise<void> {
+    if (
+      this.pwaInstallService
+        .isInstalled()
+    ) {
+      return;
+    }
+
+    if (
+      this.pwaInstallService
+        .isIosDevice()
+    ) {
+      this.showIosInstructions.set(true);
+      return;
+    }
+
+    await this.installAndroidApp();
+  }
+
+  private async installAndroidApp():
     Promise<void> {
     this.isInstalling.set(true);
 
@@ -38,6 +62,11 @@ export class InstallPrompt {
     } finally {
       this.isInstalling.set(false);
     }
+  }
+
+  protected closeIosInstructions():
+    void {
+    this.showIosInstructions.set(false);
   }
 
   protected dismissPrompt(): void {

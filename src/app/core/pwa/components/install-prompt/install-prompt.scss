@@ -106,6 +106,137 @@
   }
 }
 
+.ios-install-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 11000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.ios-install-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  background: rgba(8, 24, 35, 0.72);
+  border: 0;
+  opacity: 1;
+  backdrop-filter: blur(4px);
+}
+
+.ios-install-content {
+  position: relative;
+  z-index: 1;
+  width: min(420px, 100%);
+  max-height: calc(100vh - 36px);
+  padding: 26px 22px 22px;
+  overflow-y: auto;
+  text-align: center;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.32);
+
+  h2 {
+    margin: 14px 0 7px;
+    color: #102a43;
+    font-size: 21px;
+    font-weight: 700;
+  }
+
+  >p {
+    margin: 0 0 20px;
+    color: #627d98;
+    font-size: 14px;
+  }
+
+  >small {
+    display: block;
+    margin-top: 14px;
+    color: #829ab1;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+}
+
+.ios-install-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  color: #52677a;
+  background: #eef3f6;
+  border: 0;
+  border-radius: 50%;
+  place-items: center;
+}
+
+.ios-app-icon {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 16px;
+  box-shadow:
+    0 7px 18px rgba(18, 50, 74, 0.2);
+}
+
+.ios-install-steps {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  margin: 0 0 22px;
+  text-align: left;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    padding: 12px;
+    color: #334e68;
+    background: #f5f8fa;
+    border: 1px solid #e3eaf0;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+}
+
+.step-number {
+  display: inline-flex;
+  flex: 0 0 25px;
+  align-items: center;
+  justify-content: center;
+  width: 25px;
+  height: 25px;
+  color: #ffffff;
+  background: #00a651;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ios-got-it-button {
+  width: 100%;
+  height: 44px;
+  color: #ffffff;
+  background:
+    linear-gradient(135deg,
+      #087f6a,
+      #00a651);
+  border: 0;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
 @keyframes prompt-enter {
   from {
     opacity: 0;

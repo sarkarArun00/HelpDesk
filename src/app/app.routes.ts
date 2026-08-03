@@ -194,7 +194,13 @@ export const routes: Routes = [
             ).then(component => component.TicketReports),
       },
         
-      
+      {
+        path: 'help',
+        loadComponent: () =>
+          import('./features/help/help').then(
+            component => component.Help,
+          ),
+      }
     ],
   },
   {

@@ -227,44 +227,44 @@
           }
 
           @if (hasMoreNotifications()) {
-  <div class="notification-load-more">
-    <button
-      type="button"
-      [disabled]="
-        isLoadingMoreNotifications()
-      "
-      (click)="
-        notificationService
-          .loadMoreNotifications()
-      "
-    >
-      @if (
-        isLoadingMoreNotifications()
-      ) {
-        <span
-          class="
-            spinner-border
-            spinner-border-sm
-          "
-          aria-hidden="true"
-        ></span>
+        <div class="notification-load-more">
+          <button
+            type="button"
+            [disabled]="
+              isLoadingMoreNotifications()
+            "
+            (click)="
+              notificationService
+                .loadMoreNotifications()
+            "
+          >
+            @if (
+              isLoadingMoreNotifications()
+            ) {
+              <span
+                class="
+                  spinner-border
+                  spinner-border-sm
+                "
+                aria-hidden="true"
+              ></span>
 
-        Loading...
-      } @else {
-        Load more notifications
+              Loading...
+            } @else {
+              Load more notifications
+            }
+          </button>
+
+          <span>
+            Showing
+            {{ notifications().length }}
+            of
+            {{
+              notificationPagination().total
+            }}
+          </span>
+        </div>
       }
-    </button>
-
-    <span>
-      Showing
-      {{ notifications().length }}
-      of
-      {{
-        notificationPagination().total
-      }}
-    </span>
-  </div>
-}
         } @else {
           <div class="empty-notification-state">
             <span>
@@ -298,25 +298,23 @@
           aria-haspopup="menu"
           (click)="toggleProfileMenu()"
         >
-      <span class="profile-avatar">
-        @if (
-          getProfilePhotoUrl(
-            currentUser.employeePhoto
-          );
-          as profilePhotoUrl
-        ) {
-          <img
-            [src]="profilePhotoUrl"
-            [alt]="currentUser.fullName"
-          />
-        } @else {
-          {{
-            getInitials(
+        <span class="profile-avatar">
+          @if (
+            getProfilePhotoUrl(currentUser.employeePhoto);
+            as profilePhotoUrl
+          ) {
+            <img
+              [src]="profilePhotoUrl"
+              [alt]="currentUser.fullName || 'Profile'"
+            />
+          } @else {
+            {{
               currentUser.fullName
-            )
-          }}
-        }
-      </span>
+                ? currentUser.fullName.trim().charAt(0).toUpperCase()
+                : '?'
+            }}
+          }
+        </span>
 
           <span class="profile-content">
             <strong>
@@ -352,25 +350,25 @@
             role="menu"
           >
             <header class="profile-menu-header">
-        <span class="menu-avatar">
-          @if (
-            getProfilePhotoUrl(
-              currentUser.employeePhoto
-            );
-            as profilePhotoUrl
-          ) {
-            <img
-              [src]="profilePhotoUrl"
-              [alt]="currentUser.fullName"
-            />
-          } @else {
-            {{
-              getInitials(
-                currentUser.fullName
-              )
-            }}
-          }
-        </span>
+            <span class="menu-avatar">
+              @if (
+                getProfilePhotoUrl(
+                  currentUser.employeePhoto
+                );
+                as profilePhotoUrl
+              ) {
+                <img
+                  [src]="profilePhotoUrl"
+                  [alt]="currentUser.fullName"
+                />
+              } @else {
+                {{
+                  getInitials(
+                    currentUser.fullName
+                  )
+                }}
+              }
+            </span>
 
               <div>
                 <strong>

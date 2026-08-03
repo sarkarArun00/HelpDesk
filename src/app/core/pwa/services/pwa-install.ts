@@ -3,17 +3,17 @@ import {
   signal,
 } from '@angular/core';
 
-interface BeforeInstallPromptEvent
-  extends Event {
+interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
 
   userChoice: Promise<{
-    outcome:
-      | 'accepted'
-      | 'dismissed';
-
+    outcome: 'accepted' | 'dismissed';
     platform: string;
   }>;
+}
+
+interface NavigatorWithStandalone extends Navigator {
+  standalone?: boolean;
 }
 
 @Injectable({
@@ -21,18 +21,16 @@ interface BeforeInstallPromptEvent
 })
 export class PwaInstallService {
   private deferredPrompt:
-    BeforeInstallPromptEvent | null =
-      null;
+    BeforeInstallPromptEvent | null = null;
+
+  readonly isIosDevice =
+    signal(this.detectIosDevice());
+
+  readonly isInstalled =
+    signal(this.detectStandaloneMode());
 
   readonly canInstall =
     signal(false);
-
-  readonly isInstalled =
-    signal(
-      window.matchMedia(
-        '(display-mode: standalone)',
-      ).matches,
-    );
 
   constructor() {
     window.addEventListener(
@@ -41,8 +39,7 @@ export class PwaInstallService {
         event.preventDefault();
 
         this.deferredPrompt =
-          event as
-            BeforeInstallPromptEvent;
+          event as BeforeInstallPromptEvent;
 
         this.canInstall.set(true);
       },
@@ -56,10 +53,49 @@ export class PwaInstallService {
         this.isInstalled.set(true);
       },
     );
+
+    window
+      .matchMedia('(display-mode: standalone)')
+      .addEventListener('change', event => {
+        this.isInstalled.set(event.matches);
+
+        if (event.matches) {
+          this.canInstall.set(false);
+        }
+      });
   }
 
-  async installApp():
-    Promise<boolean> {
+  private detectIosDevice(): boolean {
+    const userAgent =
+      navigator.userAgent.toLowerCase();
+
+    const isAppleMobile =
+      /iphone|ipad|ipod/.test(userAgent);
+
+    /*
+     * Newer iPads can report themselves
+     * as Macintosh devices.
+     */
+    const isModernIpad =
+      navigator.platform === 'MacIntel' &&
+      navigator.maxTouchPoints > 1;
+
+    return isAppleMobile || isModernIpad;
+  }
+
+  private detectStandaloneMode(): boolean {
+    const navigatorWithStandalone =
+      navigator as NavigatorWithStandalone;
+
+    return (
+      window.matchMedia(
+        '(display-mode: standalone)',
+      ).matches ||
+      navigatorWithStandalone.standalone === true
+    );
+  }
+
+  async installApp(): Promise<boolean> {
     if (!this.deferredPrompt) {
       return false;
     }
@@ -67,15 +103,12 @@ export class PwaInstallService {
     await this.deferredPrompt.prompt();
 
     const choice =
-      await this.deferredPrompt
-        .userChoice;
+      await this.deferredPrompt.userChoice;
 
     this.deferredPrompt = null;
     this.canInstall.set(false);
 
-    if (
-      choice.outcome === 'accepted'
-    ) {
+    if (choice.outcome === 'accepted') {
       this.isInstalled.set(true);
 
       return true;
