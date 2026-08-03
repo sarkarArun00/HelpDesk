@@ -1,7 +1,10 @@
 @if (
-  pwaInstallService.canInstall() &&
   !pwaInstallService.isInstalled() &&
-  !isDismissed()
+  !isDismissed() &&
+  (
+    pwaInstallService.canInstall() ||
+    pwaInstallService.isIosDevice()
+  )
 ) {
   <aside
     class="pwa-install-prompt"
@@ -20,7 +23,7 @@
       src="pwa-icons/icon-192x192.png"
       alt="NHCPL Helpdesk"
       class="app-icon"
-    >
+    />
 
     <div class="prompt-content">
       <strong>
@@ -28,8 +31,16 @@
       </strong>
 
       <p>
-        Install the application for faster
-        access and a better experience.
+        @if (
+          pwaInstallService.isIosDevice()
+        ) {
+          Add the application to your
+          iPhone Home Screen.
+        } @else {
+          Install the application for
+          faster access and a better
+          experience.
+        }
       </p>
     </div>
 
@@ -37,7 +48,7 @@
       type="button"
       class="install-button"
       [disabled]="isInstalling()"
-      (click)="installApp()"
+      (click)="openInstallOption()"
     >
       @if (isInstalling()) {
         Installing...
@@ -46,4 +57,111 @@
       }
     </button>
   </aside>
+}
+
+@if (showIosInstructions()) {
+  <div
+    class="ios-install-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="ios-install-title"
+  >
+    <button
+      type="button"
+      class="ios-install-backdrop"
+      aria-label="Close installation guide"
+      (click)="closeIosInstructions()"
+    ></button>
+
+    <section class="ios-install-content">
+      <button
+        type="button"
+        class="ios-install-close"
+        aria-label="Close installation guide"
+        (click)="closeIosInstructions()"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+
+      <img
+        src="pwa-icons/icon-192x192.png"
+        alt=""
+        class="ios-app-icon"
+      />
+
+      <h2 id="ios-install-title">
+        Install NHCPL Helpdesk
+      </h2>
+
+      <p>
+        Follow these steps on your
+        iPhone or iPad:
+      </p>
+
+      <ol class="ios-install-steps">
+        <li>
+          <span class="step-number">1</span>
+
+          <span>
+            Open this website directly
+            in <strong>Safari</strong>.
+          </span>
+        </li>
+
+        <li>
+          <span class="step-number">2</span>
+
+          <span>
+            Tap the
+            <strong>Share</strong>
+            button
+            <i class="bi bi-box-arrow-up"></i>.
+          </span>
+        </li>
+
+        <li>
+          <span class="step-number">3</span>
+
+          <span>
+            Scroll down and select
+            <strong>
+              Add to Home Screen
+            </strong>.
+          </span>
+        </li>
+
+        <li>
+          <span class="step-number">4</span>
+
+          <span>
+            Enable
+            <strong>Open as Web App</strong>
+            if that option appears.
+          </span>
+        </li>
+
+        <li>
+          <span class="step-number">5</span>
+
+          <span>
+            Tap <strong>Add</strong>.
+          </span>
+        </li>
+      </ol>
+
+      <button
+        type="button"
+        class="ios-got-it-button"
+        (click)="closeIosInstructions()"
+      >
+        Got it
+      </button>
+
+      <small>
+        This option is available from
+        Safari, not from WhatsApp,
+        Gmail, or other in-app browsers.
+      </small>
+    </section>
+  </div>
 }

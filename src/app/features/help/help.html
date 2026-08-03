@@ -1,0 +1,208 @@
+<section class="help-page">
+  <!-- Header -->
+  <div class="help-header">
+    <div>
+      <span class="page-label">
+        <i class="bi bi-question-circle"></i>
+        Help Center
+      </span>
+
+      <h1>Ticket Management Video Tutorials</h1>
+
+      <p>
+        Explore step-by-step video guides to learn how to raise,
+        manage, track, and resolve tickets.
+      </p>
+    </div>
+
+    <div class="header-icon">
+      <i class="bi bi-play-btn"></i>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="help-toolbar">
+    <div class="search-box">
+      <i class="bi bi-search"></i>
+
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        placeholder="Search video tutorials..."
+        aria-label="Search video tutorials"
+      />
+
+      @if (searchTerm) {
+        <button
+          type="button"
+          class="clear-search"
+          (click)="clearSearch()"
+          aria-label="Clear search"
+        >
+          <i class="bi bi-x-lg"></i>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Category filters -->
+  <div class="category-list">
+    @for (category of categories; track category) {
+      <button
+        type="button"
+        class="category-button"
+        [class.active]="selectedCategory === category"
+        (click)="selectCategory(category)"
+      >
+        {{ category }}
+      </button>
+    }
+  </div>
+
+  <!-- Result information -->
+  <div class="results-header">
+    <div>
+      <h2>
+        {{
+          selectedCategory === 'All'
+            ? 'All Tutorials'
+            : selectedCategory
+        }}
+      </h2>
+
+      <p>
+        {{ filteredVideos.length }}
+        {{
+          filteredVideos.length === 1
+            ? 'video available'
+            : 'videos available'
+        }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Video cards -->
+  @if (filteredVideos.length > 0) {
+    <div class="video-grid">
+      @for (video of filteredVideos; track video.id) {
+        <article class="video-card">
+          <button
+            type="button"
+            class="thumbnail-wrapper"
+            (click)="openVideo(video)"
+            [attr.aria-label]="'Play ' + video.title"
+          >
+            <img
+              [src]="getThumbnail(video.youtubeVideoId)"
+              [alt]="video.title"
+              loading="lazy"
+            />
+
+            <span class="thumbnail-overlay"></span>
+
+            <span class="play-button">
+              <i class="bi bi-play-fill"></i>
+            </span>
+
+            <span class="video-duration">
+              {{ video.duration }}
+            </span>
+          </button>
+
+          <div class="video-content">
+            <span class="video-category">
+              {{ video.category }}
+            </span>
+
+            <h3>{{ video.title }}</h3>
+
+            <p>{{ video.description }}</p>
+
+            <button
+              type="button"
+              class="watch-button"
+              (click)="openVideo(video)"
+            >
+              <i class="bi bi-play-circle"></i>
+              Watch tutorial
+            </button>
+          </div>
+        </article>
+      }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <span class="empty-icon">
+        <i class="bi bi-camera-video-off"></i>
+      </span>
+
+      <h3>No tutorials found</h3>
+
+      <p>
+        Try changing the selected category or search keyword.
+      </p>
+
+      <button
+        type="button"
+        (click)="clearSearch(); selectCategory('All')"
+      >
+        Show all tutorials
+      </button>
+    </div>
+  }
+</section>
+
+<!-- Video modal -->
+@if (selectedVideo && selectedVideoUrl) {
+  <div
+    class="video-modal"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="selectedVideo.title"
+  >
+    <button
+      type="button"
+      class="modal-backdrop"
+      (click)="closeVideo()"
+      aria-label="Close video"
+    ></button>
+
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <span>{{ selectedVideo.category }}</span>
+          <h2>{{ selectedVideo.title }}</h2>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          (click)="closeVideo()"
+          aria-label="Close video"
+        >
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="video-frame">
+        <iframe
+          [src]="selectedVideoUrl"
+          [title]="selectedVideo.title"
+          allow="
+            accelerometer;
+            autoplay;
+            clipboard-write;
+            encrypted-media;
+            gyroscope;
+            picture-in-picture
+          "
+          allowfullscreen
+        ></iframe>
+      </div>
+
+      <div class="modal-description">
+        {{ selectedVideo.description }}
+      </div>
+    </div>
+  </div>
+}

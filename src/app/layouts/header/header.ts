@@ -333,33 +333,23 @@ export class Header
   }
 
   getProfilePhotoUrl(
-    employeePhoto: string | null | undefined,
+    photoUrl?: string | null,
   ): string | null {
-    if (!employeePhoto) {
+    const url = photoUrl?.trim();
+
+    if (
+      !url ||
+      url === 'null' ||
+      url === 'undefined' ||
+      url.endsWith('/null') ||
+      url.endsWith('/undefined')
+    ) {
       return null;
     }
 
-    if (
-      employeePhoto.startsWith('http://') ||
-      employeePhoto.startsWith('https://')
-    ) {
-      return employeePhoto;
-    }
-
-    const baseUrl =
-      environment.apiBaseUrl.replace(
-        /\/$/,
-        '',
-      );
-
-    const photoPath =
-      employeePhoto.replace(
-        /^\//,
-        '',
-      );
-
-    return `${baseUrl}/${photoPath}`;
+    return url;
   }
+  
   
   openMobileMenu(): void {
     this.mobileMenuClicked.emit();
