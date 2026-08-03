@@ -496,6 +496,12 @@ export class UserMappingMaster
     ).format(date);
   }
 
+  // getInitials(fullName: string): string {
+  //   return fullName?.trim()
+  //     ? fullName.trim().charAt(0).toUpperCase()
+  //     : '?';
+  // }
+
   private createEmptyForm(): UserMappingForm {
     return {
       employeeCode: '',

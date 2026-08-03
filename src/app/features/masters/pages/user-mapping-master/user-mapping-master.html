@@ -224,7 +224,18 @@
               <tr>
                 <td>
                   <div class="employee-cell">
-                    <img  class="employee-avatar" [src]="user.employeePhoto" [alt]="user.employeePhoto">
+                    <!-- <img  class="employee-avatar" [src]="user.employeePhoto" [alt]="user.employeePhoto"> -->
+                     @if (user.employeePhoto) {
+                      <img
+                        class="employee-avatar"
+                        [src]="user.employeePhoto"
+                        [alt]="user.fullName"
+                      />
+                    } @else {
+                      <span class="employee-avatar">
+                        {{ getInitials(user.fullName) }}
+                      </span>
+                    }
                     <!-- <span class="employee-avatar">
                       {{ getInitials(user.fullName) }}
                     </span> -->
