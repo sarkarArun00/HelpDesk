@@ -389,7 +389,7 @@ export class MyActionItems
 
   onPageSizeChange(): void {
     this.currentPage = 1;
-    this.loadAssignedTickets();
+    // this.loadAssignedTickets();
   }
 
   private mapPriority(

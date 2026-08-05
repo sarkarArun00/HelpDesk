@@ -34,8 +34,8 @@ export class Help {
 
   readonly categories: string[] = [
     'All',
-    'Getting Started',
     'Raise Ticket',
+    'Getting Started',
     'Ticket Management',
     'Reports',
     'Administration',
@@ -44,39 +44,57 @@ export class Help {
   readonly videos: HelpVideo[] = [
     {
       id: 1,
-      title: 'Getting Started with HelpDesk',
+      title: 'Getting Started with HelpDesk (Hindi)',
       description:
         'Learn how to log in, navigate the dashboard, and use the main HelpDesk features.',
       category: 'Getting Started',
-      youtubeVideoId: 'sF6fxhX1Mo0',
-      duration: '6:24',
+      youtubeVideoId: 'hwGxGYXAw6Q',
+      duration: '02:20',
     },
     {
       id: 2,
-      title: 'How to Raise a Ticket',
+      title: 'Getting Started with HelpDesk (Bengali)',
       description:
-        'A complete guide to selecting a category, entering ticket details, and adding attachments.',
-      category: 'Raise Ticket',
-      youtubeVideoId: 'YOUR_VIDEO_ID',
-      duration: '04:45',
+        'Learn how to log in, navigate the dashboard, and use the main HelpDesk features.',
+      category: 'Getting Started',
+      youtubeVideoId: 'u0-SCYnO--g',
+      duration: '02:20',
     },
     {
       id: 3,
-      title: 'Assign and Manage Tickets',
+      title: 'ISD - Ticket Management System (Hindi)',
       description:
-        'Learn how to assign, update, track, and resolve support tickets.',
-      category: 'Ticket Management',
-      youtubeVideoId: 'YOUR_VIDEO_ID',
-      duration: '07:10',
+        'How to raise ticket.',
+      category: 'Raise Ticket',
+      youtubeVideoId: 'Bo-q6ty6lfI',
+      duration: '02:24',
     },
     {
       id: 4,
-      title: 'Ticket Reports and Filters',
+      title: 'ISD - Ticket Management System (Bengali)',
       description:
-        'Understand ticket reports, search filters, charts, pagination, and exports.',
-      category: 'Reports',
-      youtubeVideoId: 'YOUR_VIDEO_ID',
-      duration: '06:20',
+        'How to raise ticket.',
+      category: 'Raise Ticket',
+      youtubeVideoId: 'K_YuRzyUNxA',
+      duration: '02:17',
+    },
+    {
+      id: 5,
+      title: 'Assign and Manage Tickets (Hindi)',
+      description:
+        'Learn how to assign, update, track, and resolve support tickets.',
+      category: 'Ticket Management',
+      youtubeVideoId: 'yDlAzuKyzEI',
+      duration: '01:43',
+    },
+    {
+      id: 6,
+      title: 'Assign and Manage Tickets (Bengali)',
+      description:
+        'Learn how to assign, update, track, and resolve support tickets.',
+      category: 'Ticket Management',
+      youtubeVideoId: 'bcooRZ8WFVo',
+      duration: '01:43',
     },
   ];
 
