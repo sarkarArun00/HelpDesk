@@ -263,21 +263,19 @@ export class TicketDetails implements OnInit {
   };
 
   ngOnInit(): void {
-    const routeTicketId =
-      Number(
-        this.activatedRoute.snapshot
-          .paramMap.get('ticketId'),
+    this.activatedRoute.paramMap.subscribe(params => {
+      const routeTicketId = Number(
+        params.get('ticketId'),
       );
 
-    if (!routeTicketId) {
-      this.loadError =
-        'Invalid ticket ID.';
-      return;
-    }
+      if (!routeTicketId) {
+        this.loadError = 'Invalid ticket ID.';
+        return;
+      }
 
-    this.loadTicketDetails(
-      routeTicketId,
-    );
+      this.loadError = '';
+      this.loadTicketDetails(routeTicketId);
+    });
   }
 
   private getActivityTitle(

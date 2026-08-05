@@ -401,7 +401,7 @@ export class MyRaisedTickets
 
   onPageSizeChange(): void {
     this.currentPage = 1;
-    this.loadTickets();
+    // this.loadTickets();
   }
   
   private mapPriority(

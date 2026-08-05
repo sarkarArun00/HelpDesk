@@ -531,12 +531,10 @@ export class AllTickets implements OnInit {
     }
 
     this.currentPage = page;
-    this.loadTickets();
   }
 
   onPageSizeChange(): void {
     this.currentPage = 1;
-    this.loadTickets();
   }
 
   getPriorityClass(
