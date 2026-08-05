@@ -37,8 +37,8 @@ export class Help {
     'Raise Ticket',
     'Getting Started',
     'Ticket Management',
-    'Reports',
-    'Administration',
+    // 'Reports',
+    // 'Administration',
   ];
 
   readonly videos: HelpVideo[] = [
