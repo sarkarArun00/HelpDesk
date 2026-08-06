@@ -44,56 +44,56 @@ export class Help {
   readonly videos: HelpVideo[] = [
     {
       id: 1,
-      title: 'Getting Started with HelpDesk (Hindi)',
+      title: "Tutorial 01 - ISD - Ticket Login Overview(Hindi) | Nirnayan Healthcare",
       description:
         'Learn how to log in, navigate the dashboard, and use the main HelpDesk features.',
       category: 'Getting Started',
-      youtubeVideoId: 'hwGxGYXAw6Q',
-      duration: '02:20',
+      youtubeVideoId: 'RHeD1RQh9Ek',
+      duration: '02:01',
     },
     {
       id: 2,
-      title: 'Getting Started with HelpDesk (Bengali)',
+      title: 'Tutorial 02 - ISD - Ticket Login Overview (Bengali)|Nirnayan Healthcare',
       description:
         'Learn how to log in, navigate the dashboard, and use the main HelpDesk features.',
       category: 'Getting Started',
-      youtubeVideoId: 'u0-SCYnO--g',
-      duration: '02:20',
+      youtubeVideoId: 'eAyXDNNFs_0',
+      duration: '02:01',
     },
     {
       id: 3,
-      title: 'ISD - Ticket Management System (Hindi)',
+      title: "Tutorial 03 - ISD - Raise Ticket(Hindi) | Nirnayan Healthcare",
       description:
         'How to raise ticket.',
       category: 'Raise Ticket',
-      youtubeVideoId: 'Bo-q6ty6lfI',
+      youtubeVideoId: 'Y_2EyZsig1I',
       duration: '02:24',
     },
     {
       id: 4,
-      title: 'ISD - Ticket Management System (Bengali)',
+      title: "Tutorial 04 - ISD - Raise Ticket(Bengali) | Nirnayan Healthcare",
       description:
         'How to raise ticket.',
       category: 'Raise Ticket',
-      youtubeVideoId: 'K_YuRzyUNxA',
-      duration: '02:17',
+      youtubeVideoId: 'o5-D5c8zzUk',
+      duration: '02:24',
     },
     {
       id: 5,
-      title: 'Assign and Manage Tickets (Hindi)',
+      title: "Tutorial 05 - ISD - Ticket Workflow(Bengali) | Nirnayan Healthcare",
       description:
         'Learn how to assign, update, track, and resolve support tickets.',
       category: 'Ticket Management',
-      youtubeVideoId: 'yDlAzuKyzEI',
+      youtubeVideoId: 'vCWaIWB5cpM',
       duration: '01:43',
     },
     {
       id: 6,
-      title: 'Assign and Manage Tickets (Bengali)',
+      title: "Tutorial 06 - ISD - Ticket Workflow (Hindi) | Nirnayan Healthcare",
       description:
         'Learn how to assign, update, track, and resolve support tickets.',
       category: 'Ticket Management',
-      youtubeVideoId: 'bcooRZ8WFVo',
+      youtubeVideoId: '_QHcN-pG4MY',
       duration: '01:43',
     },
   ];
