@@ -13,7 +13,10 @@ interface HelpVideo {
   category: string;
   youtubeVideoId: string;
   duration: string;
+  language: HelpLanguage;
 }
+
+type HelpLanguage = 'English' | 'Hindi' | 'Bengali';
 
 @Component({
   selector: 'app-help',
@@ -28,6 +31,7 @@ interface HelpVideo {
 export class Help {
   searchTerm = '';
   selectedCategory = 'All';
+  selectedLanguage: HelpLanguage = 'Hindi';
 
   selectedVideo: HelpVideo | null = null;
   selectedVideoUrl: SafeResourceUrl | null = null;
@@ -41,6 +45,12 @@ export class Help {
     // 'Administration',
   ];
 
+  readonly languages: HelpLanguage[] = [
+    'Hindi',
+    'Bengali',
+    'English',
+  ];
+
   readonly videos: HelpVideo[] = [
     {
       id: 1,
@@ -50,6 +60,7 @@ export class Help {
       category: 'Getting Started',
       youtubeVideoId: 'RHeD1RQh9Ek',
       duration: '02:01',
+      language: 'Hindi',
     },
     {
       id: 2,
@@ -59,6 +70,7 @@ export class Help {
       category: 'Getting Started',
       youtubeVideoId: 'eAyXDNNFs_0',
       duration: '02:01',
+      language: 'Bengali',
     },
     {
       id: 3,
@@ -68,6 +80,7 @@ export class Help {
       category: 'Raise Ticket',
       youtubeVideoId: 'Y_2EyZsig1I',
       duration: '02:24',
+      language: 'Hindi',
     },
     {
       id: 4,
@@ -77,6 +90,7 @@ export class Help {
       category: 'Raise Ticket',
       youtubeVideoId: 'o5-D5c8zzUk',
       duration: '02:24',
+      language: 'Bengali',
     },
     {
       id: 5,
@@ -86,6 +100,7 @@ export class Help {
       category: 'Ticket Management',
       youtubeVideoId: 'vCWaIWB5cpM',
       duration: '01:43',
+      language: 'Bengali',
     },
     {
       id: 6,
@@ -95,6 +110,7 @@ export class Help {
       category: 'Ticket Management',
       youtubeVideoId: '_QHcN-pG4MY',
       duration: '01:43',
+      language: 'Hindi',
     },
   ];
 
@@ -111,17 +127,30 @@ export class Help {
         this.selectedCategory === 'All' ||
         video.category === this.selectedCategory;
 
+      const matchesLanguage =
+        video.language === this.selectedLanguage;
+
       const matchesSearch =
         !searchValue ||
         video.title.toLowerCase().includes(searchValue) ||
         video.description.toLowerCase().includes(searchValue);
 
-      return matchesCategory && matchesSearch;
+      return (
+        matchesLanguage &&
+        matchesCategory &&
+        matchesSearch
+      );
     });
   }
 
   selectCategory(category: string): void {
     this.selectedCategory = category;
+  }
+
+  selectLanguage(language: HelpLanguage): void {
+    this.selectedLanguage = language;
+    this.selectedCategory = 'All';
+    this.closeVideo();
   }
 
   openVideo(video: HelpVideo): void {
