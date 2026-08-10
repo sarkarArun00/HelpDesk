@@ -45,8 +45,29 @@
     </div>
   </div>
 
+  <!-- Language filters -->
+  <div class="language-filter" aria-label="Video language">
+    <!-- <span class="filter-label">
+      <i class="bi bi-translate"></i>
+      Select language
+    </span> -->
+
+    <div class="category-list">
+      @for (language of languages; track language) {
+        <button
+          type="button"
+          class="category-button"
+          [class.active]="selectedLanguage === language"
+          (click)="selectLanguage(language)"
+        >
+          {{ language }}
+        </button>
+      }
+    </div>
+  </div>
+
   <!-- Category filters -->
-  <div class="category-list">
+  <!-- <div class="category-list">
     @for (category of categories; track category) {
       <button
         type="button"
@@ -57,17 +78,14 @@
         {{ category }}
       </button>
     }
-  </div>
+  </div> -->
 
   <!-- Result information -->
   <div class="results-header">
     <div>
       <h2>
-        {{
-          selectedCategory === 'All'
-            ? 'All Tutorials'
-            : selectedCategory
-        }}
+        {{ selectedLanguage }} ·
+        {{ selectedCategory === 'All' ? 'All Tutorials' : selectedCategory }}
       </h2>
 
       <p>
@@ -139,7 +157,8 @@
       <h3>No tutorials found</h3>
 
       <p>
-        Try changing the selected category or search keyword.
+        No {{ selectedLanguage }} videos match the selected
+        category or search keyword.
       </p>
 
       <button
