@@ -54,64 +54,184 @@ export class Help {
   readonly videos: HelpVideo[] = [
     {
       id: 1,
-      title: "Tutorial 01 - ISD - Ticket Login Overview(Hindi) | Nirnayan Healthcare",
+      title: "Tutorial 01 - ISD - Ticket Login Overview(Bengali) | Nirnayan Healthcare",
       description:
         'Learn how to log in, navigate the dashboard, and use the main HelpDesk features.',
       category: 'Getting Started',
-      youtubeVideoId: 'RHeD1RQh9Ek',
+      youtubeVideoId: 'VgfqA5ILAc4',
       duration: '02:01',
-      language: 'Hindi',
-    },
+      language: 'Bengali',
+    }, // done
     {
       id: 2,
-      title: 'Tutorial 02 - ISD - Ticket Login Overview (Bengali)|Nirnayan Healthcare',
+      title: 'Tutorial 01 - ISD - Ticket Login Overview(Hindi) | Nirnayan Healthcare',
       description:
         'Learn how to log in, navigate the dashboard, and use the main HelpDesk features.',
       category: 'Getting Started',
-      youtubeVideoId: 'eAyXDNNFs_0',
+      youtubeVideoId: 'sp5PXzwLhkE',
       duration: '02:01',
-      language: 'Bengali',
-    },
+      language: 'Hindi',
+    }, // done
     {
       id: 3,
-      title: "Tutorial 03 - ISD - Raise Ticket(Hindi) | Nirnayan Healthcare",
+      title: "Tutorial 01 - ISD - Ticket Login Overview(English) | Nirnayan Healthcare",
       description:
-        'How to raise ticket.',
+        'Learn how to log in, navigate the dashboard, and use the main HelpDesk features.',
       category: 'Raise Ticket',
-      youtubeVideoId: 'Y_2EyZsig1I',
+      youtubeVideoId: '3N7k9znkbMA',
       duration: '02:24',
-      language: 'Hindi',
-    },
+      language: 'English',
+    }, // done
     {
       id: 4,
-      title: "Tutorial 04 - ISD - Raise Ticket(Bengali) | Nirnayan Healthcare",
+      title: "Tutorial 02 - ISD - Raise Ticket(Hindi) | Nirnayan Healthcare",
       description:
-        'How to raise ticket.',
+        'Learn how to raise a new support ticket, select the appropriate category and priority, describe the issue, add an attachment, and submit it successfully.',
       category: 'Raise Ticket',
-      youtubeVideoId: 'o5-D5c8zzUk',
-      duration: '02:24',
-      language: 'Bengali',
-    },
+      youtubeVideoId: 'pprapkJqjjQ',
+      duration: '02:21',
+      language: 'Hindi',
+    }, // done
     {
       id: 5,
-      title: "Tutorial 05 - ISD - Ticket Workflow(Bengali) | Nirnayan Healthcare",
+      title: "Tutorial 02 - ISD - Raise Ticket(English) | Nirnayan Healthcare",
       description:
-        'Learn how to assign, update, track, and resolve support tickets.',
+        'Learn how to raise a new support ticket, select the appropriate category and priority, describe the issue, add an attachment, and submit it successfully.',
       category: 'Ticket Management',
-      youtubeVideoId: 'vCWaIWB5cpM',
-      duration: '01:43',
-      language: 'Bengali',
-    },
+      youtubeVideoId: 'l8ll-L0Wp28',
+      duration: '02:21',
+      language: 'English',
+    }, // done
     {
       id: 6,
-      title: "Tutorial 06 - ISD - Ticket Workflow (Hindi) | Nirnayan Healthcare",
+      title: "Tutorial 02 - ISD - Raise Ticket(Bengali) | Nirnayan Healthcare",
       description:
-        'Learn how to assign, update, track, and resolve support tickets.',
+        'Learn how to raise a new support ticket, select the appropriate category and priority, describe the issue, add an attachment, and submit it successfully.',
       category: 'Ticket Management',
-      youtubeVideoId: '_QHcN-pG4MY',
-      duration: '01:43',
+      youtubeVideoId: 'yWs96k8vUIQ',
+      duration: '02:21',
+      language: 'Bengali',
+    }, // done
+    {
+      id: 7,
+      title: "Tutorial 03 - ISD - Ticket Reassign(Hindi) | Nirnayan Healthcare",
+      description:
+        'Learn how to reassign a support ticket to the appropriate team member and submit the changes successfully.',
+      category: 'Ticket Management',
+      youtubeVideoId: 'hzHx83SBIYY',
+      duration: '01:00',
       language: 'Hindi',
-    },
+    }, // done
+    {
+      id: 8,
+      title: "Tutorial 03 - ISD - Ticket Reassign(Bengali) | Nirnayan Healthcare",
+      description:
+        'Learn how to reassign a support ticket to the appropriate team member and submit the changes successfully.',
+      category: 'Ticket Management',
+      youtubeVideoId: 'CyCqFGfnXv8',
+      duration: '01:00',
+      language: 'Bengali',
+    }, // done
+    {
+      id: 9,
+      title: "Tutorial 03 - ISD - Ticket Reassign(English) | Nirnayan Healthcare",
+      description:
+        'Learn how to reassign a support ticket to the appropriate team member and submit the changes successfully.',
+      category: 'Ticket Management',
+      youtubeVideoId: 'WfnuUeLz-UQ',
+      duration: '01:00',
+      language: 'English',
+    }, // done
+    {
+      id: 10,
+      title: "Tutorial 04 - ISD - Ticket Workflow(Hindi) | Nirnayan Healthcare",
+      description:
+        'Learn how to manage the complete ticket workflow, including reviewing, assigning, reassigning, updating, and resolving a ticket successfully.',
+      category: 'Ticket Management',
+      youtubeVideoId: 'GuHwoJBYp1k',
+      duration: '01:42',
+      language: 'Hindi',
+    }, // done
+    {
+      id: 11,
+      title: "Tutorial 04 - ISD - Ticket Workflow(English) | Nirnayan Healthcare",
+      description:
+        'Learn how to manage the complete ticket workflow, including reviewing, assigning, reassigning, updating, and resolving a ticket successfully.',
+      category: 'Ticket Management',
+      youtubeVideoId: 'VaFEOJ4UWOw',
+      duration: '01:42',
+      language: 'English',
+    }, // done
+    {
+      id: 12,
+      title: "Tutorial 04 - ISD - Ticket Workflow(Bengali) | Nirnayan Healthcare",
+      description:
+        'Learn how to manage the complete ticket workflow, including reviewing, assigning, reassigning, updating, and resolving a ticket successfully.',
+      category: 'Ticket Management',
+      youtubeVideoId: 'BoBXcM5fl6w',
+      duration: '01:42',
+      language: 'Bengali',
+    }, // done
+    // {
+    //   id: 7,
+    //   title: "Tutorial 7 - ISD - Forget Password(Bengali) | Nirnayan Healthcare",
+    //   description:
+    //     'Learn how to reset a forgotten password and create a new one.',
+    //   category: 'Forgot Password',
+    //   youtubeVideoId: 'kEUVHyDPLYM',
+    //   duration: '01:44',
+    //   language: 'Bengali',
+    // },
+    // {
+    //   id: 8,
+    //   title: "Tutorial 8 - ISD - Forget Password(Hindi) | Nirnayan Healthcare",
+    //   description:
+    //     'Learn how to reset a forgotten password and create a new one.',
+    //   category: 'Forgot Password',
+    //   youtubeVideoId: 'KAJqj61jt8k',
+    //   duration: '01:41',
+    //   language: 'Hindi',
+    // },
+    // {
+    //   id: 9,
+    //   title: "Tutorial 9 - ISD - Forget Password(English) | Nirnayan Healthcare",
+    //   description:
+    //     'Learn how to reset a forgotten password and create a new one.',
+    //   category: 'Forgot Password',
+    //   youtubeVideoId: 'LWxHDyQlUek',
+    //   duration: '01:41',
+    //   language: 'English',
+    // },
+    // {
+    //   id: 10,
+    //   title: "Tutorial 10 - ISD - Close Ticket Overview(English) | Nirnayan Healthcare",
+    //   description:
+    //     'Learn how to review a resolved ticket and close it after confirming that the issue has been successfully resolved.',
+    //   category: 'Close Ticket',
+    //   youtubeVideoId: 'ZJ5A85yg5Ms',
+    //   duration: '01:12',
+    //   language: 'English',
+    // },
+    // {
+    //   id: 11,
+    //   title: "Tutorial 11 - ISD - Close Ticket Overview (Hindi) | Nirnayan Healthcare",
+    //   description:
+    //     'Learn how to review a resolved ticket and close it after confirming that the issue has been successfully resolved.',
+    //   category: 'Close Ticket',
+    //   youtubeVideoId: '2bF2Zk7isK4',
+    //   duration: '01:12',
+    //   language: 'Hindi',
+    // },
+    // {
+    //   id: 12,
+    //   title: "Tutorial 12 - ISD - Close Ticket Overview(Bengali) Nirnayan Healthcare",
+    //   description:
+    //     'Learn how to review a resolved ticket and close it after confirming that the issue has been successfully resolved.',
+    //   category: 'Close Ticket',
+    //   youtubeVideoId: 'QFwhkhEVFU4',
+    //   duration: '01:12',
+    //   language: 'Bengali',
+    // },
   ];
 
   constructor(
