@@ -195,9 +195,18 @@
                     @for (ticket of recentTickets; track ticket.ticketId) {
                     <tr>
                         <td>
-                            <button type="button" class="ticket-id">
+                            <!-- <button type="button" class="ticket-id">
                                 {{ ticket.ticketId }}
-                            </button>
+                            </button> -->
+                            <a
+                      [routerLink]="[
+                        '/tickets',
+                        ticket.id
+                      ]"
+                      class="ticket-id"
+                      >
+                        {{ ticket.ticketId }}
+                      </a>
                         </td>
 
                         <td>
