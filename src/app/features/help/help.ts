@@ -172,66 +172,97 @@ export class Help {
       duration: '01:42',
       language: 'Bengali',
     }, // done
-    // {
-    //   id: 7,
-    //   title: "Tutorial 7 - ISD - Forget Password(Bengali) | Nirnayan Healthcare",
-    //   description:
-    //     'Learn how to reset a forgotten password and create a new one.',
-    //   category: 'Forgot Password',
-    //   youtubeVideoId: 'kEUVHyDPLYM',
-    //   duration: '01:44',
-    //   language: 'Bengali',
-    // },
-    // {
-    //   id: 8,
-    //   title: "Tutorial 8 - ISD - Forget Password(Hindi) | Nirnayan Healthcare",
-    //   description:
-    //     'Learn how to reset a forgotten password and create a new one.',
-    //   category: 'Forgot Password',
-    //   youtubeVideoId: 'KAJqj61jt8k',
-    //   duration: '01:41',
-    //   language: 'Hindi',
-    // },
-    // {
-    //   id: 9,
-    //   title: "Tutorial 9 - ISD - Forget Password(English) | Nirnayan Healthcare",
-    //   description:
-    //     'Learn how to reset a forgotten password and create a new one.',
-    //   category: 'Forgot Password',
-    //   youtubeVideoId: 'LWxHDyQlUek',
-    //   duration: '01:41',
-    //   language: 'English',
-    // },
-    // {
-    //   id: 10,
-    //   title: "Tutorial 10 - ISD - Close Ticket Overview(English) | Nirnayan Healthcare",
-    //   description:
-    //     'Learn how to review a resolved ticket and close it after confirming that the issue has been successfully resolved.',
-    //   category: 'Close Ticket',
-    //   youtubeVideoId: 'ZJ5A85yg5Ms',
-    //   duration: '01:12',
-    //   language: 'English',
-    // },
-    // {
-    //   id: 11,
-    //   title: "Tutorial 11 - ISD - Close Ticket Overview (Hindi) | Nirnayan Healthcare",
-    //   description:
-    //     'Learn how to review a resolved ticket and close it after confirming that the issue has been successfully resolved.',
-    //   category: 'Close Ticket',
-    //   youtubeVideoId: '2bF2Zk7isK4',
-    //   duration: '01:12',
-    //   language: 'Hindi',
-    // },
-    // {
-    //   id: 12,
-    //   title: "Tutorial 12 - ISD - Close Ticket Overview(Bengali) Nirnayan Healthcare",
-    //   description:
-    //     'Learn how to review a resolved ticket and close it after confirming that the issue has been successfully resolved.',
-    //   category: 'Close Ticket',
-    //   youtubeVideoId: 'QFwhkhEVFU4',
-    //   duration: '01:12',
-    //   language: 'Bengali',
-    // },
+
+    {
+      id: 16,
+      title: "Tutorial 5 - ISD - Close Ticket Overview(English) | Nirnayan Healthcare",
+      description:
+        'Learn how to review a resolved ticket and close it after confirming that the issue has been successfully resolved.',
+      category: 'Close Ticket',
+      youtubeVideoId: 'nNpjTflBVeA',
+      duration: '01:12',
+      language: 'English',
+    },
+    {
+      id: 17,
+      title: "Tutorial 5 - ISD - Close Ticket Overview (Hindi) | Nirnayan Healthcare",
+      description:
+        'Learn how to review a resolved ticket and close it after confirming that the issue has been successfully resolved.',
+      category: 'Close Ticket',
+      youtubeVideoId: 'mFloiAzBobM',
+      duration: '01:12',
+      language: 'Hindi',
+    },
+    {
+      id: 18,
+      title: "Tutorial 5 - ISD - Close Ticket Overview(Bengali) Nirnayan Healthcare",
+      description:
+        'Learn how to review a resolved ticket and close it after confirming that the issue has been successfully resolved.',
+      category: 'Close Ticket',
+      youtubeVideoId: '3xvskmEoeCs',
+      duration: '01:12',
+      language: 'Bengali',
+    }, //done
+    {
+      id: 13,
+      title: "Tutorial 6 - ISD - Forget Password(Hindi) | Nirnayan Healthcare",
+      description:
+        'Learn how to reset a forgotten password and create a new one.',
+      category: 'Forgot Password',
+      youtubeVideoId: 'qwiUg2REhfk',
+      duration: '01:44',
+      language: 'Hindi',
+    },
+    {
+      id: 14,
+      title: "Tutorial 6 - ISD - Forget Password(Bengali) | Nirnayan Healthcare",
+      description:
+        'Learn how to reset a forgotten password and create a new one.',
+      category: 'Forgot Password',
+      youtubeVideoId: 'h0G_E0xjgeA',
+      duration: '01:41',
+      language: 'Bengali',
+    },
+    {
+      id: 15,
+      title: "Tutorial 6 - ISD - Forget Password(English) | Nirnayan Healthcare",
+      description:
+        'Learn how to reset a forgotten password and create a new one.',
+      category: 'Forgot Password',
+      youtubeVideoId: 'l6YHvIxVhF8',
+      duration: '01:41',
+      language: 'English',
+    },
+    {
+      id: 19,
+      title: "Tutorial 7 - ISD - Ticket Report(Bengali) | Nirnayan Healthcare",
+      description:
+        'Learn how to view, filter, and understand ticket reports for effective ticket tracking and management.',
+      category: 'Ticket Report',
+      youtubeVideoId: 'F3UHQHyTmuI',
+      duration: '01:12',
+      language: 'Bengali',
+    },
+    {
+      id: 20,
+      title: "Tutorial 7 - ISD - Ticket Report(English) | Nirnayan Healthcare",
+      description:
+        'Learn how to view, filter, and understand ticket reports for effective ticket tracking and management.',
+      category: 'Ticket Report',
+      youtubeVideoId: 'HAeZtzbw_QE',
+      duration: '01:12',
+      language: 'English',
+    },
+    {
+      id: 21,
+      title: "Tutorial 7 - ISD - Ticket Report(Hindi) | Nirnayan Healthcare",
+      description:
+        'Learn how to view, filter, and understand ticket reports for effective ticket tracking and management.',
+      category: 'Ticket Report',
+      youtubeVideoId: 'eh43jY1AgTQ',
+      duration: '01:12',
+      language: 'Hindi',
+    },
   ];
 
   constructor(
