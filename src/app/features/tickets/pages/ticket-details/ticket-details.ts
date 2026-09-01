@@ -181,12 +181,33 @@ export class TicketDetails implements OnInit {
       'Current User'
     );
   }
-  get currentUserProfile(): string {
-    return (
-      this.authService.currentUser()
-        ?.employeePhoto ??
-      'User Profile'
-    );
+  get currentUserProfile(): string | null {
+    const employeePhoto =
+      this.authService.currentUser()?.employeePhoto?.trim();
+
+    if (!employeePhoto) {
+      return null;
+    }
+
+    const cleanUrl = employeePhoto
+      .split('?')[0]
+      .split('#')[0]
+      .replace(/\/+$/, '');
+
+    const lastPathPart = cleanUrl
+      .split('/')
+      .pop()
+      ?.toLowerCase();
+
+    if (
+      !lastPathPart ||
+      lastPathPart === 'null' ||
+      lastPathPart === 'undefined'
+    ) {
+      return null;
+    }
+
+    return employeePhoto;
   }
 
   pendingStatus: TicketUpdateStatus | null = null;
@@ -1993,6 +2014,7 @@ export class TicketDetails implements OnInit {
 
     return icons[type];
   }
+  
 
   getInitials(fullName: string): string {
     if (!fullName?.trim()) {
@@ -2054,58 +2076,76 @@ export class TicketDetails implements OnInit {
     ).format(date);
   }
 
-  formatCommentDate(
-    dateValue:
-      string | null | undefined,
-  ): string {
-    if (!dateValue) {
-      return 'Not available';
-    }
+  // formatCommentDate(
+  //   dateValue:
+  //     string | null | undefined,
+  // ): string {
+  //   if (!dateValue) {
+  //     return 'Not available';
+  //   }
 
-    const apiDate =
-      new Date(dateValue);
+  //   const apiDate =
+  //     new Date(dateValue);
 
-    if (
-      Number.isNaN(
-        apiDate.getTime(),
-      )
-    ) {
-      return 'Not available';
-    }
+  //   if (
+  //     Number.isNaN(
+  //       apiDate.getTime(),
+  //     )
+  //   ) {
+  //     return 'Not available';
+  //   }
 
-    // Temporary fix:
-    // Backend sends IST clock time marked with Z.
-    const correctedDate =
-      new Date(
-        apiDate.getTime() -
-        5.5 * 60 * 60 * 1000,
-      );
+  //   // Temporary fix:
+  //   // Backend sends IST clock time marked with Z.
+  //   const correctedDate =
+  //     new Date(
+  //       apiDate.getTime() -
+  //       5.5 * 60 * 60 * 1000,
+  //     );
 
-    return new Intl.DateTimeFormat(
-      'en-IN',
-      {
-        timeZone:
-          'Asia/Kolkata',
+  //   return new Intl.DateTimeFormat(
+  //     'en-IN',
+  //     {
+  //       timeZone:
+  //         'Asia/Kolkata',
 
-        day:
-          '2-digit',
+  //       day:
+  //         '2-digit',
 
-        month:
-          'short',
+  //       month:
+  //         'short',
 
-        year:
-          'numeric',
+  //       year:
+  //         'numeric',
 
-        hour:
-          '2-digit',
+  //       hour:
+  //         '2-digit',
 
-        minute:
-          '2-digit',
+  //       minute:
+  //         '2-digit',
 
-        hour12:
-          true,
-      },
-    ).format(correctedDate);
+  //       hour12:
+  //         true,
+  //     },
+  //   ).format(correctedDate);
+  // }
+
+  formatCommentDate(input: Date | string | number): string {
+    const date = new Date(input);
+
+    const day = date.getDate();
+    const month = date.toLocaleString("en-US", { month: "short" });
+    const year = date.getFullYear();
+
+    const hours24 = date.getHours();
+    const hours12 = hours24 % 12 || 12;
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const ampm = hours24 >= 12 ? "pm" : "am";
+
+    return `${day} ${month} ${year}, ${String(hours12).padStart(
+      2,
+      "0"
+    )}:${minutes} ${ampm}`;
   }
 
   get canEditTicket(): boolean {
