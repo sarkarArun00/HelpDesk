@@ -363,15 +363,22 @@ export class AuthService {
     if (!this.isBrowser()) {
       return;
     }
-    // localStorage.clear();
+
     localStorage.removeItem(
       this.localStorageKey,
+    );
+
+    localStorage.removeItem(
+      this.localTokenStorageKey,
     );
 
     sessionStorage.removeItem(
       this.sessionStorageKey,
     );
-    
+
+    sessionStorage.removeItem(
+      this.sessionTokenStorageKey,
+    );
   }
 
   private isBrowser(): boolean {

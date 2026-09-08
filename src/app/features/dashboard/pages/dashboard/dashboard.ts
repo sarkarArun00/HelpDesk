@@ -24,6 +24,7 @@ import { FormsModule } from '@angular/forms';
 import {
   Achievements,
 } from '../../components/achievements/achievements';
+import { AuthService } from '../../../../core/auth/services/auth.service';
 
 
 
@@ -104,6 +105,7 @@ export class Dashboard
   private readonly ticketCategoryApiService =
     inject(TicketCategoryApiService);
 
+  readonly authService = inject(AuthService);
   isLoadingTickets = false;
 
   selectedSummaryDateFilter:
@@ -532,6 +534,15 @@ constructor() {
           this.summaryLoadError =
             error.error?.message ||
             'Unable to load ticket summary.';
+          if (error.status == 401) {
+            this.authService.logout();
+            void this.router.navigate(
+              ['/auth/login'],
+            );
+
+            return;
+          }
+
         },
       });
   }

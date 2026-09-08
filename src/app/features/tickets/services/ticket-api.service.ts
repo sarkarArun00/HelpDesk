@@ -43,6 +43,7 @@ export interface TicketListItem {
         employee_name: string;
         email_id: string | null;
         employeePhoto: string | null;
+        departmentName: string | null;
     } | null;
 
     category_id: number;

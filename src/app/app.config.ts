@@ -13,6 +13,11 @@ import { authInterceptor } from './core/auth/interceptors/auth.interceptor';
 import { routes } from './app.routes';
 import { provideServiceWorker } from '@angular/service-worker';
 
+
+import {
+  authErrorInterceptor,
+} from './core/auth/interceptors/auth-error.interceptor.js';
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
@@ -23,6 +28,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([
         authInterceptor,
+        authErrorInterceptor
       ]),
     ), provideServiceWorker('ngsw-worker.js', {
             enabled: !isDevMode(),

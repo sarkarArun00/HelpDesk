@@ -631,13 +631,19 @@
               </span>
             }
 
-              <div>
-                <span>Created By</span>
-                <strong>{{ ticket.createdBy }}</strong>
-                <small>
-                  {{ createrCode }}
-                </small>
-              </div>
+<div>
+  <span>Created By</span>
+
+  <strong>
+    {{ ticket.createdBy }}
+  </strong>
+
+  <small>
+    {{ createrCode }}
+    ·
+    {{ ticket.creatorDepartments }}
+  </small>
+</div>
             </article>
 
             <article class="person-item">

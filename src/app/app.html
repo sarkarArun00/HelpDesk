@@ -1,2 +1,33 @@
 <router-outlet />
 <app-install-prompt />
+
+@if (customAlert.isVisible()) {
+  <div
+    class="custom-alert-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="custom-alert-title"
+  >
+    <div class="custom-alert-box">
+      <div class="custom-alert-icon">
+        <i class="bi bi-clock-history"></i>
+      </div>
+
+      <h2 id="custom-alert-title">
+        {{ customAlert.title() }}
+      </h2>
+
+      <p>
+        {{ customAlert.message() }}
+      </p>
+
+      <button
+        type="button"
+        class="custom-alert-button"
+        (click)="customAlert.confirm()"
+      >
+        Go to Login
+      </button>
+    </div>
+  </div>
+}

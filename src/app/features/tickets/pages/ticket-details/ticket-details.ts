@@ -48,6 +48,14 @@ interface EditPriorityOption {
   name: string;
 }
 
+interface DepartmentDetails {
+  id: number;
+  departmentName: string;
+  description: string | null;
+  status: string;
+}
+
+
 type TicketStatus =
   | 'Open'
   | 'Assigned'
@@ -122,6 +130,7 @@ interface TicketDetail {
   status: TicketStatus;
   createdByPhoto: string | null;
   assigneePhoto: string | null;
+  creatorDepartments: string | null;
   createdBy: string;
   originatingDepartment: string;
   targetDepartment: string;
@@ -146,6 +155,17 @@ interface TicketComment {
   createdAt: string;
   replies: TicketComment[];
   // createdByUser: []
+}
+
+interface RequesterDepartmentEntry {
+  department?: {
+    departmentName?: string | null;
+  } | null;
+}
+
+interface RequesterWithDepartments {
+  department?:
+  RequesterDepartmentEntry[] | null;
 }
 
 
@@ -482,6 +502,8 @@ export class TicketDetails implements OnInit {
   locationBack() {
     this.location.back();
   }
+
+  
   loadTicketDetails(
     ticketId: number,
   ): void {
@@ -701,6 +723,31 @@ export class TicketDetails implements OnInit {
                 ),
           );
         
+        const requesterWithDepartments =
+          apiTicket.requester as
+          (typeof apiTicket.requester &
+            RequesterWithDepartments) |
+          null |
+          undefined;
+
+        const creatorDepartments =
+          requesterWithDepartments
+            ?.department
+            ?.map(
+              departmentEntry =>
+                departmentEntry.department
+                  ?.departmentName
+                  ?.trim(),
+            )
+            .filter(
+              (
+                departmentName,
+              ): departmentName is string =>
+                Boolean(departmentName),
+            )
+            .join(', ') ||
+          'Department not available';
+        
         this.ticket = {
           ticketId:
             apiTicket.ticket_number,
@@ -713,6 +760,7 @@ export class TicketDetails implements OnInit {
               ?.category_name ??
             'Not available',
 
+          
           description:
             apiTicket.description,
           
@@ -746,6 +794,7 @@ export class TicketDetails implements OnInit {
               ?.employee_name ??
             'Not available',
 
+          creatorDepartments,
           originatingDepartment:
             'Not available',
 
@@ -775,6 +824,7 @@ export class TicketDetails implements OnInit {
 
           updatedAt:
             apiTicket.updated_at,
+          
 
           attachments:
             apiTicket.attachments.map(
@@ -822,6 +872,7 @@ export class TicketDetails implements OnInit {
   }
 
   isSameDptHod: boolean = false
+
   requestedDepart(dept: any) {
     const storedUserData =
       localStorage.getItem('isd-authenticated-user');
@@ -959,6 +1010,7 @@ export class TicketDetails implements OnInit {
       assignments: [],
       originatingDepartment: '',
       targetDepartment: '',
+      creatorDepartments: '',
       centre: '',
       assignee: '',
       assigneeCode: '',
@@ -1036,7 +1088,7 @@ export class TicketDetails implements OnInit {
 
       return;
     }
-    console.log('depppppppp', this.ticket)
+
 
     const employeeApiRole:
       'Admin' | 'Manager' =
