@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { InstallPrompt } from './core/pwa/components/install-prompt/install-prompt';
-
+import {
+  CustomAlertService,
+} from './core/auth/services/custom-alert.service.js';
 
 
 @Component({
@@ -10,4 +12,9 @@ import { InstallPrompt } from './core/pwa/components/install-prompt/install-prom
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App {}
+export class App {
+  constructor(
+    public readonly customAlert:
+      CustomAlertService,
+  ) { }
+}

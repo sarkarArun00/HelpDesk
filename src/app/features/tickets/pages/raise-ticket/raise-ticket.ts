@@ -347,8 +347,6 @@ private readonly ticketStore =
 
     this.catDescription = this.categories.find(item => item.id == categoryId)?.description
     
-    console.log('ahsgdghsadsahgdhgasdghasdfhgasd', this.catDescription)
-
 
   }
 

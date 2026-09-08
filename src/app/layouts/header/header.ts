@@ -135,10 +135,6 @@ export class Header
                 response.data,
               );
 
-            console.log(
-              'Current user:',
-              this.authService.currentUser(),
-            );
           }
         },
 
