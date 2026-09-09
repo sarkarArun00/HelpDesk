@@ -67,7 +67,6 @@ export class MyRaisedTickets
   selectedCentre = '';
 
   readonly statuses: TicketStatus[] = [
-    'Open',
     'Assigned',
     'In Progress',
     'Resolved',
