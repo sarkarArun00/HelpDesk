@@ -22,7 +22,14 @@
   </header>
 
   <section class="summary-grid">
-    <article class="summary-card">
+    <article
+  class="summary-card"
+  [class.active]="selectedStatus === ''"
+  role="button"
+  tabindex="0"
+  (click)="filterTicketsByStatus('')"
+  (keydown.enter)="filterTicketsByStatus('')"
+  (keydown.space)="filterTicketsByStatus(''); $event.preventDefault()">
       <span class="summary-icon total">
         <i class="bi bi-ticket-perforated"></i>
       </span>
@@ -33,7 +40,14 @@
       </div>
     </article>
 
-    <article class="summary-card">
+<article
+  class="summary-card"
+  [class.active]="selectedStatus === 'Assigned'"
+  role="button"
+  tabindex="0"
+  (click)="filterTicketsByStatus('Assigned')"
+  (keydown.enter)="filterTicketsByStatus('Assigned')"
+  (keydown.space)="filterTicketsByStatus('Assigned'); $event.preventDefault()">
       <span class="summary-icon assigned">
         <i class="bi bi-person-check"></i>
       </span>
@@ -45,7 +59,14 @@
       </div>
     </article>
 
-    <article class="summary-card">
+<article
+  class="summary-card"
+  [class.active]="selectedStatus === 'In Progress'"
+  role="button"
+  tabindex="0"
+  (click)="filterTicketsByStatus('In Progress')"
+  (keydown.enter)="filterTicketsByStatus('In Progress')"
+  (keydown.space)="filterTicketsByStatus('In Progress'); $event.preventDefault()">
       <span class="summary-icon progress">
         <i class="bi bi-arrow-repeat"></i>
       </span>

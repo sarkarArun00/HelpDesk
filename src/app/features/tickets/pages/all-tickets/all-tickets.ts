@@ -36,6 +36,11 @@ type TicketStatus =
   | 'Reopened'
   | 'Closed';
 
+type TicketStatusFilter =
+  | ''
+  | TicketStatus
+  | 'Resolved / Closed';
+
 interface AllTicketRecord {
   id: number;
   ticketId: string;
@@ -77,7 +82,7 @@ export class AllTickets implements OnInit {
   selectedDepartment = '';
   selectedCentre = '';
   selectedPriority = '';
-  selectedStatus = '';
+  selectedStatus: TicketStatusFilter = '';
 
   currentPage = 1;
   pageSize = 10;
@@ -112,6 +117,8 @@ export class AllTickets implements OnInit {
       'Reopened',
       'Closed',
     ];
+  
+  
 
   ngOnInit(): void {
     this.loadTickets();
@@ -160,8 +167,12 @@ export class AllTickets implements OnInit {
 
       const matchesStatus =
         !this.selectedStatus ||
-        ticket.status ===
-        this.selectedStatus;
+        (
+          this.selectedStatus === 'Resolved / Closed'
+            ? ticket.status === 'Resolved' ||
+            ticket.status === 'Closed'
+            : ticket.status === this.selectedStatus
+        );
 
       return (
         matchesSearch &&
@@ -506,6 +517,13 @@ export class AllTickets implements OnInit {
         ticket.status === 'Resolved' ||
         ticket.status === 'Closed',
     ).length;
+  }
+
+  filterTicketsByStatus(
+    status: TicketStatusFilter
+  ): void {
+    this.selectedStatus = status;
+    this.currentPage = 1;
   }
 
   onFiltersChanged(): void {
