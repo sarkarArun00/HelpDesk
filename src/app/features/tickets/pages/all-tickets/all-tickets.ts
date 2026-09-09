@@ -110,11 +110,11 @@ export class AllTickets implements OnInit {
 
   readonly statuses:
     TicketStatus[] = [
-      'Open',
+      // 'Open',
       'Assigned',
       'In Progress',
       'Resolved',
-      'Reopened',
+      // 'Reopened',
       'Closed',
     ];
   

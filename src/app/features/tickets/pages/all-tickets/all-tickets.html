@@ -78,7 +78,14 @@
       </div>
     </article>
 
-    <article class="summary-card">
+<article
+  class="summary-card"
+  [class.active]="selectedStatus === 'Resolved / Closed'"
+  role="button"
+  tabindex="0"
+  (click)="filterTicketsByStatus('Resolved / Closed')"
+  (keydown.enter)="filterTicketsByStatus('Resolved / Closed')"
+  (keydown.space)="filterTicketsByStatus('Resolved / Closed'); $event.preventDefault()">
       <span class="summary-icon resolved">
         <i class="bi bi-check-circle"></i>
       </span>

@@ -114,25 +114,7 @@
           </div>
         </div>
 
-        <div class="col-12 col-md-4 col-xl-2">
-          <label for="statusFilter" class="form-label">
-            Status
-          </label>
 
-          <select
-            id="statusFilter"
-            class="form-select"
-            [(ngModel)]="selectedStatus"
-          >
-            <option value="">All Statuses</option>
-
-            @for (status of statuses; track status) {
-              <option [value]="status">
-                {{ status }}
-              </option>
-            }
-          </select>
-        </div>
 
         <div class="col-12 col-md-4 col-xl-2">
           <label for="priorityFilter" class="form-label">
@@ -169,6 +151,26 @@
             @for (centre of centres; track centre) {
               <option [value]="centre">
                 {{ centre }}
+              </option>
+            }
+          </select>
+        </div>
+
+                <div class="col-12 col-md-4 col-xl-2">
+          <label for="statusFilter" class="form-label">
+            Status
+          </label>
+
+          <select
+            id="statusFilter"
+            class="form-select"
+            [(ngModel)]="selectedStatus"
+          >
+            <option value="">All Statuses</option>
+
+            @for (status of statuses; track status) {
+              <option [value]="status">
+                {{ status }}
               </option>
             }
           </select>
