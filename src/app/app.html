@@ -31,3 +31,54 @@
     </div>
   </div>
 }
+
+@if (
+  appUpdateService
+    .isUpdateAvailable()
+) {
+  <div
+    class="app-update-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="app-update-title"
+  >
+    <section class="app-update-modal">
+      <div class="app-update-icon">
+        <i class="bi bi-cloud-arrow-down"></i>
+      </div>
+
+      <h2 id="app-update-title">
+        New Update Available
+      </h2>
+
+      <p>
+        A newer version of NHCPL Helpdesk
+        is ready. Update now to receive
+        the latest features and
+        improvements.
+      </p>
+
+      <div class="app-update-note">
+        <i class="bi bi-info-circle"></i>
+
+        <span>
+          The application will refresh
+          automatically.
+        </span>
+      </div>
+
+      <button
+        type="button"
+        class="app-update-button"
+        (click)="
+          appUpdateService
+            .updateApplication()
+        "
+      >
+        <i class="bi bi-arrow-clockwise"></i>
+
+        Update Now
+      </button>
+    </section>
+  </div>
+}
