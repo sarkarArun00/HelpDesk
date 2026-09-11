@@ -433,3 +433,60 @@
     }
   </div>
 </header>
+
+@if (isBirthdayPopupVisible) {
+  <div
+    class="birthday-popup-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="birthday-popup-title"
+  >
+    <div class="birthday-confetti">
+      <span>🎊</span>
+      <span>🎉</span>
+      <span>✨</span>
+      <span>🎈</span>
+      <span>🎊</span>
+      <span>✨</span>
+    </div>
+
+    <section class="birthday-popup">
+      <div class="birthday-icon">
+        🎂
+      </div>
+
+      <span class="birthday-label">
+        A Special Day
+      </span>
+
+      <h2 id="birthday-popup-title">
+        Happy Birthday!
+      </h2>
+
+      <h3>
+        {{ birthdayEmployeeName }}
+      </h3>
+
+      <p>
+        Wishing you a wonderful birthday
+        filled with happiness, success,
+        and memorable moments.
+      </p>
+
+      <p class="birthday-company-message">
+        Best wishes from everyone at
+        <strong>
+          Nirnayan Health Care Private Limited
+        </strong>
+      </p>
+
+      <button
+        type="button"
+        class="birthday-close-button"
+        (click)="closeBirthdayPopup()"
+      >
+        Thank You 🎉
+      </button>
+    </section>
+  </div>
+}

@@ -82,12 +82,16 @@ export class Header
   
   private readonly router =
     inject(Router);
+  private birthdayStorageKey = '';
   
   isProfileMenuVisible = false;
   isNotificationMenuVisible = false;
+  isBirthdayPopupVisible = false;
+  birthdayEmployeeName = '';
 
   isRequestingPushPermission = false;
   fcmToken: string | null = null;
+  
 
 
   ngOnInit(): void {
@@ -135,6 +139,11 @@ export class Header
                 response.data,
               );
 
+            this.checkEmployeeBirthday(
+              response.data.dob,
+              response.data.employee_name,
+              response.data.employee_code,
+            );
           }
         },
 
@@ -157,6 +166,109 @@ export class Header
           );
         },
       });
+  }
+
+  private checkEmployeeBirthday(
+    dob: string | null,
+    employeeName: string,
+    employeeCode: string,
+  ): void {
+    if (!dob) {
+      return;
+    }
+
+    const dateParts = dob
+      .trim()
+      .split('-');
+
+    if (dateParts.length !== 3) {
+      return;
+    }
+
+    const birthMonth = Number(
+      dateParts[1],
+    );
+
+    const birthDay = Number(
+      dateParts[2],
+    );
+
+    if (
+      !Number.isInteger(birthDay) ||
+      !Number.isInteger(birthMonth)
+    ) {
+      return;
+    }
+
+    const today = new Date();
+
+    const currentDay =
+      today.getDate();
+
+    const currentMonth =
+      today.getMonth() + 1;
+
+    if (
+      birthDay !== currentDay ||
+      birthMonth !== currentMonth
+    ) {
+      return;
+    }
+
+    const todayKey = [
+      today.getFullYear(),
+      String(currentMonth).padStart(
+        2,
+        '0',
+      ),
+      String(currentDay).padStart(
+        2,
+        '0',
+      ),
+    ].join('-');
+
+    this.birthdayStorageKey =
+      `isd-birthday-wish-${employeeCode}`;
+
+    const lastShownDate =
+      localStorage.getItem(
+        this.birthdayStorageKey,
+      );
+
+    if (lastShownDate === todayKey) {
+      return;
+    }
+
+    this.birthdayEmployeeName =
+      employeeName;
+
+    this.isBirthdayPopupVisible =
+      true;
+  }
+
+  
+
+  closeBirthdayPopup(): void {
+    const today = new Date();
+
+    const todayKey = [
+      today.getFullYear(),
+      String(
+        today.getMonth() + 1,
+      ).padStart(2, '0'),
+      String(
+        today.getDate(),
+      ).padStart(2, '0'),
+    ].join('-');
+
+    if (this.birthdayStorageKey) {
+      localStorage.setItem(
+        this.birthdayStorageKey,
+        todayKey,
+      );
+    }
+
+    this.isBirthdayPopupVisible = false;
   }
 
   private async listenForFirebaseMessages():

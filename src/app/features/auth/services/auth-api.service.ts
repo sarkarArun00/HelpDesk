@@ -105,6 +105,7 @@ export class AuthApiService {
             employee_name: string;
             email_id: string | null;
             user_name: string;
+            dob: string | null;
             employeePhoto: string | null;
             user_type: string;
             deparments: string[];
@@ -120,6 +121,7 @@ export class AuthApiService {
                 employee_name: string;
                 email_id: string | null;
                 user_name: string;
+                dob: string | null;
                 employeePhoto: string | null;
                 user_type: string;
                 deparments: string[];
