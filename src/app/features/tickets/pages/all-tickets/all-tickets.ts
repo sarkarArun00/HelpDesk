@@ -41,6 +41,16 @@ type TicketStatusFilter =
   | TicketStatus
   | 'Resolved / Closed';
 
+interface AllTicketsFilterState {
+  searchTerm: string;
+  selectedDepartment: string;
+  selectedCentre: string;
+  selectedPriority: string;
+  selectedStatus: TicketStatusFilter;
+  currentPage: number;
+  pageSize: number;
+}
+
 interface AllTicketRecord {
   id: number;
   ticketId: string;
@@ -66,6 +76,9 @@ interface AllTicketRecord {
   styleUrl: './all-tickets.scss',
 })
 export class AllTickets implements OnInit {
+  private static savedFilterState:
+    AllTicketsFilterState | null = null;
+  
   private readonly authService =
     inject(AuthService);
 
@@ -118,9 +131,11 @@ export class AllTickets implements OnInit {
       'Closed',
     ];
   
+
   
 
   ngOnInit(): void {
+    this.restoreFilterState();
     this.loadTickets();
   }
 
@@ -405,7 +420,10 @@ export class AllTickets implements OnInit {
           ),
         ].sort();
 
-        this.currentPage = 1;
+        this.currentPage = Math.min(
+          this.currentPage,
+          this.totalPages,
+        );
       },
 
       error: error => {
@@ -419,6 +437,54 @@ export class AllTickets implements OnInit {
         );
       },
     });
+  }
+
+  private saveFilterState(): void {
+    AllTickets.savedFilterState = {
+      searchTerm: this.searchTerm,
+      selectedDepartment:
+        this.selectedDepartment,
+      selectedCentre:
+        this.selectedCentre,
+      selectedPriority:
+        this.selectedPriority,
+      selectedStatus:
+        this.selectedStatus,
+      currentPage:
+        this.currentPage,
+      pageSize:
+        this.pageSize,
+    };
+  }
+
+  private restoreFilterState(): void {
+    const savedState =
+      AllTickets.savedFilterState;
+
+    if (!savedState) {
+      return;
+    }
+
+    this.searchTerm =
+      savedState.searchTerm;
+
+    this.selectedDepartment =
+      savedState.selectedDepartment;
+
+    this.selectedCentre =
+      savedState.selectedCentre;
+
+    this.selectedPriority =
+      savedState.selectedPriority;
+
+    this.selectedStatus =
+      savedState.selectedStatus;
+
+    this.currentPage =
+      savedState.currentPage;
+
+    this.pageSize =
+      savedState.pageSize;
   }
 
   get totalRecords(): number {
@@ -520,14 +586,17 @@ export class AllTickets implements OnInit {
   }
 
   filterTicketsByStatus(
-    status: TicketStatusFilter
+    status: TicketStatusFilter,
   ): void {
     this.selectedStatus = status;
     this.currentPage = 1;
+
+    this.saveFilterState();
   }
 
   onFiltersChanged(): void {
     this.currentPage = 1;
+    this.saveFilterState();
   }
 
   resetFilters(): void {
@@ -537,6 +606,8 @@ export class AllTickets implements OnInit {
     this.selectedPriority = '';
     this.selectedStatus = '';
     this.currentPage = 1;
+
+    this.saveFilterState();
   }
 
   changePage(page: number): void {
@@ -549,10 +620,12 @@ export class AllTickets implements OnInit {
     }
 
     this.currentPage = page;
+    this.saveFilterState();
   }
 
   onPageSizeChange(): void {
     this.currentPage = 1;
+    this.saveFilterState();
   }
 
   getPriorityClass(
