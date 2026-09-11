@@ -26,7 +26,7 @@ export class AppUpdateService {
         inject(ApplicationRef);
 
     readonly isUpdateAvailable =
-        signal(true);
+        signal(false);
 
     constructor() {
         if (!this.swUpdate.isEnabled) {
