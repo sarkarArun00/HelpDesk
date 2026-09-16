@@ -131,6 +131,7 @@ interface TicketDetail {
   createdByPhoto: string | null;
   assigneePhoto: string | null;
   creatorDepartments: string | null;
+  creatorSubDepartments: string | null;
   createdBy: string;
   originatingDepartment: string;
   targetDepartment: string;
@@ -163,11 +164,20 @@ interface RequesterDepartmentEntry {
   } | null;
 }
 
+interface RequesterSubDepartmentEntry {
+  subDepartment?: {
+    subDepartmentName?:
+    string | null;
+  } | null;
+}
+
 interface RequesterWithDepartments {
   department?:
   RequesterDepartmentEntry[] | null;
-}
 
+  subDeptMaps?:
+  RequesterSubDepartmentEntry[] | null;
+}
 
 
 
@@ -201,6 +211,7 @@ export class TicketDetails implements OnInit {
       'Current User'
     );
   }
+
   get currentUserProfile(): string | null {
     const employeePhoto =
       this.authService.currentUser()?.employeePhoto?.trim();
@@ -747,6 +758,25 @@ export class TicketDetails implements OnInit {
             )
             .join(', ') ||
           'Department not available';
+
+        const creatorSubDepartments =
+          requesterWithDepartments
+            ?.subDeptMaps
+            ?.map(
+              subDepartmentEntry =>
+                subDepartmentEntry
+                  .subDepartment
+                  ?.subDepartmentName
+                  ?.trim(),
+            )
+            .filter(
+              (
+                subDepartmentName,
+              ): subDepartmentName is string =>
+                Boolean(subDepartmentName),
+            )
+            .join(', ') ||
+          null;
         
         this.ticket = {
           ticketId:
@@ -795,6 +825,7 @@ export class TicketDetails implements OnInit {
             'Not available',
 
           creatorDepartments,
+          creatorSubDepartments,
           originatingDepartment:
             'Not available',
 
@@ -1011,6 +1042,7 @@ export class TicketDetails implements OnInit {
       originatingDepartment: '',
       targetDepartment: '',
       creatorDepartments: '',
+      creatorSubDepartments: null,
       centre: '',
       assignee: '',
       assigneeCode: '',

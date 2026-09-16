@@ -200,6 +200,66 @@
               </div>
             }
           </div> -->
+          <!-- Department -->
+        <div class="col-12 col-lg-6">
+          <label
+            for="departmentId"
+            class="form-label"
+          >
+            Department
+
+            <span class="required-star">
+              *
+            </span>
+          </label>
+
+          <select
+            id="departmentId"
+            class="form-select"
+            formControlName="departmentId"
+            [class.is-invalid]="
+              ticketForm.controls
+                .departmentId.touched &&
+              ticketForm.controls
+                .departmentId.invalid
+            "
+            (change)="
+              onDepartmentChange(
+                ticketForm.controls
+                  .departmentId.value
+              )
+            "
+          >
+            <option [ngValue]="0" disabled>
+              Select department
+            </option>
+
+            @for (
+              department of departments;
+              track department.id
+            ) {
+              <option
+                [ngValue]="department.id"
+              >
+                {{ department.name }}
+              </option>
+            }
+          </select>
+
+          @if (
+            ticketForm.controls
+              .departmentId.touched &&
+            ticketForm.controls
+              .departmentId.invalid
+          ) {
+            <div
+              class="invalid-feedback d-block"
+            >
+              Please select a department.
+            </div>
+          }
+        </div>
+
           <div class="col-12 col-lg-6">
             <label class="form-label">Issue Category</label>
             <div class="category-autocomplete">
@@ -253,7 +313,7 @@
           </div>
 
           <!-- Target department -->
-          <div class="col-12 col-lg-6">
+          <!-- <div class="col-12 col-lg-6">
             <label for="targetDepartment" class="form-label">
               Target Department
             </label>
@@ -270,7 +330,7 @@
             <div class="form-text">
               Determined by the selected issue category.
             </div>
-          </div>
+          </div> -->
 
           <!-- Centre -->
           <div class="col-12 col-lg-6">

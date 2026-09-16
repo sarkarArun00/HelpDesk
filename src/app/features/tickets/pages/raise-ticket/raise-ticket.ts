@@ -33,6 +33,11 @@ interface TicketCategory {
   description: string;
 }
 
+interface DepartmentOption {
+  id: number;
+  name: string;
+}
+
 interface Centre {
   id: number;
   code: string;
@@ -80,6 +85,8 @@ private readonly ticketStore =
   priorities: TicketPriority[] = [];
 
   categories: TicketCategory[] = [];
+  departments:
+    DepartmentOption[] = [];
 
   centres: Centre[] = [];
 
@@ -136,7 +143,21 @@ private readonly ticketStore =
       ],
     ],
 
-    categoryId: [0, [Validators.required, Validators.min(1)]],
+    departmentId: [
+      0,
+      [
+        Validators.required,
+        Validators.min(1),
+      ],
+    ],
+
+    categoryId: [
+      0,
+      [
+        Validators.required,
+        Validators.min(1),
+      ],
+    ],
 
     targetDepartment: [
       {
@@ -295,7 +316,40 @@ private readonly ticketStore =
               first.name.localeCompare(
                 second.name,
               ),
+          );
+        
+        const departmentMap =
+          new Map<
+            number,
+            DepartmentOption
+          >();
+
+        this.categories.forEach(category => {
+          if (
+            category.departmentId > 0 &&
+            category.targetDepartment &&
+            category.targetDepartment !==
+            'Not assigned'
+          ) {
+            departmentMap.set(
+              category.departmentId,
+              {
+                id: category.departmentId,
+                name:
+                  category.targetDepartment,
+              },
             );
+          }
+        });
+
+        this.departments = Array.from(
+          departmentMap.values(),
+        ).sort(
+          (first, second) =>
+            first.name.localeCompare(
+              second.name,
+            ),
+        );
 
         this.centres =
           response.centres.data
@@ -322,6 +376,25 @@ private readonly ticketStore =
           'Unable to load ticket form data.';
       },
     });
+  }
+
+  onDepartmentChange(
+    departmentId: number,
+  ): void {
+    this.ticketForm.patchValue({
+      departmentId,
+      categoryId: 0,
+      targetDepartment: '',
+      priority: '',
+    });
+
+    this.categorySearch = '';
+    this.catDescription = '';
+    this.isCategoryDropdownOpen = false;
+
+    this.ticketForm.controls
+      .categoryId
+      .markAsUntouched();
   }
 
   catDescription: any = ''
@@ -408,28 +481,57 @@ private readonly ticketStore =
     this.fileError = '';
   }
 
-  get filteredCategories(): TicketCategory[] {
+  get filteredCategories():
+    TicketCategory[] {
+    const selectedDepartmentId =
+      this.ticketForm.controls
+        .departmentId.value;
+
+    if (!selectedDepartmentId) {
+      return [];
+    }
+
     const searchValue =
       this.categorySearch
         .trim()
         .toLowerCase();
 
-    if (!searchValue) {
-      return this.categories;
-    }
+    return this.categories.filter(
+      category => {
+        const matchesDepartment =
+          category.departmentId ===
+          selectedDepartmentId;
 
-    return this.categories.filter(category =>
-      category.name
-        .toLowerCase()
-        .includes(searchValue),
+        const matchesSearch =
+          !searchValue ||
+          category.name
+            .toLowerCase()
+            .includes(searchValue);
+
+        return (
+          matchesDepartment &&
+          matchesSearch
+        );
+      },
     );
   }
 
 
   openCategoryDropdown(): void {
-    this.isCategoryDropdownOpen = true;
-  }
+    const selectedDepartmentId =
+      this.ticketForm.controls
+        .departmentId.value;
 
+    if (!selectedDepartmentId) {
+      this.isCategoryDropdownOpen =
+        false;
+
+      return;
+    }
+
+    this.isCategoryDropdownOpen =
+      true;
+  }
   // selectCategory(
   //   category: TicketCategory,
   // ): void {
@@ -444,6 +546,18 @@ private readonly ticketStore =
   // }
 
   selectCategory(category: TicketCategory): void {
+    const selectedDepartmentId =
+      this.ticketForm.controls
+        .departmentId.value;
+
+    if (
+      !selectedDepartmentId ||
+      category.departmentId !==
+      selectedDepartmentId
+    ) {
+      return;
+    }
+
     const categoryId = Number(category.id);
 
     this.ticketForm.controls.categoryId.setValue(
@@ -461,11 +575,19 @@ private readonly ticketStore =
 
   clearCategory(): void {
     this.categorySearch = '';
+    this.catDescription = '';
 
-    this.ticketForm.controls.categoryId.setValue(0);
-    this.ticketForm.controls.categoryId.markAsTouched();
+    this.ticketForm.patchValue({
+      categoryId: 0,
+      targetDepartment: '',
+      priority: '',
+    });
 
-    this.isCategoryDropdownOpen = true;
+    this.ticketForm.controls
+      .categoryId
+      .markAsTouched();
+
+    this.openCategoryDropdown();
   }
 
   closeCategoryDropdown(): void {
